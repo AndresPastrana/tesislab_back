@@ -3,11 +3,15 @@ import express, { Application } from "express";
 import morgan from "morgan";
 import { Server } from "node:http";
 import { Routes } from "../const.js";
-import { AuthRouter, StudentRouter } from "../routes/index.routes.js";
+import {
+  AuthRouter,
+  StudentRouter,
+  ProfesoresRouter,
+} from "../routes/index.routes.js";
 export function gracefulShutdown(server: Server) {
   console.log("Received shutdown signal. Shutting down gracefully...");
   server.close(() => {
-    console.log("Server has been gracefully shut down.");
+    console.log("Server has been gracefully shut down. ");
     // Perform any additional cleanup or resource release here
     // TODO:"Close the db connection"
     process.exit(0); // Exit the process

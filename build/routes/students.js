@@ -29,8 +29,13 @@ import { Router } from "express";
 import { protectRouteByRole } from "../middleware/protectRouteByRole.js";
 import { Sex, UserRole } from "../const.js";
 import { isValidToken } from "../middleware/jwt.js";
-import ControllerStudent from "../controllers/student.js";
-import { body } from "express-validator";
+import { validateRequest } from "../middleware/validate.js";
+import { StudentController } from "../controllers/index.js";
+import { body, param } from "express-validator";
+import { validateCi } from "../helpers/ci.js";
+import { isValidDoc } from "../middleware/dbValidators.js";
+import { ModelStudent } from "../models/Student.js";
+import { Types, isValidObjectId } from "mongoose";
 //   GET   /student/project-tesis/:id
 //   GET   /student/historial/:id
 //   GET   /student/evaluation/:id
@@ -59,11 +64,35 @@ var personDataValidations = [
     body("sex").isIn(Object.values(Sex)),
     body("address").notEmpty().isString()
 ];
-router.post("/create", // ...authValidations,
-_to_consumable_array(userValidations).concat(_to_consumable_array(personDataValidations), _to_consumable_array(studentValidations)), ControllerStudent.createStudent); // Create student controller
- // Recives all the user info data
- // Recives all the person data,
- // Recives the student specific data
- // Register the new User
- // Creates the new Person
- // Create the new Student
+var updateValidations = [
+    body("email").isEmail().withMessage("Invalid email format").normalizeEmail().optional(),
+    body("ci").custom(validateCi).withMessage("Invalid CI format").trim().escape().optional(),
+    body("name").isString().withMessage("Name must be a string").trim().escape().optional(),
+    body("lastname").isString().withMessage("Last name must be a string").trim().isLength({
+        min: 1
+    }).withMessage("Name must be at least 1 lenght").escape().optional(),
+    body("address").isString().withMessage("Invalid address format").trim().isLength({
+        min: 1
+    }).withMessage("Address must be at least 1 lenght").escape().optional(),
+    body("sex").isIn(Object.values(Sex)).withMessage("Invalid sex value").optional(),
+    body("phone").isNumeric().isLength({
+        min: 8,
+        max: 8
+    }).withMessage("Phone must be a numeric string of 8 digits").toInt().optional()
+];
+var validateIdParam = [
+    param("id").trim().escape().exists({
+        values: "falsy"
+    }).withMessage("id is required").isMongoId().withMessage("Invalid mongo id").if(function(id) {
+        return isValidObjectId(id);
+    }).withMessage("Invalid mongo id").custom(function(id) {
+        return isValidDoc(id, ModelStudent);
+    }).withMessage("Document not found").customSanitizer(function(id) {
+        return new Types.ObjectId(id);
+    })
+];
+router.post("/", // ...authValidations,
+_to_consumable_array(userValidations).concat(_to_consumable_array(personDataValidations), _to_consumable_array(studentValidations)), StudentController.createStudent);
+router.put("/:id", _to_consumable_array(validateIdParam).concat(_to_consumable_array(updateValidations), [
+    validateRequest
+]), StudentController.updateStudent);

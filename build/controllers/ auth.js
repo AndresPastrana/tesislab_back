@@ -122,64 +122,67 @@ function _ts_generator(thisArg, body) {
         };
     }
 }
-import AuthService from "../services/Auth.js";
 import { matchedData } from "express-validator";
-import { handleResponse } from "../middleware/handleResponse.js";
-var login = function() {
-    var _ref = _async_to_generator(function(req, res) {
-        var _matchedData, _matchedData_username, username, _matchedData_password, password, access_token, error, err;
-        return _ts_generator(this, function(_state) {
-            switch(_state.label){
-                case 0:
-                    _state.trys.push([
-                        0,
-                        2,
-                        ,
-                        3
-                    ]);
-                    _matchedData = matchedData(req), _matchedData_username = _matchedData.username, username = _matchedData_username === void 0 ? "" : _matchedData_username, _matchedData_password = _matchedData.password, password = _matchedData_password === void 0 ? "" : _matchedData_password;
-                    return [
-                        4,
-                        AuthService.login({
-                            username: username,
-                            password: password
-                        })
-                    ];
-                case 1:
-                    access_token = _state.sent();
-                    return [
-                        2,
-                        handleResponse({
-                            res: res,
-                            data: {
-                                access_token: access_token
-                            },
-                            statusCode: 200
-                        })
-                    ];
-                case 2:
-                    error = _state.sent();
-                    err = error;
-                    return [
-                        2,
-                        handleResponse({
-                            res: res,
-                            error: error,
-                            statusCode: 500,
-                            msg: err.message
-                        })
-                    ];
-                case 3:
-                    return [
-                        2
-                    ];
-            }
-        });
-    });
-    return function login(req, res) {
-        return _ref.apply(this, arguments);
-    };
-}();
+import { ErrorHandlerFactory } from "../errors/error.js";
+import { UserService } from "../services/index.js";
+import { handleResponse } from "./../middleware/handleResponse.js";
 export var AuthController = {
-    login: login
+    loginUser: function() {
+        var _ref = _async_to_generator(function(req, res) {
+            var _matchedData, username, password, result, error;
+            return _ts_generator(this, function(_state) {
+                switch(_state.label){
+                    case 0:
+                        _state.trys.push([
+                            0,
+                            2,
+                            ,
+                            3
+                        ]);
+                        _matchedData = matchedData(req, {
+                            locations: [
+                                "body"
+                            ]
+                        }), username = _matchedData.username, password = _matchedData.password;
+                        return [
+                            4,
+                            UserService.loginUser({
+                                username: username,
+                                password: password
+                            })
+                        ];
+                    case 1:
+                        result = _state.sent();
+                        handleResponse({
+                            statusCode: 200,
+                            msg: "Login successful",
+                            data: result,
+                            res: res
+                        });
+                        return [
+                            3,
+                            3
+                        ];
+                    case 2:
+                        error = _state.sent();
+                        handleResponse({
+                            statusCode: 500,
+                            error: ErrorHandlerFactory.createError(error),
+                            res: res
+                        });
+                        return [
+                            3,
+                            3
+                        ];
+                    case 3:
+                        return [
+                            2
+                        ];
+                }
+            });
+        });
+        return function(req, res) {
+            return _ref.apply(this, arguments);
+        };
+    }()
 };

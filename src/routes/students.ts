@@ -6,9 +6,12 @@ import { protectRouteByRole } from "../middleware/protectRouteByRole.js";
 import { Sex, UserRole } from "../const.js";
 import { isValidToken } from "../middleware/jwt.js";
 import { validateRequest } from "../middleware/validate.js";
-import ControllerStudent from "../controllers/student.js";
-import { body } from "express-validator";
-
+import { StudentController } from "../controllers/index.js";
+import { body, param } from "express-validator";
+import { validateCi } from "../helpers/ci.js";
+import { isValidDoc } from "../middleware/dbValidators.js";
+import { ModelStudent } from "../models/Student.js";
+import { Schema, Types, isValidObjectId } from "mongoose";
 //   GET   /student/project-tesis/:id
 //   GET   /student/historial/:id
 //   GET   /student/evaluation/:id
@@ -31,8 +34,70 @@ const personDataValidations = [
   body("address").notEmpty().isString(),
 ];
 
+const updateValidations = [
+  body("email")
+    .isEmail()
+    .withMessage("Invalid email format")
+    .normalizeEmail()
+    .optional(),
+  body("ci")
+    .custom(validateCi)
+    .withMessage("Invalid CI format")
+    .trim()
+    .escape()
+    .optional(),
+  body("name")
+    .isString()
+    .withMessage("Name must be a string")
+    .trim()
+    .escape()
+    .optional(),
+  body("lastname")
+    .isString()
+    .withMessage("Last name must be a string")
+    .trim()
+    .isLength({ min: 1 })
+    .withMessage("Name must be at least 1 lenght")
+    .escape()
+    .optional(),
+
+  body("address")
+    .isString()
+    .withMessage("Invalid address format")
+    .trim()
+    .isLength({ min: 1 })
+    .withMessage("Address must be at least 1 lenght")
+    .escape()
+    .optional(),
+  body("sex")
+    .isIn(Object.values(Sex))
+    .withMessage("Invalid sex value")
+    .optional(),
+  body("phone")
+    .isNumeric()
+    .isLength({ min: 8, max: 8 })
+    .withMessage("Phone must be a numeric string of 8 digits")
+    .toInt()
+    .optional(),
+];
+
+const validateIdParam = [
+  param("id")
+    .trim()
+    .escape()
+    .exists({ values: "falsy" })
+    .withMessage("id is required")
+    .isMongoId()
+    .withMessage("Invalid mongo id")
+    .if((id) => isValidObjectId(id))
+    .withMessage("Invalid mongo id")
+    .custom((id) => isValidDoc(id, ModelStudent))
+    .withMessage("Document not found")
+    .customSanitizer((id) => new Types.ObjectId(id)),
+];
+
 router.post(
-  "/create",
+  "/",
   [
     // ...authValidations,
     ...userValidations,
@@ -40,14 +105,19 @@ router.post(
     ...studentValidations,
     // validateRequest,
   ],
-  ControllerStudent.createStudent
+  StudentController.createStudent
 );
-
-// Create student controller
-// Recives all the user info data
-// Recives all the person data,
-// Recives the student specific data
-
-// Register the new User
-// Creates the new Person
-// Create the new Student
+router.put(
+  "/:id",
+  [...validateIdParam, ...updateValidations, validateRequest],
+  StudentController.updateStudent
+);
+type data = {
+  email: string;
+  ci: string;
+  name: string;
+  lastname: string;
+  address: string;
+  sex: Sex;
+  phone: string;
+};

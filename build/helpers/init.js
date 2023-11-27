@@ -6,7 +6,7 @@ import { AuthRouter, StudentRouter } from "../routes/index.routes.js";
 export function gracefulShutdown(server) {
     console.log("Received shutdown signal. Shutting down gracefully...");
     server.close(function() {
-        console.log("Server has been gracefully shut down.");
+        console.log("Server has been gracefully shut down. ");
         // Perform any additional cleanup or resource release here
         // TODO:"Close the db connection"
         process.exit(0); // Exit the process

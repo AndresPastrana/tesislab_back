@@ -8,4 +8,4 @@ var loginvalidationMiddleware = [
     body("password").exists().withMessage("Passwordname is required").isString().withMessage("Password must be a string").trim().escape(),
     validateRequest
 ];
-router.post("/login", loginvalidationMiddleware, AuthController.login);
+router.post("/login", loginvalidationMiddleware, AuthController.loginUser);

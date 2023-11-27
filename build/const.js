@@ -91,4 +91,4 @@ export var Routes;
     Routes["auth"] = "/api/auth";
     Routes["student"] = "/api/student";
 })(Routes || (Routes = {}));
-export var EMAIL_DOMAIN = "upr.tesislab@gmail.com";
+export var EMAIL_DOMAIN = "onboarding@resend.dev";

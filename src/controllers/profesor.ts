@@ -1,89 +1,88 @@
 import { Request, Response } from "express";
 import { matchedData } from "express-validator";
-import { StudentType } from "../models/Student.js";
 import { UserRole } from "../const.js";
-import {
-  EmailService,
-  StudentService,
-  UserService,
-} from "../services/index.js";
+import { ProfesorType } from "../models/Profesor.js";
 import { ErrorHandlerFactory } from "../errors/error.js";
+import {
+  ProfesorService,
+  UserService,
+  EmailService,
+} from "../services/index.js";
 import { handleResponse } from "../middleware/handleResponse.js";
+
 import { htmlTemplateCred } from "../helpers/html.js";
 
-export const StudentController = {
-  createStudent: async (req: Request, res: Response) => {
+export const ProfesorController = {
+  createProfesor: async (req: Request, res: Response) => {
     try {
-      const studentData = matchedData(req, {
-        locations: ["body"],
-      }) as StudentType;
+      const profesorData = matchedData(req, { locations: ["body"] });
 
-      //   Creates the new user
-      const newUser = await UserService.registerUser({
+      // TCretate the user
+      const new_user = await UserService.registerUser({
         role: UserRole.Student,
-        email: studentData.email,
+        email: profesorData.email,
       });
 
-      //   Creates the new student
-      const createdStudent = await StudentService.createStudent({
-        ...studentData,
-        user_id: newUser.user.id,
+      // Create the profesor
+      const createdProfesor = await ProfesorService.createProfesor({
+        ...(profesorData as ProfesorType),
+        user_id: new_user.user.id,
       });
 
       // Send the email with the credentials
       const email = await EmailService.sendEmail({
-        to: createdStudent.email,
+        to: createdProfesor.email,
         html: `${htmlTemplateCred(
-          newUser.user.username,
-          newUser.user.password
+          new_user.user.username,
+          new_user.user.password
         )}`,
       });
       handleResponse({
         statusCode: 201,
-        msg: "Student created successfully",
-        data: createdStudent,
+        msg: "Profesor created successfully",
+        data: createdProfesor,
         res,
       });
     } catch (error: any) {
       const customError = ErrorHandlerFactory.createError(error);
       handleResponse({
         statusCode: 500,
-        msg: "Error creating student",
+        msg: "Error creating Profesor",
         error: customError,
         res,
       });
     }
   },
 
-  getStudents: async (req: Request, res: Response) => {
+  getProfesores: async (req: Request, res: Response) => {
     try {
-      const students = await StudentService.getStudents();
+      const profesores = await ProfesorService.getProfesores();
       handleResponse({
         statusCode: 200,
-        msg: "Students retrieved successfully",
-        data: students,
+        msg: "Profesores retrieved successfully",
+        data: profesores,
         res,
       });
     } catch (error: any) {
       const customError = ErrorHandlerFactory.createError(error);
       handleResponse({
         statusCode: 500,
-        msg: "Error retrieving students",
+        msg: "Error retrieving Profesores",
         error: customError,
         res,
       });
     }
   },
 
-  getStudentById: async (req: Request, res: Response) => {
+  getProfesorById: async (req: Request, res: Response) => {
     try {
-      const studentId = req.params.id;
-      const student = await StudentService.getStudentById(studentId);
+      const profesorId = req.params.id;
+      const profesor = await ProfesorService.getProfesorById(profesorId);
 
-      if (!student) {
+      if (!profesor) {
         handleResponse({
           statusCode: 404,
-          msg: "Student not found",
+          msg: "Profesor not found",
           res,
         });
         return;
@@ -91,34 +90,34 @@ export const StudentController = {
 
       handleResponse({
         statusCode: 200,
-        msg: "Student retrieved successfully",
-        data: student,
+        msg: "Profesor retrieved successfully",
+        data: profesor,
         res,
       });
     } catch (error: any) {
       const customError = ErrorHandlerFactory.createError(error);
       handleResponse({
         statusCode: 500,
-        msg: "Error retrieving student",
+        msg: "Error retrieving Profesor",
         error: customError,
         res,
       });
     }
   },
 
-  updateStudent: async (req: Request, res: Response) => {
+  updateProfesor: async (req: Request, res: Response) => {
     try {
-      const studentId = req.params.id;
-      const studentData = req.body;
-      const updatedStudent = await StudentService.updateStudent(
-        studentId,
-        studentData
+      const profesorId = req.params.id;
+      const profesorData = req.body;
+      const updatedProfesor = await ProfesorService.updateProfesor(
+        profesorId,
+        profesorData
       );
 
-      if (!updatedStudent) {
+      if (!updatedProfesor) {
         handleResponse({
           statusCode: 404,
-          msg: "Student not found",
+          msg: "Profesor not found",
           res,
         });
         return;
@@ -126,35 +125,35 @@ export const StudentController = {
 
       handleResponse({
         statusCode: 200,
-        msg: "Student updated successfully",
-        data: updatedStudent,
+        msg: "Profesor updated successfully",
+        data: updatedProfesor,
         res,
       });
     } catch (error: any) {
       const customError = ErrorHandlerFactory.createError(error);
       handleResponse({
         statusCode: 500,
-        msg: "Error updating student",
+        msg: "Error updating Profesor",
         error: customError,
         res,
       });
     }
   },
 
-  deleteStudent: async (req: Request, res: Response) => {
+  deleteProfesor: async (req: Request, res: Response) => {
     try {
-      const studentId = req.params.id;
-      await StudentService.deleteStudent(studentId);
+      const profesorId = req.params.id;
+      await ProfesorService.deleteProfesor(profesorId);
       handleResponse({
         statusCode: 204,
-        msg: "Student deleted successfully",
+        msg: "Profesor deleted successfully",
         res,
       });
     } catch (error: any) {
       const customError = ErrorHandlerFactory.createError(error);
       handleResponse({
         statusCode: 500,
-        msg: "Error deleting student",
+        msg: "Error deleting Profesor",
         error: customError,
         res,
       });

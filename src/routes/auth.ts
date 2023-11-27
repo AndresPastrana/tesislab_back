@@ -21,4 +21,4 @@ const loginvalidationMiddleware = [
     .escape(),
   validateRequest,
 ];
-router.post("/login", loginvalidationMiddleware, AuthController.login);
+router.post("/login", loginvalidationMiddleware, AuthController.loginUser);

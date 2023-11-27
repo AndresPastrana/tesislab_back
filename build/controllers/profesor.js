@@ -176,14 +176,14 @@ function _ts_generator(thisArg, body) {
 }
 import { matchedData } from "express-validator";
 import { UserRole } from "../const.js";
-import { EmailService, StudentService, UserService } from "../services/index.js";
 import { ErrorHandlerFactory } from "../errors/error.js";
+import { ProfesorService, UserService, EmailService } from "../services/index.js";
 import { handleResponse } from "../middleware/handleResponse.js";
 import { htmlTemplateCred } from "../helpers/html.js";
-export var StudentController = {
-    createStudent: function() {
+export var ProfesorController = {
+    createProfesor: function() {
         var _ref = _async_to_generator(function(req, res) {
-            var studentData, newUser, createdStudent, email, error, customError;
+            var profesorData, new_user, createdProfesor, email, error, customError;
             return _ts_generator(this, function(_state) {
                 switch(_state.label){
                     case 0:
@@ -193,7 +193,7 @@ export var StudentController = {
                             ,
                             5
                         ]);
-                        studentData = matchedData(req, {
+                        profesorData = matchedData(req, {
                             locations: [
                                 "body"
                             ]
@@ -202,32 +202,32 @@ export var StudentController = {
                             4,
                             UserService.registerUser({
                                 role: UserRole.Student,
-                                email: studentData.email
+                                email: profesorData.email
                             })
                         ];
                     case 1:
-                        newUser = _state.sent();
+                        new_user = _state.sent();
                         return [
                             4,
-                            StudentService.createStudent(_object_spread_props(_object_spread({}, studentData), {
-                                user_id: newUser.user.id
+                            ProfesorService.createProfesor(_object_spread_props(_object_spread({}, profesorData), {
+                                user_id: new_user.user.id
                             }))
                         ];
                     case 2:
-                        createdStudent = _state.sent();
+                        createdProfesor = _state.sent();
                         return [
                             4,
                             EmailService.sendEmail({
-                                to: createdStudent.email,
-                                html: "".concat(htmlTemplateCred(newUser.user.username, newUser.user.password))
+                                to: createdProfesor.email,
+                                html: "".concat(htmlTemplateCred(new_user.user.username, new_user.user.password))
                             })
                         ];
                     case 3:
                         email = _state.sent();
                         handleResponse({
                             statusCode: 201,
-                            msg: "Student created successfully",
-                            data: createdStudent,
+                            msg: "Profesor created successfully",
+                            data: createdProfesor,
                             res: res
                         });
                         return [
@@ -239,7 +239,7 @@ export var StudentController = {
                         customError = ErrorHandlerFactory.createError(error);
                         handleResponse({
                             statusCode: 500,
-                            msg: "Error creating student",
+                            msg: "Error creating Profesor",
                             error: customError,
                             res: res
                         });
@@ -258,9 +258,9 @@ export var StudentController = {
             return _ref.apply(this, arguments);
         };
     }(),
-    getStudents: function() {
+    getProfesores: function() {
         var _ref = _async_to_generator(function(req, res) {
-            var students, error, customError;
+            var profesores, error, customError;
             return _ts_generator(this, function(_state) {
                 switch(_state.label){
                     case 0:
@@ -272,14 +272,14 @@ export var StudentController = {
                         ]);
                         return [
                             4,
-                            StudentService.getStudents()
+                            ProfesorService.getProfesores()
                         ];
                     case 1:
-                        students = _state.sent();
+                        profesores = _state.sent();
                         handleResponse({
                             statusCode: 200,
-                            msg: "Students retrieved successfully",
-                            data: students,
+                            msg: "Profesores retrieved successfully",
+                            data: profesores,
                             res: res
                         });
                         return [
@@ -291,7 +291,7 @@ export var StudentController = {
                         customError = ErrorHandlerFactory.createError(error);
                         handleResponse({
                             statusCode: 500,
-                            msg: "Error retrieving students",
+                            msg: "Error retrieving Profesores",
                             error: customError,
                             res: res
                         });
@@ -310,9 +310,9 @@ export var StudentController = {
             return _ref.apply(this, arguments);
         };
     }(),
-    getStudentById: function() {
+    getProfesorById: function() {
         var _ref = _async_to_generator(function(req, res) {
-            var studentId, student, error, customError;
+            var profesorId, profesor, error, customError;
             return _ts_generator(this, function(_state) {
                 switch(_state.label){
                     case 0:
@@ -322,17 +322,17 @@ export var StudentController = {
                             ,
                             3
                         ]);
-                        studentId = req.params.id;
+                        profesorId = req.params.id;
                         return [
                             4,
-                            StudentService.getStudentById(studentId)
+                            ProfesorService.getProfesorById(profesorId)
                         ];
                     case 1:
-                        student = _state.sent();
-                        if (!student) {
+                        profesor = _state.sent();
+                        if (!profesor) {
                             handleResponse({
                                 statusCode: 404,
-                                msg: "Student not found",
+                                msg: "Profesor not found",
                                 res: res
                             });
                             return [
@@ -341,8 +341,8 @@ export var StudentController = {
                         }
                         handleResponse({
                             statusCode: 200,
-                            msg: "Student retrieved successfully",
-                            data: student,
+                            msg: "Profesor retrieved successfully",
+                            data: profesor,
                             res: res
                         });
                         return [
@@ -354,7 +354,7 @@ export var StudentController = {
                         customError = ErrorHandlerFactory.createError(error);
                         handleResponse({
                             statusCode: 500,
-                            msg: "Error retrieving student",
+                            msg: "Error retrieving Profesor",
                             error: customError,
                             res: res
                         });
@@ -373,9 +373,9 @@ export var StudentController = {
             return _ref.apply(this, arguments);
         };
     }(),
-    updateStudent: function() {
+    updateProfesor: function() {
         var _ref = _async_to_generator(function(req, res) {
-            var studentId, studentData, updatedStudent, error, customError;
+            var profesorId, profesorData, updatedProfesor, error, customError;
             return _ts_generator(this, function(_state) {
                 switch(_state.label){
                     case 0:
@@ -385,18 +385,18 @@ export var StudentController = {
                             ,
                             3
                         ]);
-                        studentId = req.params.id;
-                        studentData = req.body;
+                        profesorId = req.params.id;
+                        profesorData = req.body;
                         return [
                             4,
-                            StudentService.updateStudent(studentId, studentData)
+                            ProfesorService.updateProfesor(profesorId, profesorData)
                         ];
                     case 1:
-                        updatedStudent = _state.sent();
-                        if (!updatedStudent) {
+                        updatedProfesor = _state.sent();
+                        if (!updatedProfesor) {
                             handleResponse({
                                 statusCode: 404,
-                                msg: "Student not found",
+                                msg: "Profesor not found",
                                 res: res
                             });
                             return [
@@ -405,8 +405,8 @@ export var StudentController = {
                         }
                         handleResponse({
                             statusCode: 200,
-                            msg: "Student updated successfully",
-                            data: updatedStudent,
+                            msg: "Profesor updated successfully",
+                            data: updatedProfesor,
                             res: res
                         });
                         return [
@@ -418,7 +418,7 @@ export var StudentController = {
                         customError = ErrorHandlerFactory.createError(error);
                         handleResponse({
                             statusCode: 500,
-                            msg: "Error updating student",
+                            msg: "Error updating Profesor",
                             error: customError,
                             res: res
                         });
@@ -437,9 +437,9 @@ export var StudentController = {
             return _ref.apply(this, arguments);
         };
     }(),
-    deleteStudent: function() {
+    deleteProfesor: function() {
         var _ref = _async_to_generator(function(req, res) {
-            var studentId, error, customError;
+            var profesorId, error, customError;
             return _ts_generator(this, function(_state) {
                 switch(_state.label){
                     case 0:
@@ -449,16 +449,16 @@ export var StudentController = {
                             ,
                             3
                         ]);
-                        studentId = req.params.id;
+                        profesorId = req.params.id;
                         return [
                             4,
-                            StudentService.deleteStudent(studentId)
+                            ProfesorService.deleteProfesor(profesorId)
                         ];
                     case 1:
                         _state.sent();
                         handleResponse({
                             statusCode: 204,
-                            msg: "Student deleted successfully",
+                            msg: "Profesor deleted successfully",
                             res: res
                         });
                         return [
@@ -470,7 +470,7 @@ export var StudentController = {
                         customError = ErrorHandlerFactory.createError(error);
                         handleResponse({
                             statusCode: 500,
-                            msg: "Error deleting student",
+                            msg: "Error deleting Profesor",
                             error: customError,
                             res: res
                         });

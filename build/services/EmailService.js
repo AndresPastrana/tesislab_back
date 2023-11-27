@@ -46,6 +46,58 @@ function _create_class(Constructor, protoProps, staticProps) {
     if (staticProps) _defineProperties(Constructor, staticProps);
     return Constructor;
 }
+function _define_property(obj, key, value) {
+    if (key in obj) {
+        Object.defineProperty(obj, key, {
+            value: value,
+            enumerable: true,
+            configurable: true,
+            writable: true
+        });
+    } else {
+        obj[key] = value;
+    }
+    return obj;
+}
+function _object_spread(target) {
+    for(var i = 1; i < arguments.length; i++){
+        var source = arguments[i] != null ? arguments[i] : {};
+        var ownKeys = Object.keys(source);
+        if (typeof Object.getOwnPropertySymbols === "function") {
+            ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function(sym) {
+                return Object.getOwnPropertyDescriptor(source, sym).enumerable;
+            }));
+        }
+        ownKeys.forEach(function(key) {
+            _define_property(target, key, source[key]);
+        });
+    }
+    return target;
+}
+function ownKeys(object, enumerableOnly) {
+    var keys = Object.keys(object);
+    if (Object.getOwnPropertySymbols) {
+        var symbols = Object.getOwnPropertySymbols(object);
+        if (enumerableOnly) {
+            symbols = symbols.filter(function(sym) {
+                return Object.getOwnPropertyDescriptor(object, sym).enumerable;
+            });
+        }
+        keys.push.apply(keys, symbols);
+    }
+    return keys;
+}
+function _object_spread_props(target, source) {
+    source = source != null ? source : {};
+    if (Object.getOwnPropertyDescriptors) {
+        Object.defineProperties(target, Object.getOwnPropertyDescriptors(source));
+    } else {
+        ownKeys(Object(source)).forEach(function(key) {
+            Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key));
+        });
+    }
+    return target;
+}
 function _ts_generator(thisArg, body) {
     var f, y, t, g, _ = {
         label: 0,
@@ -141,9 +193,8 @@ function _ts_generator(thisArg, body) {
         };
     }
 }
-import { EMAIL_DOMAIN } from "./../const.js";
-import { Resend } from "resend";
-var EmailService = /*#__PURE__*/ function() {
+import nodemailer from "nodemailer";
+export var EmailService = /*#__PURE__*/ function() {
     "use strict";
     function EmailService() {
         _class_call_check(this, EmailService);
@@ -151,33 +202,45 @@ var EmailService = /*#__PURE__*/ function() {
     _create_class(EmailService, null, [
         {
             key: "sendEmail",
-            value: // Send a email to an specic user
-            function sendEmail(param) {
-                var to = param.to, htmlMessage = param.htmlMessage, subject = param.subject;
+            value: // Send an email to a specific user
+            function sendEmail(options) {
                 return _async_to_generator(function() {
-                    var _data_data, resend, data;
+                    var emailOptions, info, error;
                     return _ts_generator(this, function(_state) {
                         switch(_state.label){
                             case 0:
-                                resend = new Resend(process.env.RESEND_KEY);
+                                emailOptions = _object_spread_props(_object_spread({}, options), {
+                                    from: "upr.tesislab@gmail.com"
+                                });
+                                // Convert to option to a string if it's an array
+                                if (Array.isArray(options.to)) {
+                                    emailOptions.to = options.to.join(" ");
+                                }
+                                _state.label = 1;
+                            case 1:
+                                _state.trys.push([
+                                    1,
+                                    3,
+                                    ,
+                                    4
+                                ]);
                                 return [
                                     4,
-                                    resend.emails.send({
-                                        from: EMAIL_DOMAIN,
-                                        to: to,
-                                        subject: subject,
-                                        html: htmlMessage
-                                    })
+                                    EmailService.transporter.sendMail(emailOptions)
                                 ];
-                            case 1:
-                                data = _state.sent();
-                                if (data.error) {
-                                    throw new Error(data.error.message);
-                                }
-                                console.log("Email send correctlty");
+                            case 2:
+                                info = _state.sent();
                                 return [
                                     2,
-                                    (_data_data = data.data) === null || _data_data === void 0 ? void 0 : _data_data.id
+                                    info
+                                ];
+                            case 3:
+                                error = _state.sent();
+                                console.error(error);
+                                throw new Error(error.message);
+                            case 4:
+                                return [
+                                    2
                                 ];
                         }
                     });
@@ -187,4 +250,10 @@ var EmailService = /*#__PURE__*/ function() {
     ]);
     return EmailService;
 }();
-export default EmailService;
+_define_property(EmailService, "transporter", nodemailer.createTransport({
+    service: "gmail",
+    auth: {
+        user: "upr.tesislab@gmail.com",
+        pass: "ngrb tvvb aemw yivx"
+    }
+}));

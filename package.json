@@ -1,5 +1,5 @@
 {
-  "name": "acopio_backed_app",
+  "name": "tesis_lab_backend",
   "version": "1.0.0",
   "main": "index.js",
   "license": "MIT",
@@ -21,6 +21,7 @@
     "generate-password": "^1.7.1",
     "jsonwebtoken": "9.0.2",
     "mongoose": "^7.5.3",
+    "nodemailer": "^6.9.7",
     "pdfkit": "^0.13.0",
     "resend": "^2.0.0"
   },
@@ -34,6 +35,7 @@
     "@types/mongoose": "^5.11.97",
     "@types/morgan": "^1.9.6",
     "@types/node": "^20.8.0",
+    "@types/nodemailer": "^6.4.14",
     "@types/pdfkit": "^0.12.12",
     "morgan": "^1.10.0",
     "nodemon": "^3.0.1",

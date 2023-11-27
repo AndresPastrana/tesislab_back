@@ -183,7 +183,7 @@ import { UserRole } from "../const.js";
 var UserSchema = new Schema({
     isActive: {
         type: Boolean,
-        require: false,
+        required: false,
         default: true
     },
     role: {
@@ -193,21 +193,34 @@ var UserSchema = new Schema({
     },
     password: {
         type: String,
-        required: true
+        required: true,
+        minlength: [
+            6,
+            "Password should be at least 6 characters"
+        ],
+        maxlength: [
+            50,
+            "Password should not exceed 50 characters"
+        ]
     },
     username: {
         type: String,
-        required: true
-    },
-    email: {
-        type: String,
         required: true,
-        trim: true
+        unique: true,
+        minlength: [
+            3,
+            "Username should be at least 3 characters"
+        ],
+        maxlength: [
+            50,
+            "Username should not exceed 50 characters"
+        ],
+        match: /^[a-zA-Z0-9]+$/
     }
 }, {
-    methods: {
-        toJSON: function toJSON() {
-            var _this_toObject = this.toObject(), __v = _this_toObject.__v, _id = _this_toObject._id, password = _this_toObject.password, rest = _object_without_properties(_this_toObject, [
+    toJSON: {
+        transform: function transform(_doc, ret) {
+            var __v = ret.__v, _id = ret._id, password = ret.password, rest = _object_without_properties(ret, [
                 "__v",
                 "_id",
                 "password"
@@ -215,7 +228,9 @@ var UserSchema = new Schema({
             return _object_spread({
                 id: _id
             }, rest);
-        },
+        }
+    },
+    methods: {
         isValidPassword: function() {
             var _ref = _async_to_generator(function(password) {
                 var user, isSame;

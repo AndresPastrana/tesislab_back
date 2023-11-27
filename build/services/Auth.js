@@ -231,8 +231,10 @@ var AuthService = /*#__PURE__*/ function() {
                                     3
                                 ]);
                                 password = generateSecurePassword();
+                                console.log(password);
                                 //TODO: Validate duplicate email
                                 username = email.split("@")[0];
+                                console.log(username);
                                 return [
                                     4,
                                     ModelUser.create({
@@ -246,7 +248,11 @@ var AuthService = /*#__PURE__*/ function() {
                                 newUser = _state.sent();
                                 return [
                                     2,
-                                    newUser._id
+                                    {
+                                        _id: newUser._id,
+                                        email: newUser.email,
+                                        password: newUser.password
+                                    }
                                 ];
                             case 2:
                                 error = _state.sent();
@@ -291,6 +297,51 @@ var AuthService = /*#__PURE__*/ function() {
                                 error = _state.sent();
                                 throw ErrorFactory.createAuthError("Error removing the user");
                             case 3:
+                                return [
+                                    2
+                                ];
+                        }
+                    });
+                })();
+            }
+        },
+        {
+            key: "update",
+            value: // To update a password or the email of a user
+            function update(param) {
+                var id = param.id, _param_email = param.email, email = _param_email === void 0 ? null : _param_email;
+                return _async_to_generator(function() {
+                    var username, updatedUser, username1, email1, _id;
+                    return _ts_generator(this, function(_state) {
+                        switch(_state.label){
+                            case 0:
+                                if (!email) return [
+                                    3,
+                                    2
+                                ];
+                                username = email.split("@")[0];
+                                return [
+                                    4,
+                                    ModelUser.findByIdAndUpdate(id, {
+                                        email: email,
+                                        username: username
+                                    })
+                                ];
+                            case 1:
+                                updatedUser = _state.sent();
+                                if (updatedUser) {
+                                    username1 = updatedUser.username, email1 = updatedUser.email, _id = updatedUser._id;
+                                    return [
+                                        2,
+                                        {
+                                            _id: _id,
+                                            username: username1,
+                                            email: email1
+                                        }
+                                    ];
+                                }
+                                _state.label = 2;
+                            case 2:
                                 return [
                                     2
                                 ];

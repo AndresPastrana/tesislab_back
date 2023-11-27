@@ -1,68 +1,60 @@
-// Create a new Student
+import { Model, Document } from "mongoose";
 
-import AuthService from "./Auth.js";
-import PersonService from "./PersonService.js";
-import { ModelStudent } from "../models/Student.js";
-import { UserRole } from "../const.js";
+import { ModelStudent, StudentType } from "../models/Student.js";
+import { ErrorHandlerFactory } from "../errors/error.js";
 
-type InputCreateStudent = {
-  ci: string;
-  name: string;
-  lastname: string;
-  address: string;
-  age: number;
-  phone: string;
-  sex: string;
-  email: string;
-  language_certificate: Boolean;
-};
+export class StudentService {
+  private static Student: Model<StudentType & Document> = ModelStudent;
+  private static ErrorFactory = ErrorHandlerFactory;
 
-export default class StudentService {
-  static async createStudent({
-    email,
-    language_certificate,
-    name,
-    lastname,
-    address,
-    ci,
-    age,
-    phone,
-    sex,
-  }: InputCreateStudent) {
-    // Uses the Auth Service to create a new user
-    const user_id = await AuthService.register({
-      role: UserRole.Student,
-      email,
-    });
+  static async createStudent(studentData: StudentType): Promise<StudentType> {
+    try {
+      const createdStudent = await this.Student.create(studentData);
+      return createdStudent.toObject() as StudentType;
+    } catch (error) {
+      throw this.ErrorFactory.createError(error as Error);
+    }
+  }
 
-    console.log("User saved");
+  static async getStudents(): Promise<StudentType[]> {
+    try {
+      const students = await this.Student.find();
+      return students.map((student) => student.toObject() as StudentType);
+    } catch (error) {
+      throw this.ErrorFactory.createError(error as Error);
+    }
+  }
 
-    console.log("Usuario creado.....");
+  static async getStudentById(studentId: string): Promise<StudentType | null> {
+    try {
+      const student = await this.Student.findById(studentId);
+      return student ? (student.toObject() as StudentType) : null;
+    } catch (error) {
+      throw this.ErrorFactory.createError(error as Error);
+    }
+  }
 
-    // Create a new person and la asocia con el user_id del usuario creado
-    const person_info = await PersonService.createPerson({
-      user_id,
-      name,
-      lastname,
-      address,
-      age,
-      ci,
-      phone,
-      sex,
-    });
-    console.log("Persona creada....");
+  static async updateStudent(
+    studentId: string,
+    studentData: StudentType
+  ): Promise<StudentType | null> {
+    try {
+      const updatedStudent = await this.Student.findByIdAndUpdate(
+        studentId,
+        studentData,
+        { new: true }
+      );
+      return updatedStudent ? (updatedStudent.toObject() as StudentType) : null;
+    } catch (error) {
+      throw this.ErrorFactory.createError(error as Error);
+    }
+  }
 
-    // Create the new student and lo asocia con la person creada
-    const newStudent = await ModelStudent.create({
-      language_certificate,
-      person_info,
-    });
-
-    return newStudent.toObject();
+  static async deleteStudent(studentId: string): Promise<void> {
+    try {
+      await this.Student.findByIdAndDelete(studentId);
+    } catch (error) {
+      throw this.ErrorFactory.createError(error as Error);
+    }
   }
 }
-// Edit A Student
-
-// Delete a student ,Revives the student id, Set the user as incative and the Student.amcient = true
-
-// Get hitorial , Recives the student id

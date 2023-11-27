@@ -154,158 +154,77 @@ function _ts_generator(thisArg, body) {
         };
     }
 }
-import { ModelStudent } from "../models/Student.js";
+import { ModelUser } from "../models/User.js";
+import { createJWTAsync } from "../helpers/jwt.js";
 import { ErrorHandlerFactory } from "../errors/error.js";
-export var StudentService = /*#__PURE__*/ function() {
+import { generateSecurePassword } from "../helpers/hash.js";
+export var UserService = /*#__PURE__*/ function() {
     "use strict";
-    function StudentService() {
-        _class_call_check(this, StudentService);
+    function UserService() {
+        _class_call_check(this, UserService);
     }
-    _create_class(StudentService, null, [
+    _create_class(UserService, null, [
         {
-            key: "createStudent",
-            value: function createStudent(studentData) {
+            key: "loginUser",
+            value: function loginUser(param) {
+                var username = param.username, password = param.password;
                 var _this = this;
                 return _async_to_generator(function() {
-                    var createdStudent, error;
+                    var user, isValidPassword, token, error;
                     return _ts_generator(this, function(_state) {
                         switch(_state.label){
                             case 0:
                                 _state.trys.push([
                                     0,
-                                    2,
+                                    4,
                                     ,
-                                    3
+                                    5
                                 ]);
                                 return [
                                     4,
-                                    _this.Student.create(studentData)
-                                ];
-                            case 1:
-                                createdStudent = _state.sent();
-                                return [
-                                    2,
-                                    createdStudent.toObject()
-                                ];
-                            case 2:
-                                error = _state.sent();
-                                throw _this.ErrorFactory.createError(error);
-                            case 3:
-                                return [
-                                    2
-                                ];
-                        }
-                    });
-                })();
-            }
-        },
-        {
-            key: "getStudents",
-            value: function getStudents() {
-                var _this = this;
-                return _async_to_generator(function() {
-                    var students, error;
-                    return _ts_generator(this, function(_state) {
-                        switch(_state.label){
-                            case 0:
-                                _state.trys.push([
-                                    0,
-                                    2,
-                                    ,
-                                    3
-                                ]);
-                                return [
-                                    4,
-                                    _this.Student.find()
-                                ];
-                            case 1:
-                                students = _state.sent();
-                                return [
-                                    2,
-                                    students.map(function(student) {
-                                        return student.toObject();
-                                    })
-                                ];
-                            case 2:
-                                error = _state.sent();
-                                throw _this.ErrorFactory.createError(error);
-                            case 3:
-                                return [
-                                    2
-                                ];
-                        }
-                    });
-                })();
-            }
-        },
-        {
-            key: "getStudentById",
-            value: function getStudentById(studentId) {
-                var _this = this;
-                return _async_to_generator(function() {
-                    var student, error;
-                    return _ts_generator(this, function(_state) {
-                        switch(_state.label){
-                            case 0:
-                                _state.trys.push([
-                                    0,
-                                    2,
-                                    ,
-                                    3
-                                ]);
-                                return [
-                                    4,
-                                    _this.Student.findById(studentId)
-                                ];
-                            case 1:
-                                student = _state.sent();
-                                return [
-                                    2,
-                                    student ? student.toObject() : null
-                                ];
-                            case 2:
-                                error = _state.sent();
-                                throw _this.ErrorFactory.createError(error);
-                            case 3:
-                                return [
-                                    2
-                                ];
-                        }
-                    });
-                })();
-            }
-        },
-        {
-            key: "updateStudent",
-            value: function updateStudent(studentId, studentData) {
-                var _this = this;
-                return _async_to_generator(function() {
-                    var updatedStudent, error;
-                    return _ts_generator(this, function(_state) {
-                        switch(_state.label){
-                            case 0:
-                                _state.trys.push([
-                                    0,
-                                    2,
-                                    ,
-                                    3
-                                ]);
-                                return [
-                                    4,
-                                    _this.Student.findByIdAndUpdate(studentId, studentData, {
-                                        new: true
+                                    _this.ModelUser.findOne({
+                                        username: username
                                     })
                                 ];
                             case 1:
-                                updatedStudent = _state.sent();
+                                user = _state.sent();
+                                if (!user) {
+                                    throw ErrorHandlerFactory.createError(new Error("Invalid username or password"));
+                                }
                                 return [
-                                    2,
-                                    updatedStudent ? updatedStudent.toObject() : null
+                                    4,
+                                    user.isValidPassword(password)
                                 ];
                             case 2:
-                                error = _state.sent();
-                                throw _this.ErrorFactory.createError(error);
+                                isValidPassword = _state.sent();
+                                if (!isValidPassword) {
+                                    throw ErrorHandlerFactory.createError(new Error("Invalid username or password"));
+                                }
+                                return [
+                                    4,
+                                    createJWTAsync({
+                                        userId: user._id,
+                                        username: user.username,
+                                        role: user.role
+                                    })
+                                ];
                             case 3:
+                                token = _state.sent();
+                                return [
+                                    2,
+                                    {
+                                        user: {
+                                            id: user._id.toString(),
+                                            username: user.username,
+                                            role: user.role
+                                        },
+                                        token: token
+                                    }
+                                ];
+                            case 4:
+                                error = _state.sent();
+                                throw error;
+                            case 5:
                                 return [
                                     2
                                 ];
@@ -315,34 +234,59 @@ export var StudentService = /*#__PURE__*/ function() {
             }
         },
         {
-            key: "deleteStudent",
-            value: function deleteStudent(studentId) {
+            key: "registerUser",
+            value: function registerUser(param) {
+                var role = param.role, email = param.email;
                 var _this = this;
                 return _async_to_generator(function() {
-                    var error;
+                    var username, existingUser, password, newUser, error;
                     return _ts_generator(this, function(_state) {
                         switch(_state.label){
                             case 0:
                                 _state.trys.push([
                                     0,
-                                    2,
-                                    ,
-                                    3
-                                ]);
-                                return [
-                                    4,
-                                    _this.Student.findByIdAndDelete(studentId)
-                                ];
-                            case 1:
-                                _state.sent();
-                                return [
                                     3,
-                                    3
+                                    ,
+                                    4
+                                ]);
+                                username = email.split("@")[0];
+                                return [
+                                    4,
+                                    _this.ModelUser.findOne({
+                                        username: username
+                                    })
+                                ];
+                            case 1:
+                                existingUser = _state.sent();
+                                if (existingUser) {
+                                    throw ErrorHandlerFactory.createError(new Error("Username is already taken"));
+                                }
+                                password = generateSecurePassword();
+                                return [
+                                    4,
+                                    _this.ModelUser.create({
+                                        username: username,
+                                        password: password,
+                                        role: role
+                                    })
                                 ];
                             case 2:
-                                error = _state.sent();
-                                throw _this.ErrorFactory.createError(error);
+                                newUser = _state.sent();
+                                return [
+                                    2,
+                                    {
+                                        user: {
+                                            id: newUser._id,
+                                            username: newUser.username,
+                                            role: newUser.role,
+                                            password: password
+                                        }
+                                    }
+                                ];
                             case 3:
+                                error = _state.sent();
+                                throw error;
+                            case 4:
                                 return [
                                     2
                                 ];
@@ -352,7 +296,6 @@ export var StudentService = /*#__PURE__*/ function() {
             }
         }
     ]);
-    return StudentService;
+    return UserService;
 }();
-_define_property(StudentService, "Student", ModelStudent);
-_define_property(StudentService, "ErrorFactory", ErrorHandlerFactory);
+_define_property(UserService, "ModelUser", ModelUser);

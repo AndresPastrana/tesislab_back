@@ -46,6 +46,19 @@ function _create_class(Constructor, protoProps, staticProps) {
     if (staticProps) _defineProperties(Constructor, staticProps);
     return Constructor;
 }
+function _define_property(obj, key, value) {
+    if (key in obj) {
+        Object.defineProperty(obj, key, {
+            value: value,
+            enumerable: true,
+            configurable: true,
+            writable: true
+        });
+    } else {
+        obj[key] = value;
+    }
+    return obj;
+}
 function _ts_generator(thisArg, body) {
     var f, y, t, g, _ = {
         label: 0,
@@ -141,6 +154,7 @@ function _ts_generator(thisArg, body) {
         };
     }
 }
+import { ErrorFactory } from "../errors/error.js";
 import { ModelPerson } from "../models/Person.js";
 var PersonService = /*#__PURE__*/ function() {
     "use strict";
@@ -165,7 +179,7 @@ var PersonService = /*#__PURE__*/ function() {
                                 ]);
                                 return [
                                     4,
-                                    ModelPerson.create({
+                                    PersonService.personModel.create({
                                         user_id: user_id,
                                         ci: ci,
                                         name: name,
@@ -199,6 +213,50 @@ var PersonService = /*#__PURE__*/ function() {
             }
         },
         {
+            key: "updateById",
+            value: function updateById(personId, updateData) {
+                return _async_to_generator(function() {
+                    var updatedPerson, error;
+                    return _ts_generator(this, function(_state) {
+                        switch(_state.label){
+                            case 0:
+                                _state.trys.push([
+                                    0,
+                                    2,
+                                    ,
+                                    3
+                                ]);
+                                return [
+                                    4,
+                                    PersonService.personModel.findByIdAndUpdate(personId, {
+                                        $set: updateData
+                                    }, {
+                                        new: true
+                                    } // Return the updated document
+                                    )
+                                ];
+                            case 1:
+                                updatedPerson = _state.sent();
+                                if (!updatedPerson) {
+                                    throw ErrorFactory.createPersonError("Person not found for update");
+                                }
+                                return [
+                                    2,
+                                    updatedPerson._id
+                                ];
+                            case 2:
+                                error = _state.sent();
+                                throw ErrorFactory.createPersonError("Error updating the person");
+                            case 3:
+                                return [
+                                    2
+                                ];
+                        }
+                    });
+                })();
+            }
+        },
+        {
             key: "getPersonById",
             value: function getPersonById(personId) {
                 return _async_to_generator(function() {
@@ -214,27 +272,59 @@ var PersonService = /*#__PURE__*/ function() {
                                 ]);
                                 return [
                                     4,
-                                    ModelPerson.findById(personId).populate("user_id", "email")
+                                    PersonService.personModel.findById(personId).populate("user_id", "email")
                                 ];
                             case 1:
                                 person = _state.sent();
                                 if (!person) {
-                                    return [
-                                        2,
-                                        {}
-                                    ];
-                                // throw ErrorFactory.createPersonNotFoundError("Person not found");
+                                    throw ErrorFactory.createPersonError("Person not found");
                                 }
                                 return [
                                     2,
-                                    person.toJSON()
+                                    person
                                 ];
                             case 2:
                                 error = _state.sent();
+                                throw ErrorFactory.createPersonError("Error retrieving person information");
+                            case 3:
                                 return [
-                                    3,
-                                    3
+                                    2
                                 ];
+                        }
+                    });
+                })();
+            }
+        },
+        {
+            key: "getPersonByFilter",
+            value: function getPersonByFilter(filter) {
+                return _async_to_generator(function() {
+                    var person, error;
+                    return _ts_generator(this, function(_state) {
+                        switch(_state.label){
+                            case 0:
+                                _state.trys.push([
+                                    0,
+                                    2,
+                                    ,
+                                    3
+                                ]);
+                                return [
+                                    4,
+                                    PersonService.personModel.findOne(filter).populate("user_id")
+                                ];
+                            case 1:
+                                person = _state.sent();
+                                if (!person) {
+                                    throw ErrorFactory.createPersonError("Person not found");
+                                }
+                                return [
+                                    2,
+                                    person
+                                ];
+                            case 2:
+                                error = _state.sent();
+                                throw ErrorFactory.createPersonError("Error retrieving person by filter");
                             case 3:
                                 return [
                                     2
@@ -295,4 +385,5 @@ var PersonService = /*#__PURE__*/ function() {
     ]);
     return PersonService;
 }();
+_define_property(PersonService, "personModel", ModelPerson);
 export { PersonService as default };

@@ -130,6 +130,7 @@ export var dbConection = function() {
             switch(_state.label){
                 case 0:
                     remote = process.env.MONGO_DB_DEV_LOCAL || process.env.MONGO_DB_DEV_PROD;
+                    console.log(remote);
                     return [
                         4,
                         mongoose.connect(remote)

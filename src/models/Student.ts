@@ -1,33 +1,71 @@
-import { Document, Schema, model } from "mongoose";
+import { Schema, Document, model } from "mongoose";
+import { Sex } from "../const.js";
 
 export interface StudentType {
-  person_info: Schema.Types.ObjectId;
+  user_id: Schema.Types.ObjectId;
+  ci: string;
+  name: string;
+  lastname: string;
+  address: string;
+  email: string;
+  phone: string;
+  sex: string;
+  age: number;
+  ancient: boolean;
   language_certificate: boolean;
 }
 
-interface Student extends StudentType, Document {}
+interface StudentDocument extends StudentType, Document {}
 
-const StudentSchema = new Schema<Student>(
-  {
-    person_info: {
-      type: Schema.Types.ObjectId,
-      ref: "Person",
-      required: true,
-    },
-    language_certificate: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
+const studentSchema = new Schema<StudentDocument>({
+  user_id: {
+    type: Schema.Types.ObjectId,
+    required: true,
+    ref: "User",
   },
-  {
-    methods: {
-      toJSON: function (this) {
-        const { __v, _id, id, ...rest } = this.toObject();
-        return { id: _id.toString(), ...rest };
-      },
-    },
-  }
-);
+  ci: {
+    type: String,
+    required: true,
+  },
+  name: {
+    type: String,
+    required: true,
+  },
+  lastname: {
+    type: String,
+    required: true,
+  },
+  address: {
+    type: String,
+    required: true,
+  },
+  email: {
+    type: String,
+    required: true,
+  },
+  phone: {
+    type: String,
+    required: true,
+  },
+  sex: {
+    type: String,
+    enum: Sex,
+    required: true,
+  },
+  age: {
+    type: Number,
+    required: true,
+  },
+  ancient: {
+    type: Boolean,
+    required: false,
+    default: false,
+  },
+  language_certificate: {
+    type: Boolean,
+    required: true,
+    default: false,
+  },
+});
 
-export const ModelStudent = model("Student", StudentSchema);
+export const ModelStudent = model<StudentDocument>("Student", studentSchema);

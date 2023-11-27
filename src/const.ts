@@ -91,4 +91,4 @@ export enum Routes {
   student = "/api/student",
 }
 
-export const EMAIL_DOMAIN = "upr.tesislab@gmail.com";
+export const EMAIL_DOMAIN = "onboarding@resend.dev";

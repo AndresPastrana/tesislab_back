@@ -3,28 +3,33 @@ import { Sex } from "../const.js";
 var PersonSchema = new Schema({
     user_id: {
         type: Schema.Types.ObjectId,
-        ref: "User",
-        required: true
+        required: true,
+        ref: "User"
     },
     ci: {
         type: String,
+        required: true,
         maxlength: 11,
-        required: true
+        minlength: 11,
+        trim: true
     },
     name: {
         type: String,
         required: true,
-        lowercase: true
+        lowercase: true,
+        trim: true
     },
     lastname: {
         type: String,
         required: true,
-        lowercase: true
+        lowercase: true,
+        trim: true
     },
     address: {
         type: String,
         required: true,
-        lowercase: true
+        lowercase: true,
+        trim: true
     },
     age: {
         type: Number,
@@ -35,11 +40,13 @@ var PersonSchema = new Schema({
     phone: {
         type: String,
         required: true,
-        trim: true
+        trim: true,
+        minlength: 8,
+        maxlength: 8
     },
     sex: {
         type: String,
-        enum: Object.values(Sex),
+        enum: Sex,
         required: true
     }
 });
