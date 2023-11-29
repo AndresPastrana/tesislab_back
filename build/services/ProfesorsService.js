@@ -167,32 +167,26 @@ export var ProfesorService = /*#__PURE__*/ function() {
             value: function createProfesor(profesorData) {
                 var _this = this;
                 return _async_to_generator(function() {
-                    var createdProfesor, error;
+                    var isUnique, createdProfesor;
                     return _ts_generator(this, function(_state) {
                         switch(_state.label){
                             case 0:
-                                _state.trys.push([
-                                    0,
-                                    2,
-                                    ,
-                                    3
-                                ]);
+                                return [
+                                    4,
+                                    _this.isProfessorUnique(profesorData.email, profesorData.ci)
+                                ];
+                            case 1:
+                                isUnique = _state.sent();
+                                if (!isUnique) throw new Error("Duplicated email or ci");
                                 return [
                                     4,
                                     _this.Profesor.create(profesorData)
                                 ];
-                            case 1:
+                            case 2:
                                 createdProfesor = _state.sent();
                                 return [
                                     2,
                                     createdProfesor.toObject()
-                                ];
-                            case 2:
-                                error = _state.sent();
-                                throw _this.ErrorFacatory.createError(error);
-                            case 3:
-                                return [
-                                    2
                                 ];
                         }
                     });
@@ -204,16 +198,10 @@ export var ProfesorService = /*#__PURE__*/ function() {
             value: function getProfesores() {
                 var _this = this;
                 return _async_to_generator(function() {
-                    var profesores, error;
+                    var profesores;
                     return _ts_generator(this, function(_state) {
                         switch(_state.label){
                             case 0:
-                                _state.trys.push([
-                                    0,
-                                    2,
-                                    ,
-                                    3
-                                ]);
                                 return [
                                     4,
                                     _this.Profesor.find()
@@ -226,13 +214,6 @@ export var ProfesorService = /*#__PURE__*/ function() {
                                         return profesor.toObject();
                                     })
                                 ];
-                            case 2:
-                                error = _state.sent();
-                                throw _this.ErrorFacatory.createError(error);
-                            case 3:
-                                return [
-                                    2
-                                ];
                         }
                     });
                 })();
@@ -243,16 +224,10 @@ export var ProfesorService = /*#__PURE__*/ function() {
             value: function getProfesorById(profesorId) {
                 var _this = this;
                 return _async_to_generator(function() {
-                    var profesor, error;
+                    var profesor;
                     return _ts_generator(this, function(_state) {
                         switch(_state.label){
                             case 0:
-                                _state.trys.push([
-                                    0,
-                                    2,
-                                    ,
-                                    3
-                                ]);
                                 return [
                                     4,
                                     _this.Profesor.findById(profesorId)
@@ -262,13 +237,6 @@ export var ProfesorService = /*#__PURE__*/ function() {
                                 return [
                                     2,
                                     profesor ? profesor.toObject() : null
-                                ];
-                            case 2:
-                                error = _state.sent();
-                                throw _this.ErrorFacatory.createError(error);
-                            case 3:
-                                return [
-                                    2
                                 ];
                         }
                     });
@@ -280,34 +248,28 @@ export var ProfesorService = /*#__PURE__*/ function() {
             value: function updateProfesor(profesorId, profesorData) {
                 var _this = this;
                 return _async_to_generator(function() {
-                    var updatedProfesor, error;
+                    var isUnique, updatedProfesor;
                     return _ts_generator(this, function(_state) {
                         switch(_state.label){
                             case 0:
-                                _state.trys.push([
-                                    0,
-                                    2,
-                                    ,
-                                    3
-                                ]);
+                                return [
+                                    4,
+                                    _this.isProfessorUnique(profesorData.email, profesorData.ci, profesorId)
+                                ];
+                            case 1:
+                                isUnique = _state.sent();
+                                if (!isUnique) throw new Error("Duplicated email or ci");
                                 return [
                                     4,
                                     _this.Profesor.findByIdAndUpdate(profesorId, profesorData, {
                                         new: true
                                     })
                                 ];
-                            case 1:
+                            case 2:
                                 updatedProfesor = _state.sent();
                                 return [
                                     2,
                                     updatedProfesor ? updatedProfesor.toObject() : null
-                                ];
-                            case 2:
-                                error = _state.sent();
-                                throw _this.ErrorFacatory.createError(error);
-                            case 3:
-                                return [
-                                    2
                                 ];
                         }
                     });
@@ -319,7 +281,36 @@ export var ProfesorService = /*#__PURE__*/ function() {
             value: function deleteProfesor(profesorId) {
                 var _this = this;
                 return _async_to_generator(function() {
-                    var error;
+                    var deletedProfesor;
+                    return _ts_generator(this, function(_state) {
+                        switch(_state.label){
+                            case 0:
+                                return [
+                                    4,
+                                    _this.Profesor.findByIdAndUpdate(profesorId, {
+                                        ancient: true
+                                    }, {
+                                        new: true
+                                    })
+                                ];
+                            case 1:
+                                deletedProfesor = _state.sent();
+                                if (!deletedProfesor) throw new Error("Professor not found for deletion");
+                                return [
+                                    2,
+                                    deletedProfesor._id
+                                ];
+                        }
+                    });
+                })();
+            }
+        },
+        {
+            key: "isProfessorUnique",
+            value: function isProfessorUnique(email, ci, excludeProfessorId) {
+                var _this = this;
+                return _async_to_generator(function() {
+                    var existingProfessor, error;
                     return _ts_generator(this, function(_state) {
                         switch(_state.label){
                             case 0:
@@ -331,17 +322,68 @@ export var ProfesorService = /*#__PURE__*/ function() {
                                 ]);
                                 return [
                                     4,
-                                    _this.Profesor.findByIdAndDelete(profesorId)
+                                    _this.Profesor.findOne({
+                                        $or: [
+                                            {
+                                                email: email === null || email === void 0 ? void 0 : email.toLowerCase()
+                                            },
+                                            {
+                                                ci: ci === null || ci === void 0 ? void 0 : ci.toLowerCase()
+                                            }
+                                        ],
+                                        _id: {
+                                            $ne: excludeProfessorId
+                                        }
+                                    })
                                 ];
                             case 1:
-                                _state.sent();
+                                existingProfessor = _state.sent();
+                                // If there's an existing professor, it's not unique
                                 return [
-                                    3,
-                                    3
+                                    2,
+                                    !existingProfessor
                                 ];
                             case 2:
                                 error = _state.sent();
-                                throw _this.ErrorFacatory.createError(error);
+                                console.log(error);
+                                throw _this.ErrorFactory.createError(new Error("Error checking professor uniqueness"));
+                            case 3:
+                                return [
+                                    2
+                                ];
+                        }
+                    });
+                })();
+            }
+        },
+        {
+            key: "doesProfessorExist",
+            value: function doesProfessorExist(filter) {
+                var _this = this;
+                return _async_to_generator(function() {
+                    var existingProfessor, error;
+                    return _ts_generator(this, function(_state) {
+                        switch(_state.label){
+                            case 0:
+                                _state.trys.push([
+                                    0,
+                                    2,
+                                    ,
+                                    3
+                                ]);
+                                return [
+                                    4,
+                                    _this.Profesor.findOne(filter)
+                                ];
+                            case 1:
+                                existingProfessor = _state.sent();
+                                return [
+                                    2,
+                                    !!existingProfessor
+                                ]; // Returns true if the professor exists, false otherwise
+                            case 2:
+                                error = _state.sent();
+                                throw _this.ErrorFactory.createError(new Error("Error checking professor existence"));
                             case 3:
                                 return [
                                     2
@@ -355,4 +397,4 @@ export var ProfesorService = /*#__PURE__*/ function() {
     return ProfesorService;
 }();
 _define_property(ProfesorService, "Profesor", ModelProfesor);
-_define_property(ProfesorService, "ErrorFacatory", ErrorHandlerFactory);
+_define_property(ProfesorService, "ErrorFactory", ErrorHandlerFactory);

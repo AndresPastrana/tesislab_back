@@ -170,16 +170,10 @@ export var UserService = /*#__PURE__*/ function() {
                 var username = param.username, password = param.password;
                 var _this = this;
                 return _async_to_generator(function() {
-                    var user, isValidPassword, token, error;
+                    var user, isValidPassword, token;
                     return _ts_generator(this, function(_state) {
                         switch(_state.label){
                             case 0:
-                                _state.trys.push([
-                                    0,
-                                    4,
-                                    ,
-                                    5
-                                ]);
                                 return [
                                     4,
                                     _this.ModelUser.findOne({
@@ -188,18 +182,14 @@ export var UserService = /*#__PURE__*/ function() {
                                 ];
                             case 1:
                                 user = _state.sent();
-                                if (!user) {
-                                    throw ErrorHandlerFactory.createError(new Error("Invalid username or password"));
-                                }
+                                if (!user) throw new Error("Invalid username or password");
                                 return [
                                     4,
                                     user.isValidPassword(password)
                                 ];
                             case 2:
                                 isValidPassword = _state.sent();
-                                if (!isValidPassword) {
-                                    throw ErrorHandlerFactory.createError(new Error("Invalid username or password"));
-                                }
+                                if (!isValidPassword) throw new Error("Invalid username or password");
                                 return [
                                     4,
                                     createJWTAsync({
@@ -221,13 +211,6 @@ export var UserService = /*#__PURE__*/ function() {
                                         token: token
                                     }
                                 ];
-                            case 4:
-                                error = _state.sent();
-                                throw error;
-                            case 5:
-                                return [
-                                    2
-                                ];
                         }
                     });
                 })();
@@ -239,16 +222,10 @@ export var UserService = /*#__PURE__*/ function() {
                 var role = param.role, email = param.email;
                 var _this = this;
                 return _async_to_generator(function() {
-                    var username, existingUser, stringPassword, newUser, error;
+                    var username, existingUser, stringPassword, newUser;
                     return _ts_generator(this, function(_state) {
                         switch(_state.label){
                             case 0:
-                                _state.trys.push([
-                                    0,
-                                    3,
-                                    ,
-                                    4
-                                ]);
                                 username = email.split("@")[0];
                                 return [
                                     4,
@@ -258,9 +235,7 @@ export var UserService = /*#__PURE__*/ function() {
                                 ];
                             case 1:
                                 existingUser = _state.sent();
-                                if (existingUser) {
-                                    throw ErrorHandlerFactory.createError(new Error("Username is already taken"));
-                                }
+                                if (existingUser) throw new Error("Username is already taken");
                                 stringPassword = generateSecurePassword().stringPassword;
                                 return [
                                     4,
@@ -282,14 +257,6 @@ export var UserService = /*#__PURE__*/ function() {
                                             password: stringPassword
                                         }
                                     }
-                                ];
-                            case 3:
-                                error = _state.sent();
-                                console.log(error);
-                                throw error;
-                            case 4:
-                                return [
-                                    2
                                 ];
                         }
                     });

@@ -89,6 +89,8 @@ export enum UserRole {
 export enum Routes {
   auth = "/api/auth",
   student = "/api/student",
+  tesis_project = "/api/project",
+  profesor = "/api/profesor",
 }
 
 export const EMAIL_DOMAIN = "onboarding@resend.dev";

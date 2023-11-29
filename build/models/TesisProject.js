@@ -63,27 +63,38 @@ var TesisProjectSchema = new Schema({
                 ref: "Profesor"
             }
         ],
-        required: false
+        required: false,
+        default: null
     },
     student: {
         type: Schema.Types.ObjectId,
         ref: "Student",
-        required: false
+        required: false,
+        default: null
     },
     topic: {
         type: String,
         required: true,
-        maxlength: 20
+        maxlength: 200,
+        minlength: 10,
+        trim: true,
+        lowercase: true
     },
     general_target: {
         type: String,
         required: true,
-        maxlength: 30
+        minlength: 10,
+        maxlength: 200,
+        trim: true,
+        lowercase: true
     },
     scientific_problem: {
         type: String,
         required: true,
-        maxlength: 300
+        min: 20,
+        maxlength: 500,
+        trim: true,
+        lowercase: true
     },
     functional_requirements: {
         type: [
@@ -92,7 +103,9 @@ var TesisProjectSchema = new Schema({
             }
         ],
         required: false,
-        default: []
+        default: [],
+        trim: true,
+        lowercase: true
     },
     status: {
         type: String,

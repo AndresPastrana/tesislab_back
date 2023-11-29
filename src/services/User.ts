@@ -57,77 +57,55 @@ export class UserService {
     username,
     password,
   }: LoginUserInput): Promise<LoginUserResponse> {
-    try {
-      const user = await this.ModelUser.findOne({ username });
+    const user = await this.ModelUser.findOne({ username });
 
-      if (!user) {
-        throw ErrorHandlerFactory.createError(
-          new Error("Invalid username or password")
-        );
-      }
+    if (!user) throw new Error("Invalid username or password");
 
-      const isValidPassword = await user.isValidPassword(password);
+    const isValidPassword = await user.isValidPassword(password);
 
-      if (!isValidPassword) {
-        throw ErrorHandlerFactory.createError(
-          new Error("Invalid username or password")
-        );
-      }
+    if (!isValidPassword) throw new Error("Invalid username or password");
 
-      const token = await createJWTAsync({
-        userId: user._id,
+    const token = await createJWTAsync({
+      userId: user._id,
+      username: user.username,
+      role: user.role,
+    });
+
+    return {
+      user: {
+        id: user._id.toString(),
         username: user.username,
         role: user.role,
-      });
-
-      return {
-        user: {
-          id: user._id.toString(),
-          username: user.username,
-          role: user.role,
-        },
-        token,
-      };
-    } catch (error) {
-      throw error;
-    }
+      },
+      token,
+    };
   }
 
   static async registerUser({
     role,
     email,
   }: RegisterUserInput): Promise<RegisterUserResponse> {
-    try {
-      const username = email.split("@")[0];
-      const existingUser = await this.ModelUser.findOne({ username });
+    const username = email.split("@")[0];
+    const existingUser = await this.ModelUser.findOne({ username });
 
-      if (existingUser) {
-        throw ErrorHandlerFactory.createError(
-          new Error("Username is already taken")
-        );
-      }
+    if (existingUser) throw new Error("Username is already taken");
 
-      const { stringPassword } = generateSecurePassword();
+    const { stringPassword } = generateSecurePassword();
 
-      const newUser = await this.ModelUser.create({
-        username,
-        password: stringPassword, // Placeholder for the function
-        role,
-      });
+    const newUser = await this.ModelUser.create({
+      username,
+      password: stringPassword, // Placeholder for the function
+      role,
+    });
 
-      return {
-        user: {
-          id: newUser._id,
-          username: newUser.username,
-          role: newUser.role,
-          password: stringPassword,
-        },
-      };
-    } catch (error) {
-      console.log(error);
-
-      throw error;
-    }
+    return {
+      user: {
+        id: newUser._id,
+        username: newUser.username,
+        role: newUser.role,
+        password: stringPassword,
+      },
+    };
   }
 
   static async updateUser({

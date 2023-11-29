@@ -13,8 +13,9 @@ import {
   generarMensajeCambioEmail,
   htmlTemplateCred,
 } from "../helpers/html.js";
-import { userInfo } from "os";
+
 import { caluculateAge } from "../helpers/age.js";
+import { TesisProjectService } from "../services/TesisProject.js";
 
 export const StudentController = {
   createStudent: async (req: Request, res: Response) => {
@@ -119,7 +120,6 @@ export const StudentController = {
   updateStudent: async (req: Request, res: Response) => {
     try {
       let obj = Object.create(null);
-      let isEmailChange = false;
       const { id } = matchedData(req, { locations: ["params"] }) as {
         id: string;
       };
@@ -188,19 +188,21 @@ export const StudentController = {
 
   deleteStudent: async (req: Request, res: Response) => {
     try {
+      // const studentId = req.params.id;
       const { id: studentId } = matchedData(req, { locations: ["params"] });
-      // Detele Student and delete user
+      // TODO: Get th user_id of the student
+      const student = await StudentService.getStudentById(studentId);
 
-      const user = await StudentService.getStudentById(studentId);
-
-      if (!user) {
-        return res.json({ msg: false });
+      if (student) {
+        await Promise.all([
+          UserService.deactivateUser({ userId: student.user_id }), //Deactivate the user
+          StudentService.deleteStudent(studentId), //Set the student as ancient
+          TesisProjectService.removeMemberFromTesisProject({
+            typeOfMember: UserRole.Student,
+            memberId: studentId as any,
+          }), //Remove the student of any linked active current tesis_project
+        ]);
       }
-
-      await Promise.all([
-        UserService.deactivateUser({ userId: user.user_id }),
-        StudentService.deleteStudent(studentId),
-      ]);
 
       handleResponse({
         statusCode: 204,

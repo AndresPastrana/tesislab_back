@@ -1,4 +1,4 @@
-import { Model, Document } from "mongoose";
+import { Model, Document, Schema } from "mongoose";
 
 import { ModelStudent, StudentType } from "../models/Student.js";
 import { ErrorHandlerFactory } from "../errors/error.js";
@@ -51,11 +51,14 @@ export class StudentService {
     }
   }
 
-  static async deleteStudent(studentId: string): Promise<void> {
-    try {
-      await this.Student.findByIdAndUpdate(studentId, { ancient: true });
-    } catch (error) {
-      throw this.ErrorFactory.createError(error as Error);
-    }
+  static async deleteStudent(
+    studentId: string
+  ): Promise<Schema.Types.ObjectId> {
+    const student = await this.Student.findByIdAndUpdate(
+      studentId,
+      { ancient: true },
+      { new: true }
+    );
+    return student?._id;
   }
 }

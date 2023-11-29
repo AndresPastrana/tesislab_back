@@ -205,7 +205,7 @@ export var EmailService = /*#__PURE__*/ function() {
             value: // Send an email to a specific user
             function sendEmail(options) {
                 return _async_to_generator(function() {
-                    var emailOptions, info, error;
+                    var emailOptions, info, error, err;
                     return _ts_generator(this, function(_state) {
                         switch(_state.label){
                             case 0:
@@ -236,8 +236,8 @@ export var EmailService = /*#__PURE__*/ function() {
                                 ];
                             case 3:
                                 error = _state.sent();
-                                console.error(error);
-                                throw new Error(error.message);
+                                err = error;
+                                throw new Error("Error in email service : ".concat(err.message));
                             case 4:
                                 return [
                                     2

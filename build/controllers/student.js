@@ -379,7 +379,7 @@ export var StudentController = {
     }(),
     updateStudent: function() {
         var _ref = _async_to_generator(function(req, res) {
-            var obj, isEmailChange, id, studentData, _ref, _ref_user, username, password, updatedStudent, error, customError;
+            var obj, id, studentData, _ref, _ref_user, username, password, updatedStudent, error, customError;
             return _ts_generator(this, function(_state) {
                 switch(_state.label){
                     case 0:
@@ -390,7 +390,6 @@ export var StudentController = {
                             6
                         ]);
                         obj = Object.create(null);
-                        isEmailChange = false;
                         id = matchedData(req, {
                             locations: [
                                 "params"

@@ -179,11 +179,13 @@ import { UserRole } from "../const.js";
 import { ErrorHandlerFactory } from "../errors/error.js";
 import { ProfesorService, UserService, EmailService } from "../services/index.js";
 import { handleResponse } from "../middleware/handleResponse.js";
-import { htmlTemplateCred } from "../helpers/html.js";
+import { generarMensajeCambioEmail, htmlTemplateCred } from "../helpers/html.js";
+import { caluculateAge } from "../helpers/age.js";
+import { TesisProjectService } from "../services/TesisProject.js";
 export var ProfesorController = {
     createProfesor: function() {
         var _ref = _async_to_generator(function(req, res) {
-            var profesorData, new_user, createdProfesor, email, error, customError;
+            var profesorData, age, new_user, createdProfesor, info, error;
             return _ts_generator(this, function(_state) {
                 switch(_state.label){
                     case 0:
@@ -198,6 +200,7 @@ export var ProfesorController = {
                                 "body"
                             ]
                         });
+                        age = caluculateAge(profesorData.ci);
                         return [
                             4,
                             UserService.registerUser({
@@ -210,11 +213,14 @@ export var ProfesorController = {
                         return [
                             4,
                             ProfesorService.createProfesor(_object_spread_props(_object_spread({}, profesorData), {
-                                user_id: new_user.user.id
+                                user_id: new_user.user.id,
+                                age: age
                             }))
                         ];
                     case 2:
                         createdProfesor = _state.sent();
+                        console.log(createdProfesor.email);
+                        console.log(new_user.user.username);
                         return [
                             4,
                             EmailService.sendEmail({
@@ -223,24 +229,23 @@ export var ProfesorController = {
                             })
                         ];
                     case 3:
-                        email = _state.sent();
-                        handleResponse({
-                            statusCode: 201,
-                            msg: "Profesor created successfully",
-                            data: createdProfesor,
-                            res: res
-                        });
+                        info = _state.sent();
                         return [
-                            3,
-                            5
+                            2,
+                            handleResponse({
+                                statusCode: 201,
+                                msg: "Profesor created successfully",
+                                data: createdProfesor,
+                                res: res
+                            })
                         ];
                     case 4:
                         error = _state.sent();
-                        customError = ErrorHandlerFactory.createError(error);
+                        console.log(error);
                         handleResponse({
                             statusCode: 500,
                             msg: "Error creating Profesor",
-                            error: customError,
+                            error: ErrorHandlerFactory.createError(error),
                             res: res
                         });
                         return [
@@ -375,23 +380,66 @@ export var ProfesorController = {
     }(),
     updateProfesor: function() {
         var _ref = _async_to_generator(function(req, res) {
-            var profesorId, profesorData, updatedProfesor, error, customError;
+            var id, profesorData, dynamicObject, _ref, _ref_user, username, password, updatedProfesor, error, customError;
             return _ts_generator(this, function(_state) {
                 switch(_state.label){
                     case 0:
                         _state.trys.push([
                             0,
-                            2,
+                            7,
                             ,
-                            3
+                            8
                         ]);
-                        profesorId = req.params.id;
-                        profesorData = req.body;
+                        id = matchedData(req, {
+                            locations: [
+                                "params"
+                            ]
+                        }).id;
+                        profesorData = matchedData(req, {
+                            locations: [
+                                "body"
+                            ]
+                        });
+                        if (!(Object.keys(profesorData).length >= 1)) return [
+                            3,
+                            5
+                        ];
+                        dynamicObject = new Object();
+                        // Set the new ci and recalculate the age if the ci is in the profesorData
+                        if (profesorData.ci) {
+                            dynamicObject.ci = profesorData.ci;
+                            dynamicObject.age = caluculateAge(profesorData.ci);
+                        }
+                        if (!profesorData.email) return [
+                            3,
+                            3
+                        ];
                         return [
                             4,
-                            ProfesorService.updateProfesor(profesorId, profesorData)
+                            UserService.updateUser({
+                                userId: id,
+                                newEmail: profesorData.email
+                            })
                         ];
                     case 1:
+                        _ref = _state.sent(), _ref_user = _ref.user, username = _ref_user.username, password = _ref_user.password;
+                        // Send email
+                        return [
+                            4,
+                            EmailService.sendEmail({
+                                to: profesorData.email,
+                                html: generarMensajeCambioEmail(username, profesorData.email, password)
+                            })
+                        ];
+                    case 2:
+                        _state.sent();
+                        _state.label = 3;
+                    case 3:
+                        return [
+                            4,
+                            ProfesorService.updateProfesor(id, _object_spread({}, profesorData, dynamicObject))
+                        ];
+                    case 4:
                         updatedProfesor = _state.sent();
                         if (!updatedProfesor) {
                             handleResponse({
@@ -411,10 +459,30 @@ export var ProfesorController = {
                         });
                         return [
                             3,
-                            3
+                            6
                         ];
-                    case 2:
+                    case 5:
+                        return [
+                            2,
+                            handleResponse({
+                                res: res,
+                                statusCode: 400,
+                                error: {
+                                    error: {
+                                        name: "ValidationError",
+                                        message: "Nothing to update"
+                                    }
+                                }
+                            })
+                        ];
+                    case 6:
+                        return [
+                            3,
+                            8
+                        ];
+                    case 7:
                         error = _state.sent();
+                        console.log(error);
                         customError = ErrorHandlerFactory.createError(error);
                         handleResponse({
                             statusCode: 500,
@@ -424,9 +492,9 @@ export var ProfesorController = {
                         });
                         return [
                             3,
-                            3
+                            8
                         ];
-                    case 3:
+                    case 8:
                         return [
                             2
                         ];
@@ -439,23 +507,49 @@ export var ProfesorController = {
     }(),
     deleteProfesor: function() {
         var _ref = _async_to_generator(function(req, res) {
-            var profesorId, error, customError;
+            var _matchedData, profesorId, profesor, error, customError;
             return _ts_generator(this, function(_state) {
                 switch(_state.label){
                     case 0:
                         _state.trys.push([
                             0,
-                            2,
+                            4,
                             ,
-                            3
+                            5
                         ]);
-                        profesorId = req.params.id;
+                        // const profesorId = req.params.id;
+                        _matchedData = matchedData(req, {
+                            locations: [
+                                "params"
+                            ]
+                        }), profesorId = _matchedData.id;
                         return [
                             4,
-                            ProfesorService.deleteProfesor(profesorId)
+                            ProfesorService.getProfesorById(profesorId)
                         ];
                     case 1:
+                        profesor = _state.sent();
+                        if (!profesor) return [
+                            3,
+                            3
+                        ];
+                        return [
+                            4,
+                            Promise.all([
+                                UserService.deactivateUser({
+                                    userId: profesor.user_id
+                                }),
+                                ProfesorService.deleteProfesor(profesorId),
+                                TesisProjectService.removeMemberFromTesisProject({
+                                    typeOfMember: UserRole.Profesor,
+                                    memberId: profesorId
+                                })
+                            ])
+                        ];
+                    case 2:
                         _state.sent();
+                        _state.label = 3;
+                    case 3:
                         handleResponse({
                             statusCode: 204,
                             msg: "Profesor deleted successfully",
@@ -463,9 +557,9 @@ export var ProfesorController = {
                         });
                         return [
                             3,
-                            3
+                            5
                         ];
-                    case 2:
+                    case 4:
                         error = _state.sent();
                         customError = ErrorHandlerFactory.createError(error);
                         handleResponse({
@@ -476,9 +570,9 @@ export var ProfesorController = {
                         });
                         return [
                             3,
-                            3
+                            5
                         ];
-                    case 3:
+                    case 5:
                         return [
                             2
                         ];

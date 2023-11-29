@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import { Request, Response, response } from "express";
 import { matchedData } from "express-validator";
 import { UserRole } from "../const.js";
 import { ProfesorType } from "../models/Profesor.js";
@@ -10,14 +10,20 @@ import {
 } from "../services/index.js";
 import { handleResponse } from "../middleware/handleResponse.js";
 
-import { htmlTemplateCred } from "../helpers/html.js";
+import {
+  generarMensajeCambioEmail,
+  htmlTemplateCred,
+} from "../helpers/html.js";
+
+import { caluculateAge } from "../helpers/age.js";
+import { TesisProjectService } from "../services/TesisProject.js";
 
 export const ProfesorController = {
   createProfesor: async (req: Request, res: Response) => {
     try {
       const profesorData = matchedData(req, { locations: ["body"] });
+      const age = caluculateAge(profesorData.ci);
 
-      // TCretate the user
       const new_user = await UserService.registerUser({
         role: UserRole.Student,
         email: profesorData.email,
@@ -27,28 +33,33 @@ export const ProfesorController = {
       const createdProfesor = await ProfesorService.createProfesor({
         ...(profesorData as ProfesorType),
         user_id: new_user.user.id,
+        age,
       });
+      console.log(createdProfesor.email);
+      console.log(new_user.user.username);
 
       // Send the email with the credentials
-      const email = await EmailService.sendEmail({
+      const info = await EmailService.sendEmail({
         to: createdProfesor.email,
         html: `${htmlTemplateCred(
           new_user.user.username,
           new_user.user.password
         )}`,
       });
-      handleResponse({
+
+      return handleResponse({
         statusCode: 201,
         msg: "Profesor created successfully",
         data: createdProfesor,
         res,
       });
     } catch (error: any) {
-      const customError = ErrorHandlerFactory.createError(error);
+      console.log(error);
+
       handleResponse({
         statusCode: 500,
         msg: "Error creating Profesor",
-        error: customError,
+        error: ErrorHandlerFactory.createError(error),
         res,
       });
     }
@@ -107,30 +118,75 @@ export const ProfesorController = {
 
   updateProfesor: async (req: Request, res: Response) => {
     try {
-      const profesorId = req.params.id;
-      const profesorData = req.body;
-      const updatedProfesor = await ProfesorService.updateProfesor(
-        profesorId,
-        profesorData
-      );
+      const { id } = matchedData(req, { locations: ["params"] });
+      const profesorData = matchedData(req, {
+        locations: ["body"],
+      }) as ProfesorType;
 
-      if (!updatedProfesor) {
+      if (Object.keys(profesorData).length >= 1) {
+        let dynamicObject: any = new Object();
+
+        // Set the new ci and recalculate the age if the ci is in the profesorData
+        if (profesorData.ci) {
+          dynamicObject.ci = profesorData.ci;
+          dynamicObject.age = caluculateAge(profesorData.ci);
+        }
+
+        // Update the user if email
+        if (profesorData.email) {
+          const {
+            user: { username, password },
+          } = await UserService.updateUser({
+            userId: id,
+            newEmail: profesorData.email,
+          });
+
+          // Send email
+          await EmailService.sendEmail({
+            to: profesorData.email,
+            html: generarMensajeCambioEmail(
+              username,
+              profesorData.email,
+              password
+            ),
+          });
+        }
+
+        // Do somthing just if the body has at least a key with a value
+        const updatedProfesor = await ProfesorService.updateProfesor(id, {
+          ...profesorData,
+          ...dynamicObject,
+        });
+
+        if (!updatedProfesor) {
+          handleResponse({
+            statusCode: 404,
+            msg: "Profesor not found",
+            res,
+          });
+          return;
+        }
+
         handleResponse({
-          statusCode: 404,
-          msg: "Profesor not found",
+          statusCode: 200,
+          msg: "Profesor updated successfully",
+          data: updatedProfesor,
           res,
         });
-        return;
+      } else {
+        return handleResponse({
+          res,
+          statusCode: 400,
+          error: {
+            error: { name: "ValidationError", message: "Nothing to update" },
+          },
+        });
       }
-
-      handleResponse({
-        statusCode: 200,
-        msg: "Profesor updated successfully",
-        data: updatedProfesor,
-        res,
-      });
     } catch (error: any) {
+      console.log(error);
+
       const customError = ErrorHandlerFactory.createError(error);
+
       handleResponse({
         statusCode: 500,
         msg: "Error updating Profesor",
@@ -142,8 +198,22 @@ export const ProfesorController = {
 
   deleteProfesor: async (req: Request, res: Response) => {
     try {
-      const profesorId = req.params.id;
-      await ProfesorService.deleteProfesor(profesorId);
+      // const profesorId = req.params.id;
+      const { id: profesorId } = matchedData(req, { locations: ["params"] });
+      // TODO: Get th user_id of the profesor
+      const profesor = await ProfesorService.getProfesorById(profesorId);
+
+      if (profesor) {
+        await Promise.all([
+          UserService.deactivateUser({ userId: profesor.user_id }), //Deactivate the user
+          ProfesorService.deleteProfesor(profesorId), //Set the profesor as ancient
+          TesisProjectService.removeMemberFromTesisProject({
+            typeOfMember: UserRole.Profesor,
+            memberId: profesorId as any,
+          }), //Remove the profesor of any linked tesis_project
+        ]);
+      }
+
       handleResponse({
         statusCode: 204,
         msg: "Profesor deleted successfully",

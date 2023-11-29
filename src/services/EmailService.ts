@@ -25,8 +25,8 @@ export class EmailService {
       const info = await EmailService.transporter.sendMail(emailOptions);
       return info;
     } catch (error) {
-      console.error(error);
-      throw new Error((error as Error).message);
+      const err = error as Error;
+      throw new Error(`Error in email service : ${err.message}`);
     }
   }
 }

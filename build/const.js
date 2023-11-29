@@ -90,5 +90,7 @@ export var Routes;
 (function(Routes) {
     Routes["auth"] = "/api/auth";
     Routes["student"] = "/api/student";
+    Routes["tesis_project"] = "/api/project";
+    Routes["profesor"] = "/api/profesor";
 })(Routes || (Routes = {}));
 export var EMAIL_DOMAIN = "onboarding@resend.dev";
