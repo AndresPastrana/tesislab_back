@@ -11,73 +11,77 @@ import { body, param } from "express-validator";
 import { validateCi } from "../helpers/ci.js";
 import { isValidDoc } from "../middleware/dbValidators.js";
 import { ModelStudent } from "../models/Student.js";
-import { Schema, Types, isValidObjectId } from "mongoose";
+import { Types, isValidObjectId } from "mongoose";
+import { ModelUser } from "../models/User.js";
+
 //   GET   /student/project-tesis/:id
 //   GET   /student/historial/:id
-//   GET   /student/evaluation/:id
+//   GET   /student/evaluations/
+//   GET   /student/evaluations/:id
 //   GET   /student/:id
 
 export const router: Router = Router();
 
 const authValidations = [isValidToken, protectRouteByRole([UserRole.Admin])];
 
-const userValidations = [body("email").isString().isEmail()];
-
-const studentValidations = [body("language_certificate").isBoolean()];
-
-const personDataValidations = [
-  body("ci").notEmpty(),
-  body("name").trim().escape().notEmpty().isString(),
-  body("lastname").trim().escape().notEmpty().isString(),
+// TODO: Validate that ci can not be repeated in create and update
+const createStudentValidations = [
+  body("ci")
+    .isLength({ min: 11, max: 11 })
+    .isNumeric()
+    .custom((ci) => {
+      if (validateCi(ci)) {
+        return true;
+      }
+      throw new Error("Invalid ci");
+    }),
+  body("name").trim().escape().notEmpty().isString().toLowerCase(),
+  body("lastname").trim().escape().notEmpty().isString().toLowerCase(),
   body("phone").notEmpty().isNumeric().isLength({ min: 8, max: 8 }),
-  body("sex").isIn(Object.values(Sex)),
-  body("address").notEmpty().isString(),
+  body("sex").trim().escape().toLowerCase().isIn(Object.values(Sex)),
+  body("address").trim().escape().notEmpty().isString(),
+  body("language_certificate").isBoolean(),
+  body("email").trim().escape().isString().isEmail().normalizeEmail(),
+  body("role").trim().escape().toLowerCase().isIn(Object.values(UserRole)),
 ];
 
 const updateValidations = [
-  body("email")
-    .isEmail()
-    .withMessage("Invalid email format")
-    .normalizeEmail()
-    .optional(),
+  body("user_id")
+    .exists({ values: "falsy" })
+    .withMessage("user_id is required")
+    .isMongoId()
+    .withMessage("Invalid id format")
+    .custom(async (id) => await isValidDoc(id, ModelUser)),
   body("ci")
-    .custom(validateCi)
-    .withMessage("Invalid CI format")
-    .trim()
-    .escape()
-    .optional(),
-  body("name")
-    .isString()
-    .withMessage("Name must be a string")
-    .trim()
-    .escape()
-    .optional(),
-  body("lastname")
-    .isString()
-    .withMessage("Last name must be a string")
-    .trim()
-    .isLength({ min: 1 })
-    .withMessage("Name must be at least 1 lenght")
-    .escape()
-    .optional(),
-
-  body("address")
-    .isString()
-    .withMessage("Invalid address format")
-    .trim()
-    .isLength({ min: 1 })
-    .withMessage("Address must be at least 1 lenght")
-    .escape()
-    .optional(),
-  body("sex")
-    .isIn(Object.values(Sex))
-    .withMessage("Invalid sex value")
-    .optional(),
-  body("phone")
+    .isLength({ min: 11, max: 11 })
+    .withMessage("CI must be 11 length")
     .isNumeric()
-    .isLength({ min: 8, max: 8 })
-    .withMessage("Phone must be a numeric string of 8 digits")
-    .toInt()
+    .withMessage("CI must be 11 length")
+    .custom((ci) => {
+      if (validateCi(ci)) {
+        return true;
+      }
+      throw new Error("Invalid ci");
+    })
+    .optional(),
+  body("name").trim().escape().notEmpty().isString().toLowerCase().optional(),
+  body("lastname")
+    .trim()
+    .escape()
+    .notEmpty()
+    .isString()
+    .toLowerCase()
+    .optional(),
+  body("phone").notEmpty().isNumeric().isLength({ min: 8, max: 8 }).optional(),
+  body("sex").trim().escape().toLowerCase().isIn(Object.values(Sex)).optional(),
+  body("address").trim().escape().notEmpty().isString().optional(),
+  body("language_certificate").isBoolean().optional(),
+  body("email")
+    .trim()
+    .escape()
+    .isString()
+    .isEmail()
+    .normalizeEmail()
     .optional(),
 ];
 
@@ -91,20 +95,21 @@ const validateIdParam = [
     .withMessage("Invalid mongo id")
     .if((id) => isValidObjectId(id))
     .withMessage("Invalid mongo id")
-    .custom((id) => isValidDoc(id, ModelStudent))
-    .withMessage("Document not found")
+    .custom(async (id) => {
+      const is = await isValidDoc(id, ModelStudent);
+
+      if (is) {
+        return true;
+      }
+      throw new Error("Student not found");
+    })
+    .withMessage("Student not found")
     .customSanitizer((id) => new Types.ObjectId(id)),
 ];
 
 router.post(
   "/",
-  [
-    // ...authValidations,
-    ...userValidations,
-    ...personDataValidations,
-    ...studentValidations,
-    // validateRequest,
-  ],
+  [...createStudentValidations, validateRequest],
   StudentController.createStudent
 );
 router.put(
@@ -112,6 +117,10 @@ router.put(
   [...validateIdParam, ...updateValidations, validateRequest],
   StudentController.updateStudent
 );
+
+router.delete("/:id", [...validateIdParam], StudentController.deleteStudent);
+
+router.get("/:id", [...validateIdParam], StudentController.getStudentById);
 type data = {
   email: string;
   ci: string;

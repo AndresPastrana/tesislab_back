@@ -18,5 +18,5 @@ export const compareHash = async (
 export const generateSecurePassword = () => {
   const stringPassword = generate({ length: 8, numbers: true, exclude: "@" });
   const hashedpassword = hashSync(stringPassword, 10);
-  return hashedpassword;
+  return { stringPassword, hashedpassword };
 };

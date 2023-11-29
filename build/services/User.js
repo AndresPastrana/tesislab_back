@@ -239,7 +239,7 @@ export var UserService = /*#__PURE__*/ function() {
                 var role = param.role, email = param.email;
                 var _this = this;
                 return _async_to_generator(function() {
-                    var username, existingUser, password, newUser, error;
+                    var username, existingUser, stringPassword, newUser, error;
                     return _ts_generator(this, function(_state) {
                         switch(_state.label){
                             case 0:
@@ -261,12 +261,12 @@ export var UserService = /*#__PURE__*/ function() {
                                 if (existingUser) {
                                     throw ErrorHandlerFactory.createError(new Error("Username is already taken"));
                                 }
-                                password = generateSecurePassword();
+                                stringPassword = generateSecurePassword().stringPassword;
                                 return [
                                     4,
                                     _this.ModelUser.create({
                                         username: username,
-                                        password: password,
+                                        password: stringPassword,
                                         role: role
                                     })
                                 ];
@@ -279,12 +279,144 @@ export var UserService = /*#__PURE__*/ function() {
                                             id: newUser._id,
                                             username: newUser.username,
                                             role: newUser.role,
-                                            password: password
+                                            password: stringPassword
                                         }
                                     }
                                 ];
                             case 3:
                                 error = _state.sent();
+                                console.log(error);
+                                throw error;
+                            case 4:
+                                return [
+                                    2
+                                ];
+                        }
+                    });
+                })();
+            }
+        },
+        {
+            key: "updateUser",
+            value: function updateUser(param) {
+                var userId = param.userId, newEmail = param.newEmail;
+                var _this = this;
+                return _async_to_generator(function() {
+                    var existingUser, newUsername, stringPassword, updatedUser, error;
+                    return _ts_generator(this, function(_state) {
+                        switch(_state.label){
+                            case 0:
+                                _state.trys.push([
+                                    0,
+                                    3,
+                                    ,
+                                    4
+                                ]);
+                                return [
+                                    4,
+                                    _this.ModelUser.findById(userId)
+                                ];
+                            case 1:
+                                existingUser = _state.sent();
+                                if (!existingUser) {
+                                    throw ErrorHandlerFactory.createError(new Error("User not found"));
+                                }
+                                // Generate a new username based on the new email
+                                newUsername = newEmail.split("@")[0];
+                                // Generate a new secure password
+                                stringPassword = generateSecurePassword().stringPassword;
+                                return [
+                                    4,
+                                    _this.ModelUser.findByIdAndUpdate(userId, {
+                                        email: newEmail,
+                                        username: newUsername,
+                                        password: stringPassword
+                                    }, {
+                                        new: true,
+                                        runValidators: true
+                                    })
+                                ];
+                            case 2:
+                                updatedUser = _state.sent();
+                                if (!updatedUser) {
+                                    throw ErrorHandlerFactory.createError(new Error("User update failed"));
+                                }
+                                return [
+                                    2,
+                                    {
+                                        user: {
+                                            id: updatedUser._id,
+                                            username: updatedUser.username,
+                                            role: updatedUser.role,
+                                            password: stringPassword
+                                        }
+                                    }
+                                ];
+                            case 3:
+                                error = _state.sent();
+                                console.log(error);
+                                throw error;
+                            case 4:
+                                return [
+                                    2
+                                ];
+                        }
+                    });
+                })();
+            }
+        },
+        {
+            key: "deactivateUser",
+            value: function deactivateUser(param) {
+                var userId = param.userId;
+                var _this = this;
+                return _async_to_generator(function() {
+                    var existingUser, deactivatedUser, error;
+                    return _ts_generator(this, function(_state) {
+                        switch(_state.label){
+                            case 0:
+                                _state.trys.push([
+                                    0,
+                                    3,
+                                    ,
+                                    4
+                                ]);
+                                return [
+                                    4,
+                                    _this.ModelUser.findById(userId)
+                                ];
+                            case 1:
+                                existingUser = _state.sent();
+                                if (!existingUser) {
+                                    throw ErrorHandlerFactory.createError(new Error("User not found"));
+                                }
+                                return [
+                                    4,
+                                    _this.ModelUser.findByIdAndUpdate(userId, {
+                                        isActive: false
+                                    }, {
+                                        new: true
+                                    })
+                                ];
+                            case 2:
+                                deactivatedUser = _state.sent();
+                                if (!deactivatedUser) {
+                                    throw ErrorHandlerFactory.createError(new Error("User deactivation failed"));
+                                }
+                                return [
+                                    2,
+                                    {
+                                        user: {
+                                            id: deactivatedUser._id,
+                                            username: deactivatedUser.username,
+                                            role: deactivatedUser.role,
+                                            isActive: deactivatedUser.isActive
+                                        }
+                                    }
+                                ];
+                            case 3:
+                                error = _state.sent();
+                                console.log(error);
                                 throw error;
                             case 4:
                                 return [

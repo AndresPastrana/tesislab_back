@@ -16,6 +16,7 @@ export class StudentService {
     }
   }
 
+  //TODO: Add a flag th shwo all students or just ancient = true
   static async getStudents(): Promise<StudentType[]> {
     try {
       const students = await this.Student.find();
@@ -52,7 +53,7 @@ export class StudentService {
 
   static async deleteStudent(studentId: string): Promise<void> {
     try {
-      await this.Student.findByIdAndDelete(studentId);
+      await this.Student.findByIdAndUpdate(studentId, { ancient: true });
     } catch (error) {
       throw this.ErrorFactory.createError(error as Error);
     }

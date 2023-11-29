@@ -201,7 +201,8 @@ export var StudentService = /*#__PURE__*/ function() {
         },
         {
             key: "getStudents",
-            value: function getStudents() {
+            value: //TODO: Add a flag th shwo all students or just ancient = true
+            function getStudents() {
                 var _this = this;
                 return _async_to_generator(function() {
                     var students, error;
@@ -331,7 +332,9 @@ export var StudentService = /*#__PURE__*/ function() {
                                 ]);
                                 return [
                                     4,
-                                    _this.Student.findByIdAndDelete(studentId)
+                                    _this.Student.findByIdAndUpdate(studentId, {
+                                        ancient: true
+                                    })
                                 ];
                             case 1:
                                 _state.sent();

@@ -9,7 +9,12 @@ import {
 } from "../services/index.js";
 import { ErrorHandlerFactory } from "../errors/error.js";
 import { handleResponse } from "../middleware/handleResponse.js";
-import { htmlTemplateCred } from "../helpers/html.js";
+import {
+  generarMensajeCambioEmail,
+  htmlTemplateCred,
+} from "../helpers/html.js";
+import { userInfo } from "os";
+import { caluculateAge } from "../helpers/age.js";
 
 export const StudentController = {
   createStudent: async (req: Request, res: Response) => {
@@ -27,6 +32,7 @@ export const StudentController = {
       //   Creates the new student
       const createdStudent = await StudentService.createStudent({
         ...studentData,
+        age: caluculateAge(studentData.ci),
         user_id: newUser.user.id,
       });
 
@@ -38,6 +44,8 @@ export const StudentController = {
           newUser.user.password
         )}`,
       });
+      console.log("Email sent");
+
       handleResponse({
         statusCode: 201,
         msg: "Student created successfully",
@@ -45,6 +53,8 @@ export const StudentController = {
         res,
       });
     } catch (error: any) {
+      console.log(error);
+
       const customError = ErrorHandlerFactory.createError(error);
       handleResponse({
         statusCode: 500,
@@ -108,12 +118,47 @@ export const StudentController = {
 
   updateStudent: async (req: Request, res: Response) => {
     try {
-      const studentId = req.params.id;
-      const studentData = req.body;
-      const updatedStudent = await StudentService.updateStudent(
-        studentId,
-        studentData
-      );
+      let obj = Object.create(null);
+      let isEmailChange = false;
+      const { id } = matchedData(req, { locations: ["params"] }) as {
+        id: string;
+      };
+
+      const studentData = matchedData(req, {
+        locations: ["body"],
+      }) as StudentType;
+
+      if (studentData.ci) {
+        obj["ci"] = studentData.ci;
+        obj["age"] = caluculateAge(studentData.ci);
+      }
+
+      if (studentData.email) {
+        obj["email"] = studentData.email;
+        // Update  the user here
+        const {
+          user: { username, password },
+        } = await UserService.updateUser({
+          userId: studentData.user_id,
+          newEmail: studentData.email,
+        });
+
+        // Send email
+        await EmailService.sendEmail({
+          to: studentData.email,
+          html: generarMensajeCambioEmail(
+            username,
+            studentData.email,
+            password
+          ),
+        });
+      }
+
+      // Update the student
+      const updatedStudent = await StudentService.updateStudent(id, {
+        ...studentData,
+        ...obj,
+      });
 
       if (!updatedStudent) {
         handleResponse({
@@ -143,8 +188,20 @@ export const StudentController = {
 
   deleteStudent: async (req: Request, res: Response) => {
     try {
-      const studentId = req.params.id;
-      await StudentService.deleteStudent(studentId);
+      const { id: studentId } = matchedData(req, { locations: ["params"] });
+      // Detele Student and delete user
+
+      const user = await StudentService.getStudentById(studentId);
+
+      if (!user) {
+        return res.json({ msg: false });
+      }
+
+      await Promise.all([
+        UserService.deactivateUser({ userId: user.user_id }),
+        StudentService.deleteStudent(studentId),
+      ]);
+
       handleResponse({
         statusCode: 204,
         msg: "Student deleted successfully",

@@ -179,7 +179,8 @@ import { UserRole } from "../const.js";
 import { EmailService, StudentService, UserService } from "../services/index.js";
 import { ErrorHandlerFactory } from "../errors/error.js";
 import { handleResponse } from "../middleware/handleResponse.js";
-import { htmlTemplateCred } from "../helpers/html.js";
+import { generarMensajeCambioEmail, htmlTemplateCred } from "../helpers/html.js";
+import { caluculateAge } from "../helpers/age.js";
 export var StudentController = {
     createStudent: function() {
         var _ref = _async_to_generator(function(req, res) {
@@ -210,6 +211,7 @@ export var StudentController = {
                         return [
                             4,
                             StudentService.createStudent(_object_spread_props(_object_spread({}, studentData), {
+                                age: caluculateAge(studentData.ci),
                                 user_id: newUser.user.id
                             }))
                         ];
@@ -224,6 +226,7 @@ export var StudentController = {
                         ];
                     case 3:
                         email = _state.sent();
+                        console.log("Email sent");
                         handleResponse({
                             statusCode: 201,
                             msg: "Student created successfully",
@@ -236,6 +239,7 @@ export var StudentController = {
                         ];
                     case 4:
                         error = _state.sent();
+                        console.log(error);
                         customError = ErrorHandlerFactory.createError(error);
                         handleResponse({
                             statusCode: 500,
@@ -375,23 +379,63 @@ export var StudentController = {
     }(),
     updateStudent: function() {
         var _ref = _async_to_generator(function(req, res) {
-            var studentId, studentData, updatedStudent, error, customError;
+            var obj, isEmailChange, id, studentData, _ref, _ref_user, username, password, updatedStudent, error, customError;
             return _ts_generator(this, function(_state) {
                 switch(_state.label){
                     case 0:
                         _state.trys.push([
                             0,
-                            2,
+                            5,
                             ,
-                            3
+                            6
                         ]);
-                        studentId = req.params.id;
-                        studentData = req.body;
+                        obj = Object.create(null);
+                        isEmailChange = false;
+                        id = matchedData(req, {
+                            locations: [
+                                "params"
+                            ]
+                        }).id;
+                        studentData = matchedData(req, {
+                            locations: [
+                                "body"
+                            ]
+                        });
+                        if (studentData.ci) {
+                            obj["ci"] = studentData.ci;
+                            obj["age"] = caluculateAge(studentData.ci);
+                        }
+                        if (!studentData.email) return [
+                            3,
+                            3
+                        ];
+                        obj["email"] = studentData.email;
                         return [
                             4,
-                            StudentService.updateStudent(studentId, studentData)
+                            UserService.updateUser({
+                                userId: studentData.user_id,
+                                newEmail: studentData.email
+                            })
                         ];
                     case 1:
+                        _ref = _state.sent(), _ref_user = _ref.user, username = _ref_user.username, password = _ref_user.password;
+                        // Send email
+                        return [
+                            4,
+                            EmailService.sendEmail({
+                                to: studentData.email,
+                                html: generarMensajeCambioEmail(username, studentData.email, password)
+                            })
+                        ];
+                    case 2:
+                        _state.sent();
+                        _state.label = 3;
+                    case 3:
+                        return [
+                            4,
+                            StudentService.updateStudent(id, _object_spread({}, studentData, obj))
+                        ];
+                    case 4:
                         updatedStudent = _state.sent();
                         if (!updatedStudent) {
                             handleResponse({
@@ -411,9 +455,9 @@ export var StudentController = {
                         });
                         return [
                             3,
-                            3
+                            6
                         ];
-                    case 2:
+                    case 5:
                         error = _state.sent();
                         customError = ErrorHandlerFactory.createError(error);
                         handleResponse({
@@ -424,9 +468,9 @@ export var StudentController = {
                         });
                         return [
                             3,
-                            3
+                            6
                         ];
-                    case 3:
+                    case 6:
                         return [
                             2
                         ];
@@ -439,22 +483,45 @@ export var StudentController = {
     }(),
     deleteStudent: function() {
         var _ref = _async_to_generator(function(req, res) {
-            var studentId, error, customError;
+            var _matchedData, studentId, user, error, customError;
             return _ts_generator(this, function(_state) {
                 switch(_state.label){
                     case 0:
                         _state.trys.push([
                             0,
-                            2,
+                            3,
                             ,
-                            3
+                            4
                         ]);
-                        studentId = req.params.id;
+                        _matchedData = matchedData(req, {
+                            locations: [
+                                "params"
+                            ]
+                        }), studentId = _matchedData.id;
                         return [
                             4,
-                            StudentService.deleteStudent(studentId)
+                            StudentService.getStudentById(studentId)
                         ];
                     case 1:
+                        user = _state.sent();
+                        if (!user) {
+                            return [
+                                2,
+                                res.json({
+                                    msg: false
+                                })
+                            ];
+                        }
+                        return [
+                            4,
+                            Promise.all([
+                                UserService.deactivateUser({
+                                    userId: user.user_id
+                                }),
+                                StudentService.deleteStudent(studentId)
+                            ])
+                        ];
+                    case 2:
                         _state.sent();
                         handleResponse({
                             statusCode: 204,
@@ -463,9 +530,9 @@ export var StudentController = {
                         });
                         return [
                             3,
-                            3
+                            4
                         ];
-                    case 2:
+                    case 3:
                         error = _state.sent();
                         customError = ErrorHandlerFactory.createError(error);
                         handleResponse({
@@ -476,9 +543,9 @@ export var StudentController = {
                         });
                         return [
                             3,
-                            3
+                            4
                         ];
-                    case 3:
+                    case 4:
                         return [
                             2
                         ];

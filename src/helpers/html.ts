@@ -52,3 +52,36 @@ export const htmlTemplateCred = (username: string, password: string) => {
 
   return emailHTML;
 };
+
+export const generarMensajeCambioEmail = (
+  nombreUsuario: string,
+  nuevoEmail: string,
+  nuevaContraseña: string
+) => {
+  return `
+    <div style="font-family: 'Arial', sans-serif; max-width: 400px; margin: 0 auto; padding: 20px; background-color: #f4f4f4; border-radius: 8px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);">
+      <h2 style="color: #333; text-align: center;">Cambio de Email de la Cuenta</h2>
+      <p style="color: #555; line-height: 1.6; text-align: justify;">
+        Hola ${nombreUsuario},
+      </p>
+      <p style="color: #555; line-height: 1.6; text-align: justify;">
+        Queremos informarte que el email de tu cuenta ha sido cambiado exitosamente.
+        Tu nuevo email es: <strong>${nuevoEmail}</strong>.
+      </p>
+      <p style="color: #555; line-height: 1.6; text-align: justify;">
+        Además, se han asignado nuevas credenciales a tu cuenta:
+      </p>
+      <p style="color: #555; line-height: 1.6; text-align: justify;">
+        <strong>Nombre de Usuario:</strong> ${nombreUsuario}<br />
+        <strong>Contraseña:</strong> ${nuevaContraseña}
+      </p>
+      <p style="color: #555; line-height: 1.6; text-align: justify;">
+        Por favor, mantén esta información segura. Si no solicitaste este cambio,
+        por favor contacta a nuestro equipo de soporte de inmediato.
+      </p>
+      <p style="color: #555; line-height: 1.6; text-align: center; margin-top: 20px;">
+        ¡Gracias por usar nuestros servicios!
+      </p>
+    </div>
+  `;
+};

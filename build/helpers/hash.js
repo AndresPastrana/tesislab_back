@@ -179,5 +179,8 @@ export var generateSecurePassword = function() {
         exclude: "@"
     });
     var hashedpassword = hashSync(stringPassword, 10);
-    return hashedpassword;
+    return {
+        stringPassword: stringPassword,
+        hashedpassword: hashedpassword
+    };
 };
