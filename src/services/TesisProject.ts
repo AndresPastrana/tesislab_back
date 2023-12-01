@@ -2,6 +2,7 @@ import { Schema, Document } from "mongoose";
 import { TesisProjectStatus, UserRole } from "../const.js";
 import { ModelTesisProject } from "../models/TesisProject.js";
 import { ErrorHandlerFactory } from "../errors/error.js";
+import { ModelProfesor } from "../models/Profesor.js";
 
 export interface TesisProjectInput {
   topic: string;
@@ -165,6 +166,42 @@ export class TesisProjectService {
     } catch (error) {
       const err = error as Error;
       throw new Error(`Error in TesisProjectServices: ${err.message}`);
+    }
+  }
+
+  static async getApprovalInfo(studentId: Schema.Types.ObjectId) {
+    try {
+      const tesisProject = await ModelTesisProject.findOne(
+        { student: studentId },
+        {
+          "approval.date": 1,
+          "approval.approvedBy": 1,
+          "approval.recommendations": 1,
+        }
+      ).populate({
+        path: "approval.approvedBy",
+        model: ModelProfesor,
+        select: "name lastame", // Fields to select from the referenced collection
+      });
+
+      // If tesisProject is not found, you can handle it as needed
+      if (!tesisProject) {
+        return null; // or throw an error, or return a default value
+      }
+
+      const approvalInfo = {
+        date: tesisProject.approval?.date || null,
+        approvedBy: {
+          name: tesisProject.approval?.approvedBy?.name || null,
+          lastName: tesisProject.approval?.approvedBy?.lastname || null,
+        },
+        recommendations: tesisProject.approval?.recommendations || [],
+      };
+
+      return approvalInfo;
+    } catch (error) {
+      console.error("Error fetching approval info:", error);
+      throw error; // You might want to handle this error more gracefully
     }
   }
 }

@@ -6,11 +6,11 @@ type CourtMember = {
   role: CourtRole;
 };
 
-export interface CourtType {
+export interface Court {
   name: string; // Nombre del tribunal
   members: CourtMember[]; // Lista de profesores que forman parte del tribunal y su role
 }
-interface Court extends CourtType, Document {}
+export interface CourtType extends Court, Document {}
 
 const CourtSchema = new Schema<CourtType>({
   name: { type: String, required: true },

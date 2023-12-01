@@ -44,6 +44,7 @@ export const StudentController = {
           newUser.user.username,
           newUser.user.password
         )}`,
+        subject: "Has sido agregado a upr.tesislab",
       });
       console.log("Email sent");
 
@@ -151,6 +152,7 @@ export const StudentController = {
             studentData.email,
             password
           ),
+          subject: "Nuevas Credenciales",
         });
       }
 
@@ -218,5 +220,15 @@ export const StudentController = {
         res,
       });
     }
+  },
+  getHistorial: async (req: Request, res: Response) => {
+    try {
+      const { id: studentId } = matchedData(req, { locations: ["params"] });
+      // TODO: get the aproval info of the thesis project
+
+      //TODO: Get a list of all his evaluations
+
+      // TODO: Get the info  of the defense of the project that belongs to this students
+    } catch (error) {}
   },
 };

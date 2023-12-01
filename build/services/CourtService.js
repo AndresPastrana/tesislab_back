@@ -154,85 +154,34 @@ function _ts_generator(thisArg, body) {
         };
     }
 }
-import { ModelStudent } from "../models/Student.js";
-import { ErrorHandlerFactory } from "../errors/error.js";
-export var StudentService = /*#__PURE__*/ function() {
+import { ModelCourt } from "./../models/Court.js";
+export var CourtsService = /*#__PURE__*/ function() {
     "use strict";
-    function StudentService() {
-        _class_call_check(this, StudentService);
+    function CourtsService() {
+        _class_call_check(this, CourtsService);
     }
-    _create_class(StudentService, null, [
+    _create_class(CourtsService, null, [
         {
-            key: "createStudent",
-            value: function createStudent(studentData) {
+            key: "isRoleUniqueWithinCourt",
+            value: function isRoleUniqueWithinCourt(courtId, role) {
                 var _this = this;
                 return _async_to_generator(function() {
-                    var createdStudent, error;
+                    var existingCourt;
                     return _ts_generator(this, function(_state) {
                         switch(_state.label){
                             case 0:
-                                _state.trys.push([
-                                    0,
-                                    2,
-                                    ,
-                                    3
-                                ]);
                                 return [
                                     4,
-                                    _this.Student.create(studentData)
-                                ];
-                            case 1:
-                                createdStudent = _state.sent();
-                                return [
-                                    2,
-                                    createdStudent.toObject()
-                                ];
-                            case 2:
-                                error = _state.sent();
-                                throw _this.ErrorFactory.createError(error);
-                            case 3:
-                                return [
-                                    2
-                                ];
-                        }
-                    });
-                })();
-            }
-        },
-        {
-            key: "getStudents",
-            value: //TODO: Add a flag th shwo all students or just ancient = true
-            function getStudents() {
-                var _this = this;
-                return _async_to_generator(function() {
-                    var students, error;
-                    return _ts_generator(this, function(_state) {
-                        switch(_state.label){
-                            case 0:
-                                _state.trys.push([
-                                    0,
-                                    2,
-                                    ,
-                                    3
-                                ]);
-                                return [
-                                    4,
-                                    _this.Student.find()
-                                ];
-                            case 1:
-                                students = _state.sent();
-                                return [
-                                    2,
-                                    students.map(function(student) {
-                                        return student.toObject();
+                                    _this.CourtModel.findOne({
+                                        _id: courtId,
+                                        "members.role": role
                                     })
                                 ];
-                            case 2:
-                                error = _state.sent();
-                                throw _this.ErrorFactory.createError(error);
-                            case 3:
+                            case 1:
+                                existingCourt = _state.sent();
                                 return [
-                                    2
+                                    2,
+                                    !existingCourt
                                 ];
                         }
                     });
@@ -240,11 +189,11 @@ export var StudentService = /*#__PURE__*/ function() {
             }
         },
         {
-            key: "getStudentById",
-            value: function getStudentById(studentId) {
+            key: "createCourt",
+            value: function createCourt(courtData) {
                 var _this = this;
                 return _async_to_generator(function() {
-                    var student, error;
+                    var createdCourt, error;
                     return _ts_generator(this, function(_state) {
                         switch(_state.label){
                             case 0:
@@ -256,17 +205,17 @@ export var StudentService = /*#__PURE__*/ function() {
                                 ]);
                                 return [
                                     4,
-                                    _this.Student.findById(studentId)
+                                    _this.CourtModel.create(courtData)
                                 ];
                             case 1:
-                                student = _state.sent();
+                                createdCourt = _state.sent();
                                 return [
                                     2,
-                                    student ? student.toObject() : null
+                                    createdCourt.toObject()
                                 ];
                             case 2:
                                 error = _state.sent();
-                                throw _this.ErrorFactory.createError(error);
+                                throw new Error("Error in the Court Service: ".concat(error.message));
                             case 3:
                                 return [
                                     2
@@ -277,35 +226,85 @@ export var StudentService = /*#__PURE__*/ function() {
             }
         },
         {
-            key: "updateStudent",
-            value: function updateStudent(studentId, studentData) {
+            key: "editCourt",
+            value: function editCourt(courtId, courtData) {
                 var _this = this;
                 return _async_to_generator(function() {
-                    var updatedStudent, error;
+                    var isUnique, updatedCourt, error;
                     return _ts_generator(this, function(_state) {
                         switch(_state.label){
                             case 0:
                                 _state.trys.push([
                                     0,
-                                    2,
+                                    3,
                                     ,
-                                    3
+                                    4
                                 ]);
                                 return [
                                     4,
-                                    _this.Student.findByIdAndUpdate(studentId, studentData, {
+                                    _this.isRoleUniqueWithinCourt(courtId, courtData.members[0].role)
+                                ];
+                            case 1:
+                                isUnique = _state.sent();
+                                if (!isUnique) {
+                                    throw new Error("Error in the Court Service: Role must be unique within the court");
+                                }
+                                return [
+                                    4,
+                                    _this.CourtModel.findByIdAndUpdate(courtId, courtData, {
                                         new: true
                                     })
                                 ];
-                            case 1:
-                                updatedStudent = _state.sent();
+                            case 2:
+                                updatedCourt = _state.sent();
                                 return [
                                     2,
-                                    updatedStudent ? updatedStudent.toObject() : null
+                                    updatedCourt ? updatedCourt.toObject() : null
+                                ];
+                            case 3:
+                                error = _state.sent();
+                                throw new Error("Error in the Court Service: ".concat(error.message));
+                            case 4:
+                                return [
+                                    2
+                                ];
+                        }
+                    });
+                })();
+            }
+        },
+        {
+            key: "getCourtInfoById",
+            value: function getCourtInfoById(courtId) {
+                var _this = this;
+                return _async_to_generator(function() {
+                    var court, error;
+                    return _ts_generator(this, function(_state) {
+                        switch(_state.label){
+                            case 0:
+                                _state.trys.push([
+                                    0,
+                                    2,
+                                    ,
+                                    3
+                                ]);
+                                return [
+                                    4,
+                                    _this.CourtModel.findById(courtId).populate({
+                                        path: "members.profesor",
+                                        model: "Profesor",
+                                        select: "name lastname"
+                                    }).exec()
+                                ];
+                            case 1:
+                                court = _state.sent();
+                                return [
+                                    2,
+                                    court ? court.toObject() : null
                                 ];
                             case 2:
                                 error = _state.sent();
-                                throw _this.ErrorFactory.createError(error);
+                                throw new Error("Error in the Court Service: ".concat(error.message));
                             case 3:
                                 return [
                                     2
@@ -316,27 +315,36 @@ export var StudentService = /*#__PURE__*/ function() {
             }
         },
         {
-            key: "deleteStudent",
-            value: function deleteStudent(studentId) {
+            key: "removeCourt",
+            value: function removeCourt(courtId) {
                 var _this = this;
                 return _async_to_generator(function() {
-                    var student;
+                    var error;
                     return _ts_generator(this, function(_state) {
                         switch(_state.label){
                             case 0:
+                                _state.trys.push([
+                                    0,
+                                    2,
+                                    ,
+                                    3
+                                ]);
                                 return [
                                     4,
-                                    _this.Student.findByIdAndUpdate(studentId, {
-                                        ancient: true
-                                    }, {
-                                        new: true
-                                    })
+                                    _this.CourtModel.findByIdAndDelete(courtId)
                                 ];
                             case 1:
-                                student = _state.sent();
+                                _state.sent();
                                 return [
-                                    2,
-                                    student === null || student === void 0 ? void 0 : student._id
+                                    3,
+                                    3
+                                ];
+                            case 2:
+                                error = _state.sent();
+                                throw new Error("Error in the Court Service: ".concat(error.message));
+                            case 3:
+                                return [
+                                    2
                                 ];
                         }
                     });
@@ -344,7 +352,6 @@ export var StudentService = /*#__PURE__*/ function() {
             }
         }
     ]);
-    return StudentService;
+    return CourtsService;
 }();
-_define_property(StudentService, "Student", ModelStudent);
-_define_property(StudentService, "ErrorFactory", ErrorHandlerFactory);
+_define_property(CourtsService, "CourtModel", ModelCourt);

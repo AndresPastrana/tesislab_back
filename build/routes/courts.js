@@ -1,5 +1,3 @@
-//   GET   /students
-// Just an admin can get al the students
 function _array_like_to_array(arr, len) {
     if (len == null || len > arr.length) len = arr.length;
     for(var i = 0, arr2 = new Array(len); i < len; i++)arr2[i] = arr[i];
@@ -150,136 +148,133 @@ function _ts_generator(thisArg, body) {
     }
 }
 import { Router } from "express";
-import { protectRouteByRole } from "../middleware/protectRouteByRole.js";
-import { Sex, UserRole } from "../const.js";
-import { isValidToken } from "../middleware/jwt.js";
-import { validateRequest } from "../middleware/validate.js";
-import { StudentController } from "../controllers/index.js";
 import { body, param } from "express-validator";
-import { validateCi } from "../helpers/ci.js";
+import { CourtsController } from "../controllers/courts.js";
 import { isValidDoc } from "../middleware/dbValidators.js";
-import { ModelStudent } from "../models/Student.js";
-import { Types, isValidObjectId } from "mongoose";
-import { ModelUser } from "../models/User.js";
-//   GET   /student/project-tesis/:id
-//   GET   /student/historial/:id
-//   GET   /student/evaluations/
-//   GET   /student/evaluations/:id
-//   GET   /student/:id
+import { ModelCourt } from "../models/Court.js";
+import { validateRequest } from "../middleware/validate.js";
+import { CourtRole } from "../const.js";
+import { ModelProfesor } from "../models/Profesor.js";
+import { Types } from "mongoose";
 export var router = Router();
-var authValidations = [
-    isValidToken,
-    protectRouteByRole([
-        UserRole.Admin
-    ])
-];
-// TODO: Validate that ci can not be repeated in create and update
-var createStudentValidations = [
-    body("ci").isLength({
-        min: 11,
-        max: 11
-    }).isNumeric().custom(function(ci) {
-        if (validateCi(ci)) {
-            return true;
-        }
-        throw new Error("Invalid ci");
-    }),
-    body("name").trim().escape().notEmpty().isString().toLowerCase(),
-    body("lastname").trim().escape().notEmpty().isString().toLowerCase(),
-    body("phone").notEmpty().isNumeric().isLength({
-        min: 8,
-        max: 8
-    }),
-    body("sex").trim().escape().toLowerCase().isIn(Object.values(Sex)),
-    body("address").trim().escape().notEmpty().isString(),
-    body("language_certificate").isBoolean(),
-    body("email").trim().escape().isString().isEmail().normalizeEmail(),
-    body("role").trim().escape().toLowerCase().isIn(Object.values(UserRole))
-];
-var updateValidations = [
-    body("user_id").exists({
+// TODO:
+// Validate that each profesor is  not in any other court
+var validateCreateCourt = [
+    body("name").trim().escape().isString().withMessage("Name should be a string").isLength({
+        min: 1
+    }).withMessage("Name is required"),
+    body("members").isArray({
+        min: Object.values(CourtRole).length
+    }).withMessage("The courts needs to have a least ".concat(Object.values(CourtRole).length, " members: ").concat(Object.values(CourtRole).join(", "), " ")),
+    body("members.*.profesor").exists({
         values: "falsy"
-    }).withMessage("user_id is required").isMongoId().withMessage("Invalid id format").custom(function() {
-        var _ref = _async_to_generator(function(id) {
+    }).withMessage("profesor id is required").isMongoId().withMessage("invalid id format").custom(function(profesorId) {
+        return isValidDoc(profesorId, ModelProfesor);
+    }).withMessage("Profesor not found"),
+    body("members.*.role").exists({
+        values: "falsy"
+    }).withMessage("role is required").isIn(Object.values(CourtRole)).withMessage("Invalid role"),
+    body("members").if(function(members) {
+        return members.length === 4;
+    }).custom(function(members) {
+        var rolesSet = new Set();
+        var _iteratorNormalCompletion = true, _didIteratorError = false, _iteratorError = undefined;
+        try {
+            for(var _iterator = members[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true){
+                var member = _step.value;
+                if (rolesSet.has(member.role)) {
+                    // Role is repeated, return false
+                    return false;
+                }
+                rolesSet.add(member.role);
+            }
+        } catch (err) {
+            _didIteratorError = true;
+            _iteratorError = err;
+        } finally{
+            try {
+                if (!_iteratorNormalCompletion && _iterator.return != null) {
+                    _iterator.return();
+                }
+            } finally{
+                if (_didIteratorError) {
+                    throw _iteratorError;
+                }
+            }
+        }
+        return true;
+    }).withMessage("Roles can not be repeated in the court").custom(function() {
+        var _ref = _async_to_generator(function(members) {
+            var results;
             return _ts_generator(this, function(_state) {
                 switch(_state.label){
                     case 0:
                         return [
                             4,
-                            isValidDoc(id, ModelUser)
+                            Promise.all(members.map(function() {
+                                var _ref = _async_to_generator(function(param) {
+                                    var p, match;
+                                    return _ts_generator(this, function(_state) {
+                                        switch(_state.label){
+                                            case 0:
+                                                p = param.profesor;
+                                                return [
+                                                    4,
+                                                    ModelCourt.findOne({
+                                                        members: {
+                                                            $elemMatch: {
+                                                                profesor: new Types.ObjectId(p)
+                                                            }
+                                                        }
+                                                    })
+                                                ];
+                                            case 1:
+                                                match = _state.sent();
+                                                return [
+                                                    2,
+                                                    !!match
+                                                ]; // Converts match to a boolean
+                                        }
+                                    });
+                                });
+                                return function(_) {
+                                    return _ref.apply(this, arguments);
+                                };
+                            }()))
                         ];
                     case 1:
+                        results = _state.sent();
+                        if (results.includes(true)) throw new Error("A profesor can be in just one court");
                         return [
                             2,
-                            _state.sent()
+                            true
                         ];
                 }
             });
         });
-        return function(id) {
+        return function(members) {
             return _ref.apply(this, arguments);
         };
-    }()),
-    body("ci").isLength({
-        min: 11,
-        max: 11
-    }).withMessage("CI must be 11 length").isNumeric().withMessage("CI must be 11 length").custom(function(ci) {
-        if (validateCi(ci)) {
-            return true;
-        }
-        throw new Error("Invalid ci");
-    }).optional(),
-    body("name").trim().escape().notEmpty().isString().toLowerCase().optional(),
-    body("lastname").trim().escape().notEmpty().isString().toLowerCase().optional(),
-    body("phone").notEmpty().isNumeric().isLength({
-        min: 8,
-        max: 8
-    }).optional(),
-    body("sex").trim().escape().toLowerCase().isIn(Object.values(Sex)).optional(),
-    body("address").trim().escape().notEmpty().isString().optional(),
-    body("language_certificate").isBoolean().optional(),
-    body("email").trim().escape().isString().isEmail().normalizeEmail().optional()
+    }())
 ];
-var validateIdParam = [
-    param("id").trim().escape().exists({
+var validateUpdateCourt = [
+    param("courtId").isMongoId().withMessage("Invalid Court ID"),
+    body("name").optional().trim().isLength({
+        min: 1
+    }).withMessage("Name must be at least 1 character")
+];
+var validateCourtId = [
+    param("id").exists({
         values: "falsy"
-    }).withMessage("id is required").isMongoId().withMessage("Invalid mongo id").if(function(id) {
-        return isValidObjectId(id);
-    }).withMessage("Invalid mongo id").custom(function() {
-        var _ref = _async_to_generator(function(id) {
-            var is;
-            return _ts_generator(this, function(_state) {
-                switch(_state.label){
-                    case 0:
-                        return [
-                            4,
-                            isValidDoc(id, ModelStudent)
-                        ];
-                    case 1:
-                        is = _state.sent();
-                        if (is) {
-                            return [
-                                2,
-                                true
-                            ];
-                        }
-                        throw new Error("Student not found");
-                }
-            });
-        });
-        return function(id) {
-            return _ref.apply(this, arguments);
-        };
-    }()).withMessage("Student not found").customSanitizer(function(id) {
-        return new Types.ObjectId(id);
-    })
+    }).withMessage("id is required in the params").isMongoId().withMessage("Invalid id format").custom(function(courtId) {
+        return isValidDoc(courtId, ModelCourt);
+    }).withMessage("Court not found ")
 ];
-router.post("/", _to_consumable_array(createStudentValidations).concat([
+// Routes
+router.post("/", _to_consumable_array(validateCreateCourt).concat([
     validateRequest
-]), StudentController.createStudent);
-router.put("/:id", _to_consumable_array(validateIdParam).concat(_to_consumable_array(updateValidations), [
-    validateRequest
-]), StudentController.updateStudent);
-router.delete("/:id", _to_consumable_array(validateIdParam), StudentController.deleteStudent);
-router.get("/:id", _to_consumable_array(validateIdParam), StudentController.getStudentById);
-router.get("/", _to_consumable_array(validateIdParam), StudentController.getStudents);
+]), CourtsController.createCourt);
+router.put("/:courtId", validateUpdateCourt, CourtsController.updateCourt);
+router.get("/:courtId", param("courtId").isMongoId().withMessage("Invalid Court ID"), CourtsController.getCourtById);
+//TODO: Validate that te court exist
+router.delete("/:courtId", param("courtId").isMongoId().withMessage("Invalid Court ID"), CourtsController.deleteCourt);

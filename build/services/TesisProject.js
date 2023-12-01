@@ -199,6 +199,7 @@ function _ts_generator(thisArg, body) {
 import { TesisProjectStatus, UserRole } from "../const.js";
 import { ModelTesisProject } from "../models/TesisProject.js";
 import { ErrorHandlerFactory } from "../errors/error.js";
+import { ModelProfesor } from "../models/Profesor.js";
 export var TesisProjectService = /*#__PURE__*/ function() {
     "use strict";
     function TesisProjectService() {
@@ -526,6 +527,68 @@ export var TesisProjectService = /*#__PURE__*/ function() {
                                 err = error;
                                 throw new Error("Error in TesisProjectServices: ".concat(err.message));
                             case 6:
+                                return [
+                                    2
+                                ];
+                        }
+                    });
+                })();
+            }
+        },
+        {
+            key: "getApprovalInfo",
+            value: function getApprovalInfo(studentId) {
+                return _async_to_generator(function() {
+                    var _tesisProject_approval, _tesisProject_approval_approvedBy, _tesisProject_approval1, _tesisProject_approval_approvedBy1, _tesisProject_approval2, _tesisProject_approval3, tesisProject, approvalInfo, error;
+                    return _ts_generator(this, function(_state) {
+                        switch(_state.label){
+                            case 0:
+                                _state.trys.push([
+                                    0,
+                                    2,
+                                    ,
+                                    3
+                                ]);
+                                return [
+                                    4,
+                                    ModelTesisProject.findOne({
+                                        student: studentId
+                                    }, {
+                                        "approval.date": 1,
+                                        "approval.approvedBy": 1,
+                                        "approval.recommendations": 1
+                                    }).populate({
+                                        path: "approval.approvedBy",
+                                        model: ModelProfesor,
+                                        select: "name lastame"
+                                    })
+                                ];
+                            case 1:
+                                tesisProject = _state.sent();
+                                // If tesisProject is not found, you can handle it as needed
+                                if (!tesisProject) {
+                                    return [
+                                        2,
+                                        null
+                                    ]; // or throw an error, or return a default value
+                                }
+                                approvalInfo = {
+                                    date: ((_tesisProject_approval = tesisProject.approval) === null || _tesisProject_approval === void 0 ? void 0 : _tesisProject_approval.date) || null,
+                                    approvedBy: {
+                                        name: ((_tesisProject_approval1 = tesisProject.approval) === null || _tesisProject_approval1 === void 0 ? void 0 : (_tesisProject_approval_approvedBy = _tesisProject_approval1.approvedBy) === null || _tesisProject_approval_approvedBy === void 0 ? void 0 : _tesisProject_approval_approvedBy.name) || null,
+                                        lastName: ((_tesisProject_approval2 = tesisProject.approval) === null || _tesisProject_approval2 === void 0 ? void 0 : (_tesisProject_approval_approvedBy1 = _tesisProject_approval2.approvedBy) === null || _tesisProject_approval_approvedBy1 === void 0 ? void 0 : _tesisProject_approval_approvedBy1.lastname) || null
+                                    },
+                                    recommendations: ((_tesisProject_approval3 = tesisProject.approval) === null || _tesisProject_approval3 === void 0 ? void 0 : _tesisProject_approval3.recommendations) || []
+                                };
+                                return [
+                                    2,
+                                    approvalInfo
+                                ];
+                            case 2:
+                                error = _state.sent();
+                                console.error("Error fetching approval info:", error);
+                                throw error; // You might want to handle this error more gracefully
+                            case 3:
                                 return [
                                     2
                                 ];

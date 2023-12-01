@@ -47,6 +47,7 @@ export var CourtRole;
     CourtRole["Presidente"] = "presidente";
     CourtRole["Secretario"] = "secretario";
     CourtRole["Vocal"] = "vocal";
+    CourtRole["Oponente"] = "oponente";
 })(CourtRole || (CourtRole = {}));
 export var Sex;
 (function(Sex) {
@@ -92,5 +93,6 @@ export var Routes;
     Routes["student"] = "/api/student";
     Routes["tesis_project"] = "/api/project";
     Routes["profesor"] = "/api/profesor";
+    Routes["court"] = "/api/court";
 })(Routes || (Routes = {}));
 export var EMAIL_DOMAIN = "onboarding@resend.dev";

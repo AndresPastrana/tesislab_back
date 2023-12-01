@@ -121,6 +121,7 @@ router.put(
 router.delete("/:id", [...validateIdParam], StudentController.deleteStudent);
 
 router.get("/:id", [...validateIdParam], StudentController.getStudentById);
+router.get("/", [...validateIdParam], StudentController.getStudents);
 type data = {
   email: string;
   ci: string;

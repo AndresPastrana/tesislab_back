@@ -48,6 +48,7 @@ export enum CourtRole {
   Presidente = "presidente",
   Secretario = "secretario",
   Vocal = "vocal",
+  Oponente = "oponente",
 }
 export enum Sex {
   Female = "female",
@@ -91,6 +92,7 @@ export enum Routes {
   student = "/api/student",
   tesis_project = "/api/project",
   profesor = "/api/profesor",
+  court = "/api/court",
 }
 
 export const EMAIL_DOMAIN = "onboarding@resend.dev";

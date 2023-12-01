@@ -40,7 +40,7 @@ export const htmlTemplateCred = (username: string, password: string) => {
     <div class="container">
       <h1>Hello User!</h1>
       <div class="password-info">
-      <p>Your password is: ${username}</p>
+      <p>Your username is: ${username}</p>
         <p>Your password is: ${password}</p>
         <p>Thank you for using our service.</p>
       </div>

@@ -46,19 +46,6 @@ function _create_class(Constructor, protoProps, staticProps) {
     if (staticProps) _defineProperties(Constructor, staticProps);
     return Constructor;
 }
-function _define_property(obj, key, value) {
-    if (key in obj) {
-        Object.defineProperty(obj, key, {
-            value: value,
-            enumerable: true,
-            configurable: true,
-            writable: true
-        });
-    } else {
-        obj[key] = value;
-    }
-    return obj;
-}
 function _ts_generator(thisArg, body) {
     var f, y, t, g, _ = {
         label: 0,
@@ -154,20 +141,21 @@ function _ts_generator(thisArg, body) {
         };
     }
 }
-import { ModelStudent } from "../models/Student.js";
+import { CourtsService } from "../services/CourtService.js";
+import { handleResponse } from "../middleware/handleResponse.js";
 import { ErrorHandlerFactory } from "../errors/error.js";
-export var StudentService = /*#__PURE__*/ function() {
+import { matchedData } from "express-validator";
+export var CourtsController = /*#__PURE__*/ function() {
     "use strict";
-    function StudentService() {
-        _class_call_check(this, StudentService);
+    function CourtsController() {
+        _class_call_check(this, CourtsController);
     }
-    _create_class(StudentService, null, [
+    _create_class(CourtsController, null, [
         {
-            key: "createStudent",
-            value: function createStudent(studentData) {
-                var _this = this;
+            key: "createCourt",
+            value: function createCourt(req, res) {
                 return _async_to_generator(function() {
-                    var createdStudent, error;
+                    var courtData, createdCourt, error, customError;
                     return _ts_generator(this, function(_state) {
                         switch(_state.label){
                             case 0:
@@ -177,19 +165,37 @@ export var StudentService = /*#__PURE__*/ function() {
                                     ,
                                     3
                                 ]);
+                                courtData = matchedData(req);
                                 return [
                                     4,
-                                    _this.Student.create(studentData)
+                                    CourtsService.createCourt(courtData)
                                 ];
                             case 1:
-                                createdStudent = _state.sent();
+                                createdCourt = _state.sent();
+                                // Respond with success
+                                handleResponse({
+                                    statusCode: 201,
+                                    msg: "Court created successfully",
+                                    data: createdCourt,
+                                    res: res
+                                });
                                 return [
-                                    2,
-                                    createdStudent.toObject()
+                                    3,
+                                    3
                                 ];
                             case 2:
                                 error = _state.sent();
-                                throw _this.ErrorFactory.createError(error);
+                                customError = ErrorHandlerFactory.createError(error);
+                                handleResponse({
+                                    statusCode: 500,
+                                    msg: "Error creating court",
+                                    error: customError,
+                                    res: res
+                                });
+                                return [
+                                    3,
+                                    3
+                                ];
                             case 3:
                                 return [
                                     2
@@ -200,12 +206,10 @@ export var StudentService = /*#__PURE__*/ function() {
             }
         },
         {
-            key: "getStudents",
-            value: //TODO: Add a flag th shwo all students or just ancient = true
-            function getStudents() {
-                var _this = this;
+            key: "updateCourt",
+            value: function updateCourt(req, res) {
                 return _async_to_generator(function() {
-                    var students, error;
+                    var courtId, courtData, updatedCourt, error, customError;
                     return _ts_generator(this, function(_state) {
                         switch(_state.label){
                             case 0:
@@ -215,21 +219,45 @@ export var StudentService = /*#__PURE__*/ function() {
                                     ,
                                     3
                                 ]);
+                                courtId = req.params.courtId;
+                                courtData = req.body;
                                 return [
                                     4,
-                                    _this.Student.find()
+                                    CourtsService.editCourt(courtId, courtData)
                                 ];
                             case 1:
-                                students = _state.sent();
+                                updatedCourt = _state.sent();
+                                if (updatedCourt) {
+                                    handleResponse({
+                                        statusCode: 200,
+                                        msg: "Court updated successfully",
+                                        data: updatedCourt,
+                                        res: res
+                                    });
+                                } else {
+                                    handleResponse({
+                                        statusCode: 404,
+                                        msg: "Court not found",
+                                        res: res
+                                    });
+                                }
                                 return [
-                                    2,
-                                    students.map(function(student) {
-                                        return student.toObject();
-                                    })
+                                    3,
+                                    3
                                 ];
                             case 2:
                                 error = _state.sent();
-                                throw _this.ErrorFactory.createError(error);
+                                customError = ErrorHandlerFactory.createError(error);
+                                handleResponse({
+                                    statusCode: 500,
+                                    msg: "Error updating court",
+                                    error: customError,
+                                    res: res
+                                });
+                                return [
+                                    3,
+                                    3
+                                ];
                             case 3:
                                 return [
                                     2
@@ -240,11 +268,10 @@ export var StudentService = /*#__PURE__*/ function() {
             }
         },
         {
-            key: "getStudentById",
-            value: function getStudentById(studentId) {
-                var _this = this;
+            key: "getCourtById",
+            value: function getCourtById(req, res) {
                 return _async_to_generator(function() {
-                    var student, error;
+                    var courtId, court, error, customError;
                     return _ts_generator(this, function(_state) {
                         switch(_state.label){
                             case 0:
@@ -254,19 +281,44 @@ export var StudentService = /*#__PURE__*/ function() {
                                     ,
                                     3
                                 ]);
+                                courtId = req.params.courtId;
                                 return [
                                     4,
-                                    _this.Student.findById(studentId)
+                                    CourtsService.getCourtInfoById(courtId)
                                 ];
                             case 1:
-                                student = _state.sent();
+                                court = _state.sent();
+                                if (court) {
+                                    handleResponse({
+                                        statusCode: 200,
+                                        msg: "Court retrieved successfully",
+                                        data: court,
+                                        res: res
+                                    });
+                                } else {
+                                    handleResponse({
+                                        statusCode: 404,
+                                        msg: "Court not found",
+                                        res: res
+                                    });
+                                }
                                 return [
-                                    2,
-                                    student ? student.toObject() : null
+                                    3,
+                                    3
                                 ];
                             case 2:
                                 error = _state.sent();
-                                throw _this.ErrorFactory.createError(error);
+                                customError = ErrorHandlerFactory.createError(error);
+                                handleResponse({
+                                    statusCode: 500,
+                                    msg: "Error retrieving court",
+                                    error: customError,
+                                    res: res
+                                });
+                                return [
+                                    3,
+                                    3
+                                ];
                             case 3:
                                 return [
                                     2
@@ -277,11 +329,10 @@ export var StudentService = /*#__PURE__*/ function() {
             }
         },
         {
-            key: "updateStudent",
-            value: function updateStudent(studentId, studentData) {
-                var _this = this;
+            key: "deleteCourt",
+            value: function deleteCourt(req, res) {
                 return _async_to_generator(function() {
-                    var updatedStudent, error;
+                    var courtId, error, customError;
                     return _ts_generator(this, function(_state) {
                         switch(_state.label){
                             case 0:
@@ -291,52 +342,38 @@ export var StudentService = /*#__PURE__*/ function() {
                                     ,
                                     3
                                 ]);
+                                courtId = req.params.courtId;
                                 return [
                                     4,
-                                    _this.Student.findByIdAndUpdate(studentId, studentData, {
-                                        new: true
-                                    })
+                                    CourtsService.removeCourt(courtId)
                                 ];
                             case 1:
-                                updatedStudent = _state.sent();
+                                _state.sent();
+                                handleResponse({
+                                    statusCode: 200,
+                                    msg: "Court deleted successfully",
+                                    res: res
+                                });
                                 return [
-                                    2,
-                                    updatedStudent ? updatedStudent.toObject() : null
+                                    3,
+                                    3
                                 ];
                             case 2:
                                 error = _state.sent();
-                                throw _this.ErrorFactory.createError(error);
+                                customError = ErrorHandlerFactory.createError(error);
+                                handleResponse({
+                                    statusCode: 500,
+                                    msg: "Error deleting court",
+                                    error: customError,
+                                    res: res
+                                });
+                                return [
+                                    3,
+                                    3
+                                ];
                             case 3:
                                 return [
                                     2
-                                ];
-                        }
-                    });
-                })();
-            }
-        },
-        {
-            key: "deleteStudent",
-            value: function deleteStudent(studentId) {
-                var _this = this;
-                return _async_to_generator(function() {
-                    var student;
-                    return _ts_generator(this, function(_state) {
-                        switch(_state.label){
-                            case 0:
-                                return [
-                                    4,
-                                    _this.Student.findByIdAndUpdate(studentId, {
-                                        ancient: true
-                                    }, {
-                                        new: true
-                                    })
-                                ];
-                            case 1:
-                                student = _state.sent();
-                                return [
-                                    2,
-                                    student === null || student === void 0 ? void 0 : student._id
                                 ];
                         }
                     });
@@ -344,7 +381,5 @@ export var StudentService = /*#__PURE__*/ function() {
             }
         }
     ]);
-    return StudentService;
+    return CourtsController;
 }();
-_define_property(StudentService, "Student", ModelStudent);
-_define_property(StudentService, "ErrorFactory", ErrorHandlerFactory);

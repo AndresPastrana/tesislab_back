@@ -181,6 +181,7 @@ import { ErrorHandlerFactory } from "../errors/error.js";
 import { handleResponse } from "../middleware/handleResponse.js";
 import { generarMensajeCambioEmail, htmlTemplateCred } from "../helpers/html.js";
 import { caluculateAge } from "../helpers/age.js";
+import { TesisProjectService } from "../services/TesisProject.js";
 export var StudentController = {
     createStudent: function() {
         var _ref = _async_to_generator(function(req, res) {
@@ -221,7 +222,8 @@ export var StudentController = {
                             4,
                             EmailService.sendEmail({
                                 to: createdStudent.email,
-                                html: "".concat(htmlTemplateCred(newUser.user.username, newUser.user.password))
+                                html: "".concat(htmlTemplateCred(newUser.user.username, newUser.user.password)),
+                                subject: "Has sido agregado a upr.tesislab"
                             })
                         ];
                     case 3:
@@ -423,7 +425,8 @@ export var StudentController = {
                             4,
                             EmailService.sendEmail({
                                 to: studentData.email,
-                                html: generarMensajeCambioEmail(username, studentData.email, password)
+                                html: generarMensajeCambioEmail(username, studentData.email, password),
+                                subject: "Nuevas Credenciales"
                             })
                         ];
                     case 2:
@@ -482,16 +485,17 @@ export var StudentController = {
     }(),
     deleteStudent: function() {
         var _ref = _async_to_generator(function(req, res) {
-            var _matchedData, studentId, user, error, customError;
+            var _matchedData, studentId, student, error, customError;
             return _ts_generator(this, function(_state) {
                 switch(_state.label){
                     case 0:
                         _state.trys.push([
                             0,
-                            3,
+                            4,
                             ,
-                            4
+                            5
                         ]);
+                        // const studentId = req.params.id;
                         _matchedData = matchedData(req, {
                             locations: [
                                 "params"
@@ -502,26 +506,28 @@ export var StudentController = {
                             StudentService.getStudentById(studentId)
                         ];
                     case 1:
-                        user = _state.sent();
-                        if (!user) {
-                            return [
-                                2,
-                                res.json({
-                                    msg: false
-                                })
-                            ];
-                        }
+                        student = _state.sent();
+                        if (!student) return [
+                            3,
+                            3
+                        ];
                         return [
                             4,
                             Promise.all([
                                 UserService.deactivateUser({
-                                    userId: user.user_id
+                                    userId: student.user_id
                                 }),
-                                StudentService.deleteStudent(studentId)
+                                StudentService.deleteStudent(studentId),
+                                TesisProjectService.removeMemberFromTesisProject({
+                                    typeOfMember: UserRole.Student,
+                                    memberId: studentId
+                                })
                             ])
                         ];
                     case 2:
                         _state.sent();
+                        _state.label = 3;
+                    case 3:
                         handleResponse({
                             statusCode: 204,
                             msg: "Student deleted successfully",
@@ -529,9 +535,9 @@ export var StudentController = {
                         });
                         return [
                             3,
-                            4
+                            5
                         ];
-                    case 3:
+                    case 4:
                         error = _state.sent();
                         customError = ErrorHandlerFactory.createError(error);
                         handleResponse({
@@ -542,13 +548,36 @@ export var StudentController = {
                         });
                         return [
                             3,
-                            4
+                            5
                         ];
-                    case 4:
+                    case 5:
                         return [
                             2
                         ];
                 }
+            });
+        });
+        return function(req, res) {
+            return _ref.apply(this, arguments);
+        };
+    }(),
+    getHistorial: function() {
+        var _ref = _async_to_generator(function(req, res) {
+            var _matchedData, studentId;
+            return _ts_generator(this, function(_state) {
+                try {
+                    _matchedData = matchedData(req, {
+                        locations: [
+                            "params"
+                        ]
+                    }), studentId = _matchedData.id;
+                // TODO: get the aproval info of the thesis project
+                //TODO: Get a list of all his evaluations
+                // TODO: Get the info  of the defense of the project that belongs to this students
+                } catch (error) {}
+                return [
+                    2
+                ];
             });
         });
         return function(req, res) {
