@@ -109,19 +109,40 @@ const validateIdParam = [
 
 router.post(
   "/",
-  [...createStudentValidations, validateRequest],
+  [...authValidations, ...createStudentValidations, validateRequest],
   StudentController.createStudent
 );
 router.put(
   "/:id",
-  [...validateIdParam, ...updateValidations, validateRequest],
+  [
+    ...authValidations,
+    ...validateIdParam,
+    ...updateValidations,
+    validateRequest,
+  ],
   StudentController.updateStudent
 );
 
-router.delete("/:id", [...validateIdParam], StudentController.deleteStudent);
+router.delete(
+  "/:id",
+  [...authValidations, ...validateIdParam],
+  StudentController.deleteStudent
+);
 
-router.get("/:id", [...validateIdParam], StudentController.getStudentById);
-router.get("/", [...validateIdParam], StudentController.getStudents);
+router.get(
+  "/:id",
+  [
+    authValidations[0],
+    protectRouteByRole([UserRole.Admin, UserRole.Profesor, UserRole.Student]),
+    ...validateIdParam,
+  ],
+  StudentController.getStudentById
+);
+router.get(
+  "/",
+  [...authValidations, ...validateIdParam],
+  StudentController.getStudents
+);
 type data = {
   email: string;
   ci: string;

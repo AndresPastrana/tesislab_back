@@ -204,7 +204,7 @@ export var ProfesorController = {
                         return [
                             4,
                             UserService.registerUser({
-                                role: UserRole.Student,
+                                role: UserRole.Profesor,
                                 email: profesorData.email
                             })
                         ];

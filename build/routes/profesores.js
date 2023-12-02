@@ -28,49 +28,18 @@ import { body, param } from "express-validator";
 import { ProfesorController } from "../controllers/index.js";
 import { validateRequest } from "../middleware/validate.js";
 import { isValidToken } from "../middleware/jwt.js";
-import { RangoAcademico, Sex } from "../const.js";
+import { protectRouteByRole } from "../middleware/protectRouteByRole.js";
+import { RangoAcademico, Sex, UserRole } from "../const.js";
 import { Types, isValidObjectId } from "mongoose";
 import { isValidDoc } from "../middleware/dbValidators.js";
 import { validateCi } from "../helpers/ci.js";
 import { ModelProfesor } from "../models/Profesor.js";
 export var router = Router();
 var authValidations = [
-    isValidToken
-];
-var commonValidations = [
-    body("name").isLength({
-        min: 1,
-        max: 100
-    }).trim().escape(),
-    body("lastname").isLength({
-        min: 1,
-        max: 100
-    }).trim().escape(),
-    body("address").isLength({
-        min: 1
-    }).trim().escape(),
-    body("email").isEmail().normalizeEmail(),
-    body("phone").isLength({
-        min: 8,
-        max: 8
-    }).trim().escape(),
-    body("ci").isLength({
-        min: 11,
-        max: 11
-    }).trim().escape(),
-    body("sex").isIn([
-        "Male",
-        "Female"
-    ]).trim().escape(),
-    body("age").isInt({
-        min: 16,
-        max: 60
-    }),
-    body("academic_rank").isIn([
-        "Rank1",
-        "Rank2",
-        "Rank3"
-    ]).trim().escape()
+    isValidToken,
+    protectRouteByRole([
+        UserRole.Admin
+    ])
 ];
 var createProfesorValidations = [
     body("ci").isLength({
@@ -159,18 +128,22 @@ var validateIdParam = [
 ];
 // Private routes
 // Role: admin
-router.post("/", _to_consumable_array(createProfesorValidations).concat([
+router.post("/", _to_consumable_array(authValidations).concat(_to_consumable_array(createProfesorValidations), [
     validateRequest
 ]), ProfesorController.createProfesor);
 router.get("/", ProfesorController.getProfesores);
-router.put("/:id", _to_consumable_array(validateIdParam).concat(_to_consumable_array(updateProfesorValidation), [
+router.put("/:id", _to_consumable_array(authValidations).concat(_to_consumable_array(validateIdParam), _to_consumable_array(updateProfesorValidation), [
     validateRequest
 ]), ProfesorController.updateProfesor);
-router.delete("/:id", [
+router.delete("/:id", _to_consumable_array(authValidations).concat([
     param("id").isMongoId()
-], ProfesorController.deleteProfesor);
-//Role: admin and profesor if its himself
+]), ProfesorController.deleteProfesor);
 router.get("/:id", [
+    authValidations[0],
+    protectRouteByRole([
+        UserRole.Admin,
+        UserRole.Profesor
+    ]),
     param("id").isMongoId(),
     validateRequest
 ], ProfesorController.getProfesorById);

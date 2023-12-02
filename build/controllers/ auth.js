@@ -129,7 +129,7 @@ import { handleResponse } from "./../middleware/handleResponse.js";
 export var AuthController = {
     loginUser: function() {
         var _ref = _async_to_generator(function(req, res) {
-            var _matchedData, username, password, result, error;
+            var _matchedData, username, password, token, error;
             return _ts_generator(this, function(_state) {
                 switch(_state.label){
                     case 0:
@@ -152,11 +152,13 @@ export var AuthController = {
                             })
                         ];
                     case 1:
-                        result = _state.sent();
+                        token = _state.sent().token;
                         handleResponse({
                             statusCode: 200,
                             msg: "Login successful",
-                            data: result,
+                            data: {
+                                token: token
+                            },
                             res: res
                         });
                         return [

@@ -26,7 +26,7 @@ const UserSchema = new Schema<UserDocument>(
       type: String,
       required: true,
       minlength: [6, "Password should be at least 6 characters"],
-      maxlength: [50, "Password should not exceed 50 characters"],
+      maxlength: [200, "Password should not exceed 50 characters"],
     },
     username: {
       type: String,

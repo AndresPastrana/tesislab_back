@@ -468,6 +468,26 @@ export var TesisProjectController = /*#__PURE__*/ function() {
                     });
                 })();
             }
+        },
+        {
+            key: "getAllProjects",
+            value: function getAllProjects(req, res) {
+                return _async_to_generator(function() {
+                    var _matchedData, _matchedData_old, old;
+                    return _ts_generator(this, function(_state) {
+                        try {
+                            _matchedData = matchedData(req, {
+                                locations: [
+                                    "query"
+                                ]
+                            }), _matchedData_old = _matchedData.old, old = _matchedData_old === void 0 ? false : _matchedData_old;
+                        } catch (error) {}
+                        return [
+                            2
+                        ];
+                    });
+                })();
+            }
         }
     ]);
     return TesisProjectController;

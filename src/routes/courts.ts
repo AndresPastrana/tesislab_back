@@ -4,15 +4,16 @@ import { CourtsController } from "../controllers/courts.js";
 import { isValidDoc } from "../middleware/dbValidators.js";
 import { ModelCourt } from "../models/Court.js";
 import { validateRequest } from "../middleware/validate.js";
-import { CourtRole } from "../const.js";
+import { CourtRole, UserRole } from "../const.js";
 import { ModelProfesor } from "../models/Profesor.js";
 import { ModelTesisProject } from "../models/TesisProject.js";
 import { Schema, Types } from "mongoose";
+import { isValidToken } from "../middleware/jwt.js";
+import { protectRouteByRole } from "../middleware/protectRouteByRole.js";
 
 export const router: Router = Router();
 
-// TODO:
-// Validate that each profesor is  not in any other court
+const authValidations = [isValidToken, protectRouteByRole([UserRole.Admin])];
 const validateCreateCourt = [
   body("name")
     .trim()
@@ -96,13 +97,21 @@ const validateCourtId = [
 // Routes
 router.post(
   "/",
-  [...validateCreateCourt, validateRequest],
+  [...authValidations, ...validateCreateCourt, validateRequest],
   CourtsController.createCourt
 );
-router.put("/:courtId", validateUpdateCourt, CourtsController.updateCourt);
+router.put(
+  "/:courtId",
+  [...authValidations, ...validateCourtId, ...validateUpdateCourt],
+  CourtsController.updateCourt
+);
 router.get(
   "/:courtId",
-  param("courtId").isMongoId().withMessage("Invalid Court ID"),
+  [
+    authValidations[0],
+    protectRouteByRole([UserRole.Profesor, UserRole.Admin]),
+    ...validateCourtId,
+  ],
   CourtsController.getCourtById
 );
 

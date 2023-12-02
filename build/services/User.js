@@ -222,7 +222,7 @@ export var UserService = /*#__PURE__*/ function() {
                 var role = param.role, email = param.email;
                 var _this = this;
                 return _async_to_generator(function() {
-                    var username, existingUser, stringPassword, newUser;
+                    var username, existingUser, _generateSecurePassword, stringPassword, hashedpassword, newUser;
                     return _ts_generator(this, function(_state) {
                         switch(_state.label){
                             case 0:
@@ -236,12 +236,12 @@ export var UserService = /*#__PURE__*/ function() {
                             case 1:
                                 existingUser = _state.sent();
                                 if (existingUser) throw new Error("Username is already taken");
-                                stringPassword = generateSecurePassword().stringPassword;
+                                _generateSecurePassword = generateSecurePassword(), stringPassword = _generateSecurePassword.stringPassword, hashedpassword = _generateSecurePassword.hashedpassword;
                                 return [
                                     4,
                                     _this.ModelUser.create({
                                         username: username,
-                                        password: stringPassword,
+                                        password: hashedpassword,
                                         role: role
                                     })
                                 ];

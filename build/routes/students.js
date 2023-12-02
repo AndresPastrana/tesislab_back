@@ -274,12 +274,19 @@ var validateIdParam = [
         return new Types.ObjectId(id);
     })
 ];
-router.post("/", _to_consumable_array(createStudentValidations).concat([
+router.post("/", _to_consumable_array(authValidations).concat(_to_consumable_array(createStudentValidations), [
     validateRequest
 ]), StudentController.createStudent);
-router.put("/:id", _to_consumable_array(validateIdParam).concat(_to_consumable_array(updateValidations), [
+router.put("/:id", _to_consumable_array(authValidations).concat(_to_consumable_array(validateIdParam), _to_consumable_array(updateValidations), [
     validateRequest
 ]), StudentController.updateStudent);
-router.delete("/:id", _to_consumable_array(validateIdParam), StudentController.deleteStudent);
-router.get("/:id", _to_consumable_array(validateIdParam), StudentController.getStudentById);
-router.get("/", _to_consumable_array(validateIdParam), StudentController.getStudents);
+router.delete("/:id", _to_consumable_array(authValidations).concat(_to_consumable_array(validateIdParam)), StudentController.deleteStudent);
+router.get("/:id", [
+    authValidations[0],
+    protectRouteByRole([
+        UserRole.Admin,
+        UserRole.Profesor,
+        UserRole.Student
+    ])
+].concat(_to_consumable_array(validateIdParam)), StudentController.getStudentById);
+router.get("/", _to_consumable_array(authValidations).concat(_to_consumable_array(validateIdParam)), StudentController.getStudents);

@@ -48,7 +48,5 @@ export function defineMiddlewares(app: Application) {
   app.use(Routes.profesor, ProfesoresRouter);
   app.use(Routes.court, CourtRouter);
   app.use(Routes.search, SearchRouter);
-  // app.use(Routes.user, UserRouter);
-  // app.use(Routes.request, RequestRouter);
-  // app.use(Routes.bill, BillRouter);
+  app.use(Routes.auth, AuthRouter);
 }

@@ -8,11 +8,11 @@ export const AuthController = {
   loginUser: async (req: Request, res: Response) => {
     try {
       const { username, password } = matchedData(req, { locations: ["body"] });
-      const result = await UserService.loginUser({ username, password });
+      const { token } = await UserService.loginUser({ username, password });
       handleResponse({
         statusCode: 200,
         msg: "Login successful",
-        data: result,
+        data: { token },
         res,
       });
     } catch (error: any) {

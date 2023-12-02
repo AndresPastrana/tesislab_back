@@ -199,7 +199,7 @@ var UserSchema = new Schema({
             "Password should be at least 6 characters"
         ],
         maxlength: [
-            50,
+            200,
             "Password should not exceed 50 characters"
         ]
     },

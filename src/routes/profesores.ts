@@ -11,18 +11,7 @@ import { validateCi } from "../helpers/ci.js";
 import { ModelProfesor } from "../models/Profesor.js";
 export const router: Router = Router();
 
-const authValidations = [isValidToken];
-const commonValidations = [
-  body("name").isLength({ min: 1, max: 100 }).trim().escape(),
-  body("lastname").isLength({ min: 1, max: 100 }).trim().escape(),
-  body("address").isLength({ min: 1 }).trim().escape(),
-  body("email").isEmail().normalizeEmail(),
-  body("phone").isLength({ min: 8, max: 8 }).trim().escape(),
-  body("ci").isLength({ min: 11, max: 11 }).trim().escape(),
-  body("sex").isIn(["Male", "Female"]).trim().escape(),
-  body("age").isInt({ min: 16, max: 60 }),
-  body("academic_rank").isIn(["Rank1", "Rank2", "Rank3"]).trim().escape(),
-];
+const authValidations = [isValidToken, protectRouteByRole([UserRole.Admin])];
 
 const createProfesorValidations = [
   body("ci")
@@ -170,27 +159,36 @@ const validateIdParam = [
 // Role: admin
 router.post(
   "/",
-  [...createProfesorValidations, validateRequest],
+  [...authValidations, ...createProfesorValidations, validateRequest],
   ProfesorController.createProfesor
 );
 router.get("/", ProfesorController.getProfesores);
 
 router.put(
   "/:id",
-  [...validateIdParam, ...updateProfesorValidation, validateRequest],
+  [
+    ...authValidations,
+    ...validateIdParam,
+    ...updateProfesorValidation,
+    validateRequest,
+  ],
 
   ProfesorController.updateProfesor
 );
 
 router.delete(
   "/:id",
-  [param("id").isMongoId()],
+  [...authValidations, param("id").isMongoId()],
   ProfesorController.deleteProfesor
 );
 
-//Role: admin and profesor if its himself
 router.get(
   "/:id",
-  [param("id").isMongoId(), validateRequest],
+  [
+    authValidations[0],
+    protectRouteByRole([UserRole.Admin, UserRole.Profesor]),
+    param("id").isMongoId(),
+    validateRequest,
+  ],
   ProfesorController.getProfesorById
 );

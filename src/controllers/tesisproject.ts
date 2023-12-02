@@ -148,4 +148,10 @@ export class TesisProjectController {
       });
     }
   }
+
+  static async getAllProjects(req: Request, res: Response): Promise<void> {
+    try {
+      const { old = false } = matchedData(req, { locations: ["query"] });
+    } catch (error) {}
+  }
 }

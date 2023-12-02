@@ -90,11 +90,11 @@ export class UserService {
 
     if (existingUser) throw new Error("Username is already taken");
 
-    const { stringPassword } = generateSecurePassword();
+    const { stringPassword, hashedpassword } = generateSecurePassword();
 
     const newUser = await this.ModelUser.create({
       username,
-      password: stringPassword, // Placeholder for the function
+      password: hashedpassword, // Placeholder for the function
       role,
     });
 

@@ -156,21 +156,24 @@ import { ModelStudent } from "../models/Student.js";
 import { ModelTesisProject } from "../models/TesisProject.js";
 import { Types, isValidObjectId } from "mongoose";
 import { ModelProfesor } from "../models/Profesor.js";
+import { isValidToken } from "../middleware/jwt.js";
+import { protectRouteByRole } from "../middleware/protectRouteByRole.js";
+import { UserRole } from "../const.js";
 export var router = express.Router();
-// TODO: Otional
-//  [done] Validate that the student exist in the Student model
-// Validate that there is no other project tesis with this student
-// Validate that teh tutors exist and they are not ancient
+var authValidations = [
+    isValidToken,
+    protectRouteByRole([
+        UserRole.Admin
+    ])
+];
 var createProjectValidations = [
     body("topic").trim().escape().exists({
         values: "falsy"
-    }).withMessage("general_target is required").isString().withMessage("Topic must be a string").isLength({
+    }).withMessage("topic is required").isString().withMessage("Topic must be a string").isLength({
         min: 10,
         max: 200
     }).withMessage("Topcic msut be between 10 and 200 characters").toLowerCase(),
-    body("general_target").trim().escape().exists({
-        values: "falsy"
-    }).withMessage("general_target is required").isString().withMessage("genearl_target must be a string").isLength({
+    body("general_target").trim().escape().isString().withMessage("genearl_target must be a string").isLength({
         min: 10,
         max: 200
     }).withMessage("genearl_target msut be between 10 and 200 characters").toLowerCase(),
@@ -223,22 +226,88 @@ var createProjectValidations = [
         return new Types.ObjectId(tutor_id);
     })
 ];
+var updateProjectValidations = [
+    body("topic").trim().escape().exists({
+        values: "falsy"
+    }).withMessage("topic is required").isString().withMessage("Topic must be a string").isLength({
+        min: 10,
+        max: 200
+    }).withMessage("Topcic msut be between 10 and 200 characters").toLowerCase().optional(),
+    body("general_target").trim().escape().isString().withMessage("genearl_target must be a string").isLength({
+        min: 10,
+        max: 200
+    }).withMessage("genearl_target msut be between 10 and 200 characters").toLowerCase().optional(),
+    body("scientific_problem").trim().escape().exists({
+        values: "falsy"
+    }).withMessage("scientific_problem is required").isString().withMessage("scientific_problem must be a string").isLength({
+        min: 20,
+        max: 500
+    }).withMessage("scientific_problem msut be between 20 and 500 characters").toLowerCase().optional(),
+    body("student").optional().isMongoId().withMessage("Invalid id format").if(function(id) {
+        return isValidObjectId(id);
+    }).custom(function(student_id) {
+        return isValidDoc(student_id, ModelStudent);
+    }).customSanitizer(function(student_id) {
+        return new Types.ObjectId(student_id);
+    }).custom(function() {
+        var _ref = _async_to_generator(function(student_id) {
+            return _ts_generator(this, function(_state) {
+                // TODO: Uncoment this later on
+                // const st = await ModelTesisProject.findOne({ student: student_id });
+                // if (st) throw new Error("The student has asign another project");
+                return [
+                    2,
+                    true
+                ];
+            });
+        });
+        return function(student_id) {
+            return _ref.apply(this, arguments);
+        };
+    }()).optional(),
+    body("tutors").optional().isArray({
+        min: 1
+    }).withMessage("Tutors must be an array with 1 ore more element").optional(),
+    body("tutors.*").isMongoId().withMessage("Invalid mongo id").if(function(id) {
+        return isValidObjectId(id);
+    }).custom(function(tutor_id) {
+        return isValidDoc(tutor_id, ModelProfesor);
+    }).withMessage("Tutor not found").customSanitizer(function(tutor_id) {
+        return new Types.ObjectId(tutor_id);
+    }).optional()
+];
 // Validation middleware for project ID parameter
 var validateProjectId = [
     param("id").isMongoId()
 ];
+var validateGetParam = [
+    param("old", "old must be a boolean value, exmaple: ?old=false").isBoolean().optional()
+];
 // Create TesisProject
-router.post("/", _to_consumable_array(createProjectValidations).concat([
+router.post("/", _to_consumable_array(authValidations).concat(_to_consumable_array(createProjectValidations), [
     validateRequest
 ]), TesisProjectController.createTesisProject);
 // Edit TesisProject
-router.put("/:id", validateProjectId, createProjectValidations, TesisProjectController.editTesisProject);
+router.put("/:id", _to_consumable_array(authValidations).concat(_to_consumable_array(validateProjectId), _to_consumable_array(updateProjectValidations), [
+    validateRequest
+]), TesisProjectController.editTesisProject);
 // Close TesisProject
-router.put("/close/:id", validateProjectId, TesisProjectController.closeTesisProject);
+router.put("/close/:id", _to_consumable_array(authValidations).concat(_to_consumable_array(validateProjectId)), TesisProjectController.closeTesisProject);
+// Get all tesis project
+router.get("/", _to_consumable_array(authValidations));
 // Get TesisProject Info
-router.get("/:id", validateProjectId, TesisProjectController.getTesisProjectInfo);
+router.get("/:id", [
+    authValidations[0],
+    protectRouteByRole([
+        UserRole.Admin
+    ])
+].concat(_to_consumable_array(validateProjectId)), TesisProjectController.getTesisProjectInfo);
 // Approve TesisProject
-router.put("/approve/:id", validateProjectId, TesisProjectController.approveTesisProject);
+// TODO: validate that the profesor that is tryying to aprove this proyect thesis is a tutor of the project
+router.put("/approve/:id", _to_consumable_array(authValidations).concat(_to_consumable_array(validateProjectId), [
+    validateRequest
+]), TesisProjectController.approveTesisProject);
 // Update Functional Requirements
+// TODO: validate that the syudent that is trying to update the fc is the student that belogns to this proyect
 router.put("/update-functional/:id", validateProjectId, body("functionalRequirements").isArray(), TesisProjectController.updateFunctionalRequirements);
 export default router;

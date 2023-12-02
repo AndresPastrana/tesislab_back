@@ -153,12 +153,18 @@ import { CourtsController } from "../controllers/courts.js";
 import { isValidDoc } from "../middleware/dbValidators.js";
 import { ModelCourt } from "../models/Court.js";
 import { validateRequest } from "../middleware/validate.js";
-import { CourtRole } from "../const.js";
+import { CourtRole, UserRole } from "../const.js";
 import { ModelProfesor } from "../models/Profesor.js";
 import { Types } from "mongoose";
+import { isValidToken } from "../middleware/jwt.js";
+import { protectRouteByRole } from "../middleware/protectRouteByRole.js";
 export var router = Router();
-// TODO:
-// Validate that each profesor is  not in any other court
+var authValidations = [
+    isValidToken,
+    protectRouteByRole([
+        UserRole.Admin
+    ])
+];
 var validateCreateCourt = [
     body("name").trim().escape().isString().withMessage("Name should be a string").isLength({
         min: 1
@@ -271,10 +277,16 @@ var validateCourtId = [
     }).withMessage("Court not found ")
 ];
 // Routes
-router.post("/", _to_consumable_array(validateCreateCourt).concat([
+router.post("/", _to_consumable_array(authValidations).concat(_to_consumable_array(validateCreateCourt), [
     validateRequest
 ]), CourtsController.createCourt);
-router.put("/:courtId", validateUpdateCourt, CourtsController.updateCourt);
-router.get("/:courtId", param("courtId").isMongoId().withMessage("Invalid Court ID"), CourtsController.getCourtById);
+router.put("/:courtId", _to_consumable_array(authValidations).concat(_to_consumable_array(validateCourtId), _to_consumable_array(validateUpdateCourt)), CourtsController.updateCourt);
+router.get("/:courtId", [
+    authValidations[0],
+    protectRouteByRole([
+        UserRole.Profesor,
+        UserRole.Admin
+    ])
+].concat(_to_consumable_array(validateCourtId)), CourtsController.getCourtById);
 //TODO: Validate that te court exist
 router.delete("/:courtId", param("courtId").isMongoId().withMessage("Invalid Court ID"), CourtsController.deleteCourt);
