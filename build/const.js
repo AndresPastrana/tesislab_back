@@ -94,5 +94,10 @@ export var Routes;
     Routes["tesis_project"] = "/api/project";
     Routes["profesor"] = "/api/profesor";
     Routes["court"] = "/api/court";
+    Routes["search"] = "/api/search";
 })(Routes || (Routes = {}));
-export var EMAIL_DOMAIN = "onboarding@resend.dev";
+export var Allowedcollections;
+(function(Allowedcollections) {
+    Allowedcollections["students"] = "students";
+    Allowedcollections["docs"] = "docs";
+})(Allowedcollections || (Allowedcollections = {}));

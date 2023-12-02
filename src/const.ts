@@ -93,6 +93,10 @@ export enum Routes {
   tesis_project = "/api/project",
   profesor = "/api/profesor",
   court = "/api/court",
+  search = "/api/search",
 }
 
-export const EMAIL_DOMAIN = "onboarding@resend.dev";
+export enum Allowedcollections {
+  students = "students",
+  docs = "docs",
+}

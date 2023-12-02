@@ -9,6 +9,7 @@ import {
   ProfesoresRouter,
   ProjectsRouter,
   CourtRouter,
+  SearchRouter,
 } from "../routes/index.routes.js";
 export function gracefulShutdown(server: Server) {
   console.log("Received shutdown signal. Shutting down gracefully...");
@@ -46,6 +47,7 @@ export function defineMiddlewares(app: Application) {
   app.use(Routes.tesis_project, ProjectsRouter);
   app.use(Routes.profesor, ProfesoresRouter);
   app.use(Routes.court, CourtRouter);
+  app.use(Routes.search, SearchRouter);
   // app.use(Routes.user, UserRouter);
   // app.use(Routes.request, RequestRouter);
   // app.use(Routes.bill, BillRouter);
