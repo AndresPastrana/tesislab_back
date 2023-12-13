@@ -158,6 +158,9 @@ import { ModelUser } from "../models/User.js";
 import { createJWTAsync } from "../helpers/jwt.js";
 import { ErrorHandlerFactory } from "../errors/error.js";
 import { generateSecurePassword } from "../helpers/hash.js";
+import { UserRole } from "../const.js";
+import { ModelProfesor } from "../models/Profesor.js";
+import { ModelStudent } from "../models/Student.js";
 export var UserService = /*#__PURE__*/ function() {
     "use strict";
     function UserService() {
@@ -170,7 +173,7 @@ export var UserService = /*#__PURE__*/ function() {
                 var username = param.username, password = param.password;
                 var _this = this;
                 return _async_to_generator(function() {
-                    var user, isValidPassword, token;
+                    var user, isValidPassword, userId, professor, student, token;
                     return _ts_generator(this, function(_state) {
                         switch(_state.label){
                             case 0:
@@ -190,15 +193,46 @@ export var UserService = /*#__PURE__*/ function() {
                             case 2:
                                 isValidPassword = _state.sent();
                                 if (!isValidPassword) throw new Error("Invalid username or password");
+                                userId = {};
+                                if (!(user.role === UserRole.Profesor || UserRole.Admin)) return [
+                                    3,
+                                    4
+                                ];
+                                return [
+                                    4,
+                                    ModelProfesor.findOne({
+                                        user_id: user._id
+                                    })
+                                ];
+                            case 3:
+                                professor = _state.sent();
+                                userId = professor === null || professor === void 0 ? void 0 : professor.id;
+                                _state.label = 4;
+                            case 4:
+                                if (!(user.role === UserRole.Student)) return [
+                                    3,
+                                    6
+                                ];
+                                return [
+                                    4,
+                                    ModelStudent.findOne({
+                                        user_id: user._id
+                                    })
+                                ];
+                            case 5:
+                                student = _state.sent();
+                                userId = student === null || student === void 0 ? void 0 : student.id;
+                                _state.label = 6;
+                            case 6:
                                 return [
                                     4,
                                     createJWTAsync({
-                                        userId: user._id,
+                                        userId: userId,
                                         username: user.username,
                                         role: user.role
                                     })
                                 ];
-                            case 3:
+                            case 7:
                                 token = _state.sent();
                                 return [
                                     2,
@@ -269,7 +303,7 @@ export var UserService = /*#__PURE__*/ function() {
                 var userId = param.userId, newEmail = param.newEmail;
                 var _this = this;
                 return _async_to_generator(function() {
-                    var existingUser, newUsername, stringPassword, updatedUser, error;
+                    var existingUser, newUsername, _generateSecurePassword, stringPassword, hashedpassword, updatedUser, error;
                     return _ts_generator(this, function(_state) {
                         switch(_state.label){
                             case 0:
@@ -291,13 +325,13 @@ export var UserService = /*#__PURE__*/ function() {
                                 // Generate a new username based on the new email
                                 newUsername = newEmail.split("@")[0];
                                 // Generate a new secure password
-                                stringPassword = generateSecurePassword().stringPassword;
+                                _generateSecurePassword = generateSecurePassword(), stringPassword = _generateSecurePassword.stringPassword, hashedpassword = _generateSecurePassword.hashedpassword;
                                 return [
                                     4,
                                     _this.ModelUser.findByIdAndUpdate(userId, {
                                         email: newEmail,
                                         username: newUsername,
-                                        password: stringPassword
+                                        password: hashedpassword
                                     }, {
                                         new: true,
                                         runValidators: true

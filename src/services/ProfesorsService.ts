@@ -22,7 +22,7 @@ export class ProfesorService {
 
   static async getProfesores(): Promise<ProfesorType[]> {
     const profesores = await this.Profesor.find();
-    return profesores.map((profesor) => profesor.toObject());
+    return profesores.map((profesor) => profesor.toJSON());
   }
 
   static async getProfesorById(

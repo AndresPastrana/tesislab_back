@@ -46,6 +46,58 @@ function _create_class(Constructor, protoProps, staticProps) {
     if (staticProps) _defineProperties(Constructor, staticProps);
     return Constructor;
 }
+function _define_property(obj, key, value) {
+    if (key in obj) {
+        Object.defineProperty(obj, key, {
+            value: value,
+            enumerable: true,
+            configurable: true,
+            writable: true
+        });
+    } else {
+        obj[key] = value;
+    }
+    return obj;
+}
+function _object_spread(target) {
+    for(var i = 1; i < arguments.length; i++){
+        var source = arguments[i] != null ? arguments[i] : {};
+        var ownKeys = Object.keys(source);
+        if (typeof Object.getOwnPropertySymbols === "function") {
+            ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function(sym) {
+                return Object.getOwnPropertyDescriptor(source, sym).enumerable;
+            }));
+        }
+        ownKeys.forEach(function(key) {
+            _define_property(target, key, source[key]);
+        });
+    }
+    return target;
+}
+function ownKeys(object, enumerableOnly) {
+    var keys = Object.keys(object);
+    if (Object.getOwnPropertySymbols) {
+        var symbols = Object.getOwnPropertySymbols(object);
+        if (enumerableOnly) {
+            symbols = symbols.filter(function(sym) {
+                return Object.getOwnPropertyDescriptor(object, sym).enumerable;
+            });
+        }
+        keys.push.apply(keys, symbols);
+    }
+    return keys;
+}
+function _object_spread_props(target, source) {
+    source = source != null ? source : {};
+    if (Object.getOwnPropertyDescriptors) {
+        Object.defineProperties(target, Object.getOwnPropertyDescriptors(source));
+    } else {
+        ownKeys(Object(source)).forEach(function(key) {
+            Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key));
+        });
+    }
+    return target;
+}
 function _ts_generator(thisArg, body) {
     var f, y, t, g, _ = {
         label: 0,
@@ -141,137 +193,64 @@ function _ts_generator(thisArg, body) {
         };
     }
 }
-import { ErrorFactory } from "../errors/error.js";
-import { generateSecurePassword } from "../helpers/hash.js";
-import { createJWTAsync } from "../helpers/jwt.js";
-import { ModelUser } from "../models/User.js";
-var AuthService = /*#__PURE__*/ function() {
+import { getMinioConfig } from "../helpers/minio.js";
+import { Client } from "minio";
+import { Readable } from "stream";
+import * as zlib from "zlib";
+var MinioService = /*#__PURE__*/ function() {
     "use strict";
-    function AuthService() {
-        _class_call_check(this, AuthService);
+    function MinioService(config) {
+        _class_call_check(this, MinioService);
+        _define_property(this, "minioClient", void 0);
+        var defaultConfig = _object_spread_props(_object_spread({}, getMinioConfig(), config), {
+            useSSL: false
+        });
+        this.minioClient = new Client(_object_spread({}, defaultConfig));
     }
-    _create_class(AuthService, null, [
+    _create_class(MinioService, [
         {
-            key: "login",
-            value: function login(param) {
-                var username = param.username, password = param.password;
+            key: "compressDocument",
+            value: function compressDocument(buffer) {
                 return _async_to_generator(function() {
-                    var user, isValidPassword, access_token, error, err;
                     return _ts_generator(this, function(_state) {
-                        switch(_state.label){
-                            case 0:
-                                _state.trys.push([
-                                    0,
-                                    4,
-                                    ,
-                                    5
+                        return [
+                            2,
+                            new Promise(function(resolve, reject) {
+                                var zlibStream = zlib.createDeflate();
+                                var readable = Readable.from([
+                                    buffer
                                 ]);
-                                return [
-                                    4,
-                                    ModelUser.findOne({
-                                        username: username
-                                    })
-                                ];
-                            case 1:
-                                user = _state.sent();
-                                if (!user) {
-                                    throw ErrorFactory.createAuthError("Invalid Credentials");
-                                }
-                                return [
-                                    4,
-                                    user.isValidPassword(password)
-                                ];
-                            case 2:
-                                isValidPassword = _state.sent();
-                                if (!isValidPassword) {
-                                    throw ErrorFactory.createAuthError("Invalid Credentials");
-                                }
-                                return [
-                                    4,
-                                    createJWTAsync({
-                                        uid: user._id.toString(),
-                                        role: user.role
-                                    })
-                                ];
-                            case 3:
-                                access_token = _state.sent();
-                                return [
-                                    2,
-                                    access_token
-                                ];
-                            case 4:
-                                error = _state.sent();
-                                err = error;
-                                throw new Error(err.message);
-                            case 5:
-                                return [
-                                    2
-                                ];
-                        }
-                    });
-                // Here you can generate a token or handle the login response as needed.
-                // For simplicity, we're not returning anything for a successful login.
-                })();
-            }
-        },
-        {
-            key: "register",
-            value: // Returns the user_id of the created user
-            function register(param) {
-                var role = param.role, email = param.email;
-                return _async_to_generator(function() {
-                    var password, username, newUser, error;
-                    return _ts_generator(this, function(_state) {
-                        switch(_state.label){
-                            case 0:
-                                _state.trys.push([
-                                    0,
-                                    2,
-                                    ,
-                                    3
-                                ]);
-                                password = generateSecurePassword();
-                                console.log(password);
-                                //TODO: Validate duplicate email
-                                username = email.split("@")[0];
-                                console.log(username);
-                                return [
-                                    4,
-                                    ModelUser.create({
-                                        username: username,
-                                        password: password,
-                                        role: role,
-                                        email: email
-                                    })
-                                ];
-                            case 1:
-                                newUser = _state.sent();
-                                return [
-                                    2,
-                                    {
-                                        _id: newUser._id,
-                                        email: newUser.email,
-                                        password: newUser.password
-                                    }
-                                ];
-                            case 2:
-                                error = _state.sent();
-                                throw ErrorFactory.createAuthError("Error creating the new user");
-                            case 3:
-                                return [
-                                    2
-                                ];
-                        }
+                                readable.pipe(zlibStream);
+                                var chunks = [];
+                                zlibStream.on("data", function(chunk) {
+                                    return chunks.push(chunk);
+                                });
+                                zlibStream.on("end", function() {
+                                    return resolve(Buffer.concat(chunks));
+                                });
+                                zlibStream.on("error", function(error) {
+                                    return reject(new Error("Error compressing document: ".concat(error.message)));
+                                });
+                            })
+                        ];
                     });
                 })();
             }
         },
         {
-            key: "remove",
-            value: function remove(param) {
-                var id = param.id;
+            key: "handleError",
+            value: function handleError(operation, error) {
+                var err = error;
+                throw new Error("Error ".concat(operation, ": ").concat(err.message));
+            }
+        },
+        {
+            key: "listBuckets",
+            value: // Instance methods
+            function listBuckets() {
+                var _this = this;
                 return _async_to_generator(function() {
-                    var removed_user, error;
+                    var buckets, error;
                     return _ts_generator(this, function(_state) {
                         switch(_state.label){
                             case 0:
@@ -283,74 +262,161 @@ var AuthService = /*#__PURE__*/ function() {
                                 ]);
                                 return [
                                     4,
-                                    ModelUser.findByIdAndUpdate(id, {
-                                        isActive: false
-                                    })
+                                    _this.minioClient.listBuckets()
                                 ];
                             case 1:
-                                removed_user = _state.sent();
+                                buckets = _state.sent();
                                 return [
                                     2,
-                                    removed_user === null || removed_user === void 0 ? void 0 : removed_user._id
+                                    buckets.map(function(bucket) {
+                                        return bucket.name;
+                                    })
                                 ];
                             case 2:
                                 error = _state.sent();
-                                throw ErrorFactory.createAuthError("Error removing the user");
-                            case 3:
+                                _this.handleError("listing buckets", error);
                                 return [
-                                    2
-                                ];
-                        }
-                    });
-                })();
-            }
-        },
-        {
-            key: "update",
-            value: // To update a password or the email of a user
-            function update(param) {
-                var id = param.id, _param_email = param.email, email = _param_email === void 0 ? null : _param_email;
-                return _async_to_generator(function() {
-                    var username, updatedUser, username1, email1, _id;
-                    return _ts_generator(this, function(_state) {
-                        switch(_state.label){
-                            case 0:
-                                if (!email) return [
                                     3,
-                                    2
+                                    3
                                 ];
-                                username = email.split("@")[0];
-                                return [
-                                    4,
-                                    ModelUser.findByIdAndUpdate(id, {
-                                        email: email,
-                                        username: username
-                                    })
-                                ];
-                            case 1:
-                                updatedUser = _state.sent();
-                                if (updatedUser) {
-                                    username1 = updatedUser.username, email1 = updatedUser.email, _id = updatedUser._id;
-                                    return [
-                                        2,
-                                        {
-                                            _id: _id,
-                                            username: username1,
-                                            email: email1
-                                        }
-                                    ];
-                                }
-                                _state.label = 2;
-                            case 2:
+                            case 3:
                                 return [
                                     2
                                 ];
                         }
+                    });
+                })();
+            }
+        },
+        {
+            key: "uploadFile",
+            value: function uploadFile(bucketName, fileName, file) {
+                var _this = this;
+                return _async_to_generator(function() {
+                    var error;
+                    return _ts_generator(this, function(_state) {
+                        switch(_state.label){
+                            case 0:
+                                _state.trys.push([
+                                    0,
+                                    2,
+                                    ,
+                                    3
+                                ]);
+                                return [
+                                    4,
+                                    _this.minioClient.putObject(bucketName, fileName, file, {})
+                                ];
+                            case 1:
+                                _state.sent();
+                                return [
+                                    3,
+                                    3
+                                ];
+                            case 2:
+                                error = _state.sent();
+                                _this.handleError("uploading file", error);
+                                return [
+                                    3,
+                                    3
+                                ];
+                            case 3:
+                                return [
+                                    2
+                                ];
+                        }
+                    });
+                })();
+            }
+        },
+        {
+            key: "getFile",
+            value: function getFile(bucketName, fileName) {
+                var _this = this;
+                return _async_to_generator(function() {
+                    var fileStream, chunks, error;
+                    return _ts_generator(this, function(_state) {
+                        switch(_state.label){
+                            case 0:
+                                _state.trys.push([
+                                    0,
+                                    2,
+                                    ,
+                                    3
+                                ]);
+                                return [
+                                    4,
+                                    _this.minioClient.getObject(bucketName, fileName)
+                                ];
+                            case 1:
+                                fileStream = _state.sent();
+                                chunks = [];
+                                return [
+                                    2,
+                                    new Promise(function(resolve, reject) {
+                                        fileStream.on("data", function(chunk) {
+                                            return chunks.push(chunk);
+                                        });
+                                        fileStream.on("end", function() {
+                                            return resolve(Buffer.concat(chunks));
+                                        });
+                                        fileStream.on("error", function(error) {
+                                            return reject(error);
+                                        });
+                                    })
+                                ];
+                            case 2:
+                                error = _state.sent();
+                                _this.handleError("getting file", error);
+                                return [
+                                    3,
+                                    3
+                                ];
+                            case 3:
+                                return [
+                                    2
+                                ];
+                        }
+                    });
+                })();
+            }
+        },
+        {
+            key: "getFiles",
+            value: function getFiles(bucketName) {
+                var _this = this;
+                return _async_to_generator(function() {
+                    var files;
+                    return _ts_generator(this, function(_state) {
+                        try {
+                            files = _this.minioClient.listObjects(bucketName, "", true);
+                            return [
+                                2,
+                                files
+                            ];
+                        } catch (error) {
+                            _this.handleError("getting files", error);
+                        }
+                        return [
+                            2
+                        ];
                     });
                 })();
             }
         }
+    ], [
+        {
+            key: "getInstance",
+            value: // Static methods
+            function getInstance(config) {
+                if (!MinioService.instance) {
+                    MinioService.instance = new MinioService(config);
+                }
+                return MinioService.instance;
+            }
+        }
     ]);
-    return AuthService;
+    return MinioService;
 }();
-export { AuthService as default };
+_define_property(MinioService, "instance", void 0);
+export { MinioService as default };

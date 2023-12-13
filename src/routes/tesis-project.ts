@@ -5,7 +5,7 @@ import { validateRequest } from "../middleware/validate.js";
 import { isValidDoc } from "../middleware/dbValidators.js";
 import { ModelStudent } from "../models/Student.js";
 import { ModelTesisProject } from "../models/TesisProject.js";
-import { Types, isValidObjectId } from "mongoose";
+import { Schema, Types, isValidObjectId } from "mongoose";
 import { ModelProfesor } from "../models/Profesor.js";
 import { isValidToken } from "../middleware/jwt.js";
 import { protectRouteByRole } from "../middleware/protectRouteByRole.js";
@@ -131,16 +131,30 @@ const updateProjectValidations = [
     .optional(),
 ];
 
+const memberValidationRules = [
+  query("memberId")
+    .isMongoId()
+    .withMessage("Member ID must be a valid MongoDB ID")
+    .if((memberId) => isValidObjectId(memberId))
+    .customSanitizer((memberId) => new Types.ObjectId(memberId)),
+  query("memberType")
+    .isIn([UserRole.Student, UserRole.Profesor])
+    .withMessage("Invalid memberType"),
+];
+
+const ancientValidations = [
+  query("active")
+    .exists({ values: "falsy" })
+    .withMessage("active is required")
+    .isIn([true, false, "all"])
+    .withMessage("active can be [true, false,all]"),
+];
+
 // Validation middleware for project ID parameter
 const validateProjectId = [
   param("id").isMongoId(), // Assuming MongoDB ObjectId, modify as needed
 ];
 
-const validateGetParam = [
-  param("old", "old must be a boolean value, exmaple: ?old=false")
-    .isBoolean()
-    .optional(),
-];
 // Create TesisProject
 router.post(
   "/",
@@ -169,33 +183,52 @@ router.put(
 
 // Get all tesis project
 
-router.get("/", [...authValidations]);
+router.get(
+  "/",
+  [...authValidations, ...ancientValidations, validateRequest],
+  TesisProjectController.getAllProjects
+);
+
+// Get TesisProject Info by member id
+router.get(
+  "/byMember",
+  [
+    authValidations[0],
+    protectRouteByRole(Object.values(UserRole)),
+    ...ancientValidations,
+    ...memberValidationRules,
+    validateRequest,
+  ],
+  TesisProjectController.getProjectsByMemberId
+);
 
 // Get TesisProject Info
 router.get(
   "/:id",
   [
-    authValidations[0],
-    protectRouteByRole([UserRole.Admin]),
+    ...authValidations,
+    ...ancientValidations,
     ...validateProjectId,
+    validateRequest,
   ],
   TesisProjectController.getTesisProjectInfo
 );
 
-// Approve TesisProject
-// TODO: validate that the profesor that is tryying to aprove this proyect thesis is a tutor of the project
 router.put(
   "/approve/:id",
   [...authValidations, ...validateProjectId, validateRequest],
   TesisProjectController.approveTesisProject
 );
 
-// Update Functional Requirements
-// TODO: validate that the syudent that is trying to update the fc is the student that belogns to this proyect
 router.put(
   "/update-functional/:id",
-  validateProjectId,
-  body("functionalRequirements").isArray(),
+  [
+    authValidations[0],
+    protectRouteByRole([UserRole.Student]),
+    ...validateProjectId,
+    body("functionalRequirements").isArray({ min: 1 }),
+    validateRequest,
+  ],
   TesisProjectController.updateFunctionalRequirements
 );
 

@@ -202,7 +202,7 @@ export var StudentService = /*#__PURE__*/ function() {
         {
             key: "getStudents",
             value: //TODO: Add a flag th shwo all students or just ancient = true
-            function getStudents() {
+            function getStudents(active) {
                 var _this = this;
                 return _async_to_generator(function() {
                     var students, error;
@@ -217,14 +217,16 @@ export var StudentService = /*#__PURE__*/ function() {
                                 ]);
                                 return [
                                     4,
-                                    _this.Student.find()
+                                    _this.Student.find({
+                                        ancient: active
+                                    })
                                 ];
                             case 1:
                                 students = _state.sent();
                                 return [
                                     2,
                                     students.map(function(student) {
-                                        return student.toObject();
+                                        return student.toJSON();
                                     })
                                 ];
                             case 2:

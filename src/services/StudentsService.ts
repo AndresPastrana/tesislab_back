@@ -17,10 +17,10 @@ export class StudentService {
   }
 
   //TODO: Add a flag th shwo all students or just ancient = true
-  static async getStudents(): Promise<StudentType[]> {
+  static async getStudents(active: boolean): Promise<StudentType[]> {
     try {
-      const students = await this.Student.find();
-      return students.map((student) => student.toObject() as StudentType);
+      const students = await this.Student.find({ ancient: active });
+      return students.map((student) => student.toJSON() as StudentType);
     } catch (error) {
       throw this.ErrorFactory.createError(error as Error);
     }

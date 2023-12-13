@@ -33,20 +33,18 @@ function _define_property(obj, key, value) {
 var ValidationError = function ValidationError(validationErrors) {
     "use strict";
     _class_call_check(this, ValidationError);
-    _define_property(this, "error", void 0);
-    this.error = {
-        name: "ValidationError",
-        message: JSON.stringify(validationErrors)
-    };
+    _define_property(this, "name", void 0);
+    _define_property(this, "message", void 0);
+    this.name = "ValidationError";
+    this.message = JSON.stringify(validationErrors);
 };
 var MongoDBError = function MongoDBError(errorMessage) {
     "use strict";
     _class_call_check(this, MongoDBError);
-    _define_property(this, "error", void 0);
-    this.error = {
-        name: "MongoDBError",
-        message: errorMessage
-    };
+    _define_property(this, "name", void 0);
+    _define_property(this, "message", void 0);
+    this.name = "MongoDBError";
+    this.message = errorMessage;
 };
 export var ErrorHandlerFactory = /*#__PURE__*/ function() {
     "use strict";

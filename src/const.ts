@@ -73,7 +73,7 @@ export enum TesisProjectStatus {
 }
 
 export enum EvalType {
-  CorteEvaluativo = "corte evaluativo",
+  CorteEvaluativo = "corte_evaluativo",
   Predefensa = "predefensa",
 }
 
@@ -94,9 +94,18 @@ export enum Routes {
   profesor = "/api/profesor",
   court = "/api/court",
   search = "/api/search",
+  eval = "/api/evaluaciones",
+  files = "/api/files",
 }
 
 export enum Allowedcollections {
   students = "students",
   docs = "docs",
+}
+
+export const EvalAllowedExtensions = ["pdf", "doc", "docx"];
+
+export enum BucketsS3 {
+  Evaluaciones = "evaluaciones",
+  AcademicDocs = "docs",
 }

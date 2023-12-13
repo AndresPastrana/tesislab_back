@@ -122,6 +122,8 @@ export const ProfesorController = {
       const profesorData = matchedData(req, {
         locations: ["body"],
       }) as ProfesorType;
+      console.log(id);
+      console.log(profesorData);
 
       if (Object.keys(profesorData).length >= 1) {
         let dynamicObject: any = new Object();
@@ -137,7 +139,7 @@ export const ProfesorController = {
           const {
             user: { username, password },
           } = await UserService.updateUser({
-            userId: id,
+            userId: profesorData.user_id,
             newEmail: profesorData.email,
           });
 

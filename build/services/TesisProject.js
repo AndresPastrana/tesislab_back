@@ -74,6 +74,30 @@ function _object_spread(target) {
     }
     return target;
 }
+function ownKeys(object, enumerableOnly) {
+    var keys = Object.keys(object);
+    if (Object.getOwnPropertySymbols) {
+        var symbols = Object.getOwnPropertySymbols(object);
+        if (enumerableOnly) {
+            symbols = symbols.filter(function(sym) {
+                return Object.getOwnPropertyDescriptor(object, sym).enumerable;
+            });
+        }
+        keys.push.apply(keys, symbols);
+    }
+    return keys;
+}
+function _object_spread_props(target, source) {
+    source = source != null ? source : {};
+    if (Object.getOwnPropertyDescriptors) {
+        Object.defineProperties(target, Object.getOwnPropertyDescriptors(source));
+    } else {
+        ownKeys(Object(source)).forEach(function(key) {
+            Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key));
+        });
+    }
+    return target;
+}
 function _object_without_properties(source, excluded) {
     if (source == null) return {};
     var target = _object_without_properties_loose(source, excluded);
@@ -227,9 +251,9 @@ export var TesisProjectService = /*#__PURE__*/ function() {
                                 ];
                             case 1:
                                 newTesisProject = _state.sent();
-                                if (!newTesisProject) {
-                                    throw new Error("Error creating a new tesis project");
-                                }
+                                // if (!newTesisProject) {
+                                //   throw new Error("Error creating a new tesis project");
+                                // }
                                 return [
                                     2,
                                     _this.formatTesisProjectResponse(newTesisProject)
@@ -279,6 +303,7 @@ export var TesisProjectService = /*#__PURE__*/ function() {
                                 ];
                             case 2:
                                 error = _state.sent();
+                                console.log(error);
                                 throw ErrorHandlerFactory.createError(error);
                             case 3:
                                 return [
@@ -330,10 +355,10 @@ export var TesisProjectService = /*#__PURE__*/ function() {
         },
         {
             key: "getTesisProjectInfo",
-            value: function getTesisProjectInfo(projectId) {
+            value: function getTesisProjectInfo(projectId, active) {
                 var _this = this;
                 return _async_to_generator(function() {
-                    var tesisProject, error;
+                    var status_filter, tesisProject, error;
                     return _ts_generator(this, function(_state) {
                         switch(_state.label){
                             case 0:
@@ -343,23 +368,158 @@ export var TesisProjectService = /*#__PURE__*/ function() {
                                     ,
                                     3
                                 ]);
+                                status_filter = _this.buildStatusFilter(active);
+                                console.log(status_filter);
                                 return [
                                     4,
-                                    _this.ModelTesisProject.findById(projectId)
+                                    _this.ModelTesisProject.findOne(_object_spread_props(_object_spread({}, status_filter), {
+                                        _id: projectId
+                                    })).populate("student", "name lastname") // Adjust fields as needed
+                                    .populate("tutors", "name lastname")
                                 ];
                             case 1:
                                 tesisProject = _state.sent();
                                 if (!tesisProject) {
-                                    throw new Error("Error getting the info of the tesis project");
+                                    throw new Error("Tesis project not found");
                                 }
                                 return [
                                     2,
-                                    _this.formatTesisProjectResponse(tesisProject)
+                                    _this.formatPopulatedTesisResponse(tesisProject)
                                 ];
                             case 2:
                                 error = _state.sent();
-                                throw ErrorHandlerFactory.createError(error);
+                                throw error;
                             case 3:
+                                return [
+                                    2
+                                ];
+                        }
+                    });
+                })();
+            }
+        },
+        {
+            key: "getAllProjects",
+            value: function getAllProjects(active) {
+                var _this = this;
+                return _async_to_generator(function() {
+                    var filter, tesisProjects, error;
+                    return _ts_generator(this, function(_state) {
+                        switch(_state.label){
+                            case 0:
+                                _state.trys.push([
+                                    0,
+                                    2,
+                                    ,
+                                    3
+                                ]);
+                                filter = _this.buildStatusFilter(active);
+                                return [
+                                    4,
+                                    _this.ModelTesisProject.find(_object_spread({}, filter)).populate("student", "name lastname").populate("tutors", "name lastname")
+                                ];
+                            case 1:
+                                tesisProjects = _state.sent();
+                                // Map and format the response
+                                return [
+                                    2,
+                                    tesisProjects.map(function(project) {
+                                        return _this.formatPopulatedTesisResponse(project);
+                                    })
+                                ];
+                            case 2:
+                                error = _state.sent();
+                                throw error;
+                            case 3:
+                                return [
+                                    2
+                                ];
+                        }
+                    });
+                })();
+            }
+        },
+        {
+            key: "getProjectsByMemberId",
+            value: function getProjectsByMemberId(active, memberId, typeOfMember) {
+                var _this = this;
+                return _async_to_generator(function() {
+                    var status_filter, filter, studentProject, professorProjects, error;
+                    return _ts_generator(this, function(_state) {
+                        switch(_state.label){
+                            case 0:
+                                _state.trys.push([
+                                    0,
+                                    7,
+                                    ,
+                                    8
+                                ]);
+                                status_filter = _this.buildStatusFilter(active);
+                                filter = _object_spread({}, status_filter);
+                                switch(typeOfMember){
+                                    case UserRole.Student:
+                                        return [
+                                            3,
+                                            1
+                                        ];
+                                    case UserRole.Profesor:
+                                        return [
+                                            3,
+                                            3
+                                        ];
+                                }
+                                return [
+                                    3,
+                                    5
+                                ];
+                            case 1:
+                                filter.student = memberId;
+                                return [
+                                    4,
+                                    _this.ModelTesisProject.findOne(filter).populate("student", "name lastname").populate("tutors", "name lastname")
+                                ];
+                            case 2:
+                                studentProject = _state.sent();
+                                if (!studentProject) {
+                                    throw new Error("No tesis project found for the given student ID");
+                                }
+                                // Format and return a single project
+                                return [
+                                    2,
+                                    _this.formatPopulatedTesisResponse(studentProject)
+                                ];
+                            case 3:
+                                filter.tutors = memberId;
+                                return [
+                                    4,
+                                    _this.ModelTesisProject.find(filter).populate("student", "name lastname").populate("tutors", "name lastname")
+                                ];
+                            case 4:
+                                professorProjects = _state.sent();
+                                if (!professorProjects || professorProjects.length === 0) {
+                                    return [
+                                        2,
+                                        []
+                                    ];
+                                }
+                                // Map and format the response for multiple projects
+                                return [
+                                    2,
+                                    professorProjects.map(function(project) {
+                                        return _this.formatPopulatedTesisResponse(project);
+                                    })
+                                ];
+                            case 5:
+                                throw new Error("Invalid member type");
+                            case 6:
+                                return [
+                                    3,
+                                    8
+                                ];
+                            case 7:
+                                error = _state.sent();
+                                throw error;
+                            case 8:
                                 return [
                                     2
                                 ];
@@ -433,7 +593,7 @@ export var TesisProjectService = /*#__PURE__*/ function() {
                                         functional_requirements: functionalRequirements
                                     }, {
                                         new: true
-                                    })
+                                    }).populate("student", "name lastname").populate("tutors", "name lastname")
                                 ];
                             case 1:
                                 updatedTesisProject = _state.sent();
@@ -442,7 +602,7 @@ export var TesisProjectService = /*#__PURE__*/ function() {
                                 }
                                 return [
                                     2,
-                                    _this.formatTesisProjectResponse(updatedTesisProject)
+                                    _this.formatPopulatedTesisResponse(updatedTesisProject)
                                 ];
                             case 2:
                                 error = _state.sent();
@@ -467,6 +627,73 @@ export var TesisProjectService = /*#__PURE__*/ function() {
                 return _object_spread({
                     id: _id.toString()
                 }, rest);
+            }
+        },
+        {
+            key: "buildStatusFilter",
+            value: function buildStatusFilter(active) {
+                var filter = {};
+                switch(active){
+                    case "true":
+                        filter = {
+                            $and: [
+                                {
+                                    status: {
+                                        $in: [
+                                            TesisProjectStatus.Pending,
+                                            TesisProjectStatus.Approved
+                                        ]
+                                    },
+                                    ancient: false
+                                }
+                            ]
+                        };
+                        break;
+                    case "false":
+                        filter = {
+                            ancient: true
+                        };
+                        break;
+                    default:
+                        break;
+                }
+                return filter;
+            }
+        },
+        {
+            key: "formatPopulatedTesisResponse",
+            value: // Helper method to format the response
+            function formatPopulatedTesisResponse(tesisProject) {
+                var _student__id;
+                var _tesisProject_toObject = tesisProject.toObject(), __v = _tesisProject_toObject.__v, _id = _tesisProject_toObject._id, id = _tesisProject_toObject.id, student = _tesisProject_toObject.student, tutors = _tesisProject_toObject.tutors, rest = _object_without_properties(_tesisProject_toObject, [
+                    "__v",
+                    "_id",
+                    "id",
+                    "student",
+                    "tutors"
+                ]);
+                // Format the "id" field for the student
+                var formattedStudent = {
+                    id: (student === null || student === void 0 ? void 0 : (_student__id = student._id) === null || _student__id === void 0 ? void 0 : _student__id.toString()) || null,
+                    name: (student === null || student === void 0 ? void 0 : student.name) || null,
+                    lastname: (student === null || student === void 0 ? void 0 : student.lastname) || null
+                };
+                // Format the "id" field for each tutor
+                var formattedTutors = (tutors === null || tutors === void 0 ? void 0 : tutors.map(function(tutor) {
+                    var _tutor__id;
+                    return {
+                        id: (tutor === null || tutor === void 0 ? void 0 : (_tutor__id = tutor._id) === null || _tutor__id === void 0 ? void 0 : _tutor__id.toString()) || null,
+                        name: (tutor === null || tutor === void 0 ? void 0 : tutor.name) || null,
+                        lastname: (tutor === null || tutor === void 0 ? void 0 : tutor.lastname) || null
+                    };
+                })) || [];
+                // Build the formatted response
+                var formattedResponse = _object_spread({
+                    id: _id.toString(),
+                    student: formattedStudent,
+                    tutors: formattedTutors
+                }, rest);
+                return formattedResponse;
             }
         },
         {

@@ -149,7 +149,7 @@ function _ts_generator(thisArg, body) {
 }
 import express from "express";
 import { TesisProjectController } from "../controllers/index.js";
-import { body, param } from "express-validator";
+import { body, param, query } from "express-validator";
 import { validateRequest } from "../middleware/validate.js";
 import { isValidDoc } from "../middleware/dbValidators.js";
 import { ModelStudent } from "../models/Student.js";
@@ -276,12 +276,29 @@ var updateProjectValidations = [
         return new Types.ObjectId(tutor_id);
     }).optional()
 ];
+var memberValidationRules = [
+    query("memberId").isMongoId().withMessage("Member ID must be a valid MongoDB ID").if(function(memberId) {
+        return isValidObjectId(memberId);
+    }).customSanitizer(function(memberId) {
+        return new Types.ObjectId(memberId);
+    }),
+    query("memberType").isIn([
+        UserRole.Student,
+        UserRole.Profesor
+    ]).withMessage("Invalid memberType")
+];
+var ancientValidations = [
+    query("active").exists({
+        values: "falsy"
+    }).withMessage("active is required").isIn([
+        true,
+        false,
+        "all"
+    ]).withMessage("active can be [true, false,all]")
+];
 // Validation middleware for project ID parameter
 var validateProjectId = [
     param("id").isMongoId()
-];
-var validateGetParam = [
-    param("old", "old must be a boolean value, exmaple: ?old=false").isBoolean().optional()
 ];
 // Create TesisProject
 router.post("/", _to_consumable_array(authValidations).concat(_to_consumable_array(createProjectValidations), [
@@ -294,20 +311,32 @@ router.put("/:id", _to_consumable_array(authValidations).concat(_to_consumable_a
 // Close TesisProject
 router.put("/close/:id", _to_consumable_array(authValidations).concat(_to_consumable_array(validateProjectId)), TesisProjectController.closeTesisProject);
 // Get all tesis project
-router.get("/", _to_consumable_array(authValidations));
-// Get TesisProject Info
-router.get("/:id", [
+router.get("/", _to_consumable_array(authValidations).concat(_to_consumable_array(ancientValidations), [
+    validateRequest
+]), TesisProjectController.getAllProjects);
+// Get TesisProject Info by member id
+router.get("/byMember", [
     authValidations[0],
-    protectRouteByRole([
-        UserRole.Admin
-    ])
-].concat(_to_consumable_array(validateProjectId)), TesisProjectController.getTesisProjectInfo);
-// Approve TesisProject
-// TODO: validate that the profesor that is tryying to aprove this proyect thesis is a tutor of the project
+    protectRouteByRole(Object.values(UserRole))
+].concat(_to_consumable_array(ancientValidations), _to_consumable_array(memberValidationRules), [
+    validateRequest
+]), TesisProjectController.getProjectsByMemberId);
+// Get TesisProject Info
+router.get("/:id", _to_consumable_array(authValidations).concat(_to_consumable_array(ancientValidations), _to_consumable_array(validateProjectId), [
+    validateRequest
+]), TesisProjectController.getTesisProjectInfo);
 router.put("/approve/:id", _to_consumable_array(authValidations).concat(_to_consumable_array(validateProjectId), [
     validateRequest
 ]), TesisProjectController.approveTesisProject);
-// Update Functional Requirements
-// TODO: validate that the syudent that is trying to update the fc is the student that belogns to this proyect
-router.put("/update-functional/:id", validateProjectId, body("functionalRequirements").isArray(), TesisProjectController.updateFunctionalRequirements);
+router.put("/update-functional/:id", [
+    authValidations[0],
+    protectRouteByRole([
+        UserRole.Student
+    ])
+].concat(_to_consumable_array(validateProjectId), [
+    body("functionalRequirements").isArray({
+        min: 1
+    }),
+    validateRequest
+]), TesisProjectController.updateFunctionalRequirements);
 export default router;

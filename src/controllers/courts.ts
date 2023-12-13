@@ -117,4 +117,33 @@ export class CourtsController {
       });
     }
   }
+  static async getAllCourts(req: Request, res: Response): Promise<void> {
+    try {
+      const courts = await CourtsService.getAllCourts();
+      if (courts) {
+        handleResponse({
+          statusCode: 200,
+          msg: "All courts retrieved successfully",
+          data: courts,
+          res,
+        });
+      } else {
+        handleResponse({
+          statusCode: 404,
+          msg: "No courts found",
+          res,
+        });
+      }
+    } catch (error) {
+      const customError: CustomError = ErrorHandlerFactory.createError(
+        error as Error
+      );
+      handleResponse({
+        statusCode: 500,
+        msg: "Error retrieving all courts",
+        error: customError,
+        res,
+      });
+    }
+  }
 }

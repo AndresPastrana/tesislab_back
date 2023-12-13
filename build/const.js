@@ -73,7 +73,7 @@ export var TesisProjectStatus;
 })(TesisProjectStatus || (TesisProjectStatus = {}));
 export var EvalType;
 (function(EvalType) {
-    EvalType["CorteEvaluativo"] = "corte evaluativo";
+    EvalType["CorteEvaluativo"] = "corte_evaluativo";
     EvalType["Predefensa"] = "predefensa";
 })(EvalType || (EvalType = {}));
 export var EvalStatus;
@@ -95,9 +95,21 @@ export var Routes;
     Routes["profesor"] = "/api/profesor";
     Routes["court"] = "/api/court";
     Routes["search"] = "/api/search";
+    Routes["eval"] = "/api/evaluaciones";
+    Routes["files"] = "/api/files";
 })(Routes || (Routes = {}));
 export var Allowedcollections;
 (function(Allowedcollections) {
     Allowedcollections["students"] = "students";
     Allowedcollections["docs"] = "docs";
 })(Allowedcollections || (Allowedcollections = {}));
+export var EvalAllowedExtensions = [
+    "pdf",
+    "doc",
+    "docx"
+];
+export var BucketsS3;
+(function(BucketsS3) {
+    BucketsS3["Evaluaciones"] = "evaluaciones";
+    BucketsS3["AcademicDocs"] = "docs";
+})(BucketsS3 || (BucketsS3 = {}));

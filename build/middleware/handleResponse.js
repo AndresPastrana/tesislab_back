@@ -1,4 +1,3 @@
-// No endpoint 403
 export var handleResponse = function(paylaod) {
     var error = paylaod.error, data = paylaod.data, msg = paylaod.msg, statusCode = paylaod.statusCode, res = paylaod.res;
     var response = {

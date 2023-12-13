@@ -11,7 +11,7 @@ interface TesisProjectType {
   status: TesisProjectStatus; //not required
   approval: {
     isApprove: boolean;
-    recommendations: String[];
+    recommendations: String;
     approvedBy: Schema.Types.ObjectId | null;
     date: Date | null;
   };
@@ -73,14 +73,16 @@ const TesisProjectSchema = new Schema<TesisProject>(
     approval: {
       type: {
         isApprove: { type: Boolean, required: false, default: false },
-        recommendations: { type: [String], required: false, default: [] },
+        recommendations: { type: String, required: false },
         approvedBy: {
           type: Schema.Types.ObjectId,
           ref: "Profesor",
           required: false,
         },
-        date: { type: Date },
+        date: { type: Date, required: false },
       },
+      required: false,
+      default: null,
     },
     ancient: {
       type: Boolean,

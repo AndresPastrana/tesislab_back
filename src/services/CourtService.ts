@@ -4,11 +4,12 @@ import { CourtType } from "../models/Court.js";
 
 type PopulatedCourtMember = {
   profesor: {
-    _id: string;
+    id: string;
     name: string;
     lastname: string;
   };
   role: CourtRole;
+  _id: string;
 };
 
 type PopulatedCourt = Omit<CourtType, "members"> & {
@@ -17,6 +18,8 @@ type PopulatedCourt = Omit<CourtType, "members"> & {
 
 export class CourtsService {
   private static CourtModel = ModelCourt;
+
+  //TODO: Get all courts info with the professor populated info
 
   private static async isRoleUniqueWithinCourt(
     courtId: string,
@@ -34,6 +37,22 @@ export class CourtsService {
     try {
       const createdCourt = await this.CourtModel.create(courtData);
       return createdCourt.toObject();
+    } catch (error: any) {
+      throw new Error(`Error in the Court Service: ${error.message}`);
+    }
+  }
+
+  static async getAllCourts(): Promise<PopulatedCourt[] | null> {
+    try {
+      const courts = await this.CourtModel.find()
+        .populate({
+          path: "members.profesor",
+          model: "Profesor",
+          select: "name lastname",
+        })
+        .exec();
+
+      return courts ? courts.map((court) => court.toJSON()) : null;
     } catch (error: any) {
       throw new Error(`Error in the Court Service: ${error.message}`);
     }

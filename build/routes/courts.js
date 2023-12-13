@@ -155,9 +155,9 @@ import { ModelCourt } from "../models/Court.js";
 import { validateRequest } from "../middleware/validate.js";
 import { CourtRole, UserRole } from "../const.js";
 import { ModelProfesor } from "../models/Profesor.js";
-import { Types } from "mongoose";
 import { isValidToken } from "../middleware/jwt.js";
 import { protectRouteByRole } from "../middleware/protectRouteByRole.js";
+import { Types } from "mongoose";
 export var router = Router();
 var authValidations = [
     isValidToken,
@@ -281,6 +281,9 @@ router.post("/", _to_consumable_array(authValidations).concat(_to_consumable_arr
     validateRequest
 ]), CourtsController.createCourt);
 router.put("/:courtId", _to_consumable_array(authValidations).concat(_to_consumable_array(validateCourtId), _to_consumable_array(validateUpdateCourt)), CourtsController.updateCourt);
+router.get("/", _to_consumable_array(authValidations).concat([
+    validateRequest
+]), CourtsController.getAllCourts);
 router.get("/:courtId", [
     authValidations[0],
     protectRouteByRole([

@@ -69,7 +69,11 @@ export const StudentController = {
 
   getStudents: async (req: Request, res: Response) => {
     try {
-      const students = await StudentService.getStudents();
+      const { active } = matchedData(req, { locations: ["query"] }) as {
+        active: boolean;
+      };
+
+      const students = await StudentService.getStudents(active);
       handleResponse({
         statusCode: 200,
         msg: "Students retrieved successfully",
@@ -196,6 +200,9 @@ export const StudentController = {
       const student = await StudentService.getStudentById(studentId);
 
       if (student) {
+        console.log(student.user_id);
+        console.log(studentId);
+
         await Promise.all([
           UserService.deactivateUser({ userId: student.user_id }), //Deactivate the user
           StudentService.deleteStudent(studentId), //Set the student as ancient

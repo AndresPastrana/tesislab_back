@@ -266,7 +266,7 @@ export var StudentController = {
     }(),
     getStudents: function() {
         var _ref = _async_to_generator(function(req, res) {
-            var students, error, customError;
+            var active, students, error, customError;
             return _ts_generator(this, function(_state) {
                 switch(_state.label){
                     case 0:
@@ -276,9 +276,14 @@ export var StudentController = {
                             ,
                             3
                         ]);
+                        active = matchedData(req, {
+                            locations: [
+                                "query"
+                            ]
+                        }).active;
                         return [
                             4,
-                            StudentService.getStudents()
+                            StudentService.getStudents(active)
                         ];
                     case 1:
                         students = _state.sent();
@@ -511,6 +516,8 @@ export var StudentController = {
                             3,
                             3
                         ];
+                        console.log(student.user_id);
+                        console.log(studentId);
                         return [
                             4,
                             Promise.all([

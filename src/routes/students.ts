@@ -7,7 +7,7 @@ import { Sex, UserRole } from "../const.js";
 import { isValidToken } from "../middleware/jwt.js";
 import { validateRequest } from "../middleware/validate.js";
 import { StudentController } from "../controllers/index.js";
-import { body, param } from "express-validator";
+import { body, param, query } from "express-validator";
 import { validateCi } from "../helpers/ci.js";
 import { isValidDoc } from "../middleware/dbValidators.js";
 import { ModelStudent } from "../models/Student.js";
@@ -42,7 +42,6 @@ const createStudentValidations = [
   body("address").trim().escape().notEmpty().isString(),
   body("language_certificate").isBoolean(),
   body("email").trim().escape().isString().isEmail().normalizeEmail(),
-  body("role").trim().escape().toLowerCase().isIn(Object.values(UserRole)),
 ];
 
 const updateValidations = [
@@ -138,9 +137,15 @@ router.get(
   ],
   StudentController.getStudentById
 );
+
+// A falg is required to list only the ancient user or not
 router.get(
   "/",
-  [...authValidations, ...validateIdParam],
+  [
+    ...authValidations,
+    query("active").isBoolean().withMessage("?active=boolean is required"),
+    validateRequest,
+  ],
   StudentController.getStudents
 );
 type data = {

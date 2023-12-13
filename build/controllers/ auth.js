@@ -168,7 +168,7 @@ export var AuthController = {
                     case 2:
                         error = _state.sent();
                         handleResponse({
-                            statusCode: 500,
+                            statusCode: 400,
                             error: ErrorHandlerFactory.createError(error),
                             res: res
                         });

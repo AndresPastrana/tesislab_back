@@ -379,6 +379,66 @@ export var CourtsController = /*#__PURE__*/ function() {
                     });
                 })();
             }
+        },
+        {
+            key: "getAllCourts",
+            value: function getAllCourts(req, res) {
+                return _async_to_generator(function() {
+                    var courts, error, customError;
+                    return _ts_generator(this, function(_state) {
+                        switch(_state.label){
+                            case 0:
+                                _state.trys.push([
+                                    0,
+                                    2,
+                                    ,
+                                    3
+                                ]);
+                                return [
+                                    4,
+                                    CourtsService.getAllCourts()
+                                ];
+                            case 1:
+                                courts = _state.sent();
+                                if (courts) {
+                                    handleResponse({
+                                        statusCode: 200,
+                                        msg: "All courts retrieved successfully",
+                                        data: courts,
+                                        res: res
+                                    });
+                                } else {
+                                    handleResponse({
+                                        statusCode: 404,
+                                        msg: "No courts found",
+                                        res: res
+                                    });
+                                }
+                                return [
+                                    3,
+                                    3
+                                ];
+                            case 2:
+                                error = _state.sent();
+                                customError = ErrorHandlerFactory.createError(error);
+                                handleResponse({
+                                    statusCode: 500,
+                                    msg: "Error retrieving all courts",
+                                    error: customError,
+                                    res: res
+                                });
+                                return [
+                                    3,
+                                    3
+                                ];
+                            case 3:
+                                return [
+                                    2
+                                ];
+                        }
+                    });
+                })();
+            }
         }
     ]);
     return CourtsController;

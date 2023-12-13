@@ -211,7 +211,7 @@ export var ProfesorService = /*#__PURE__*/ function() {
                                 return [
                                     2,
                                     profesores.map(function(profesor) {
-                                        return profesor.toObject();
+                                        return profesor.toJSON();
                                     })
                                 ];
                         }

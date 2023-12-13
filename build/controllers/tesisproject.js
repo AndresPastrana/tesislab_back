@@ -319,7 +319,7 @@ export var TesisProjectController = /*#__PURE__*/ function() {
             key: "getTesisProjectInfo",
             value: function getTesisProjectInfo(req, res) {
                 return _async_to_generator(function() {
-                    var projectId, tesisProject, error, customError;
+                    var _matchedData, projectId, active, tesisProject, error, customError;
                     return _ts_generator(this, function(_state) {
                         switch(_state.label){
                             case 0:
@@ -329,10 +329,15 @@ export var TesisProjectController = /*#__PURE__*/ function() {
                                     ,
                                     3
                                 ]);
-                                projectId = req.params.id;
+                                _matchedData = matchedData(req, {
+                                    locations: [
+                                        "params",
+                                        "query"
+                                    ]
+                                }), projectId = _matchedData.id, active = _matchedData.active;
                                 return [
                                     4,
-                                    TesisProjectService.getTesisProjectInfo(projectId)
+                                    TesisProjectService.getTesisProjectInfo(projectId, active)
                                 ];
                             case 1:
                                 tesisProject = _state.sent();
@@ -421,7 +426,7 @@ export var TesisProjectController = /*#__PURE__*/ function() {
             key: "updateFunctionalRequirements",
             value: function updateFunctionalRequirements(req, res) {
                 return _async_to_generator(function() {
-                    var projectId, functionalRequirements, updatedTesisProject, error, customError;
+                    var _matchedData, projectId, functionalRequirements, updatedTesisProject, error, customError;
                     return _ts_generator(this, function(_state) {
                         switch(_state.label){
                             case 0:
@@ -431,8 +436,16 @@ export var TesisProjectController = /*#__PURE__*/ function() {
                                     ,
                                     3
                                 ]);
-                                projectId = req.params.id;
-                                functionalRequirements = req.body.functionalRequirements;
+                                _matchedData = matchedData(req, {
+                                    locations: [
+                                        "params"
+                                    ]
+                                }), projectId = _matchedData.id;
+                                functionalRequirements = matchedData(req, {
+                                    locations: [
+                                        "body"
+                                    ]
+                                }).functionalRequirements;
                                 return [
                                     4,
                                     TesisProjectService.updateFunctionalRequirements(projectId, functionalRequirements)
@@ -473,18 +486,108 @@ export var TesisProjectController = /*#__PURE__*/ function() {
             key: "getAllProjects",
             value: function getAllProjects(req, res) {
                 return _async_to_generator(function() {
-                    var _matchedData, _matchedData_old, old;
+                    var _matchedData, _matchedData_active, active, projects, error, customError;
                     return _ts_generator(this, function(_state) {
-                        try {
-                            _matchedData = matchedData(req, {
-                                locations: [
-                                    "query"
-                                ]
-                            }), _matchedData_old = _matchedData.old, old = _matchedData_old === void 0 ? false : _matchedData_old;
-                        } catch (error) {}
-                        return [
-                            2
-                        ];
+                        switch(_state.label){
+                            case 0:
+                                _state.trys.push([
+                                    0,
+                                    2,
+                                    ,
+                                    3
+                                ]);
+                                _matchedData = matchedData(req, {
+                                    locations: [
+                                        "query"
+                                    ]
+                                }), _matchedData_active = _matchedData.active, active = _matchedData_active === void 0 ? true : _matchedData_active;
+                                return [
+                                    4,
+                                    TesisProjectService.getAllProjects(active)
+                                ];
+                            case 1:
+                                projects = _state.sent();
+                                handleResponse({
+                                    res: res,
+                                    statusCode: 200,
+                                    data: projects
+                                });
+                                return [
+                                    3,
+                                    3
+                                ];
+                            case 2:
+                                error = _state.sent();
+                                customError = ErrorHandlerFactory.createError(error);
+                                handleResponse({
+                                    res: res,
+                                    statusCode: 500,
+                                    error: customError
+                                });
+                                return [
+                                    3,
+                                    3
+                                ];
+                            case 3:
+                                return [
+                                    2
+                                ];
+                        }
+                    });
+                })();
+            }
+        },
+        {
+            key: "getProjectsByMemberId",
+            value: function getProjectsByMemberId(req, res) {
+                return _async_to_generator(function() {
+                    var _matchedData, memberId, memberType, active, projects, error, customError;
+                    return _ts_generator(this, function(_state) {
+                        switch(_state.label){
+                            case 0:
+                                _state.trys.push([
+                                    0,
+                                    2,
+                                    ,
+                                    3
+                                ]);
+                                _matchedData = matchedData(req, {
+                                    locations: [
+                                        "query"
+                                    ]
+                                }), memberId = _matchedData.memberId, memberType = _matchedData.memberType, active = _matchedData.active;
+                                return [
+                                    4,
+                                    TesisProjectService.getProjectsByMemberId(active, memberId, memberType)
+                                ];
+                            case 1:
+                                projects = _state.sent();
+                                handleResponse({
+                                    res: res,
+                                    statusCode: 200,
+                                    data: projects
+                                });
+                                return [
+                                    3,
+                                    3
+                                ];
+                            case 2:
+                                error = _state.sent();
+                                customError = ErrorHandlerFactory.createError(error);
+                                handleResponse({
+                                    res: res,
+                                    statusCode: 500,
+                                    error: customError
+                                });
+                                return [
+                                    3,
+                                    3
+                                ];
+                            case 3:
+                                return [
+                                    2
+                                ];
+                        }
                     });
                 })();
             }

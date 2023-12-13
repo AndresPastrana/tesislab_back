@@ -154,20 +154,26 @@ function _ts_generator(thisArg, body) {
         };
     }
 }
-import { ErrorFactory } from "../errors/error.js";
-import { ModelPerson } from "../models/Person.js";
-var PersonService = /*#__PURE__*/ function() {
+import { ModelEvaluation } from "../models/Evaluations.js";
+import { ModelSubmission } from "../models/Submission.js";
+/**
+ * Service class for handling evaluations and submissions.
+ */ export var EvaluationService = /*#__PURE__*/ function() {
     "use strict";
-    function PersonService() {
-        _class_call_check(this, PersonService);
+    function EvaluationService() {
+        _class_call_check(this, EvaluationService);
     }
-    _create_class(PersonService, null, [
+    _create_class(EvaluationService, null, [
         {
-            key: "createPerson",
-            value: function createPerson(param) {
-                var user_id = param.user_id, ci = param.ci, name = param.name, lastname = param.lastname, address = param.address, age = param.age, phone = param.phone, sex = param.sex;
+            key: "createEvaluation",
+            value: /**
+   * Create a new evaluation.
+   * @param evaluationData - Data for creating the evaluation.
+   * @returns Created evaluation document.
+   */ function createEvaluation(evaluationData) {
+                var _this = this;
                 return _async_to_generator(function() {
-                    var newPerson, error;
+                    var newEvaluation, error;
                     return _ts_generator(this, function(_state) {
                         switch(_state.label){
                             case 0:
@@ -179,196 +185,21 @@ var PersonService = /*#__PURE__*/ function() {
                                 ]);
                                 return [
                                     4,
-                                    PersonService.personModel.create({
-                                        user_id: user_id,
-                                        ci: ci,
-                                        name: name,
-                                        lastname: lastname,
-                                        address: address,
-                                        age: age,
-                                        phone: phone,
-                                        sex: sex,
-                                        ancient: false
-                                    })
+                                    _this.modelEvaluation.create(evaluationData)
                                 ];
                             case 1:
-                                newPerson = _state.sent();
+                                newEvaluation = _state.sent();
                                 return [
                                     2,
-                                    newPerson._id
+                                    newEvaluation
                                 ];
                             case 2:
                                 error = _state.sent();
-                                return [
-                                    2,
-                                    {}
-                                ];
-                            case 3:
-                                return [
-                                    2
-                                ];
-                        }
-                    });
-                })();
-            }
-        },
-        {
-            key: "updateById",
-            value: function updateById(personId, updateData) {
-                return _async_to_generator(function() {
-                    var updatedPerson, error;
-                    return _ts_generator(this, function(_state) {
-                        switch(_state.label){
-                            case 0:
-                                _state.trys.push([
-                                    0,
-                                    2,
-                                    ,
-                                    3
-                                ]);
-                                return [
-                                    4,
-                                    PersonService.personModel.findByIdAndUpdate(personId, {
-                                        $set: updateData
-                                    }, {
-                                        new: true
-                                    } // Return the updated document
-                                    )
-                                ];
-                            case 1:
-                                updatedPerson = _state.sent();
-                                if (!updatedPerson) {
-                                    throw ErrorFactory.createPersonError("Person not found for update");
+                                if (error.name === "ValidationError") {
+                                    throw new Error("Validation Error: ".concat(error.message));
+                                } else {
+                                    throw new Error("Error creating evaluation: ".concat(error.message));
                                 }
-                                return [
-                                    2,
-                                    updatedPerson._id
-                                ];
-                            case 2:
-                                error = _state.sent();
-                                throw ErrorFactory.createPersonError("Error updating the person");
-                            case 3:
-                                return [
-                                    2
-                                ];
-                        }
-                    });
-                })();
-            }
-        },
-        {
-            key: "getPersonById",
-            value: function getPersonById(personId) {
-                return _async_to_generator(function() {
-                    var person, error;
-                    return _ts_generator(this, function(_state) {
-                        switch(_state.label){
-                            case 0:
-                                _state.trys.push([
-                                    0,
-                                    2,
-                                    ,
-                                    3
-                                ]);
-                                return [
-                                    4,
-                                    PersonService.personModel.findById(personId).populate("user_id", "email")
-                                ];
-                            case 1:
-                                person = _state.sent();
-                                if (!person) {
-                                    throw ErrorFactory.createPersonError("Person not found");
-                                }
-                                return [
-                                    2,
-                                    person
-                                ];
-                            case 2:
-                                error = _state.sent();
-                                throw ErrorFactory.createPersonError("Error retrieving person information");
-                            case 3:
-                                return [
-                                    2
-                                ];
-                        }
-                    });
-                })();
-            }
-        },
-        {
-            key: "getPersonByFilter",
-            value: function getPersonByFilter(filter) {
-                return _async_to_generator(function() {
-                    var person, error;
-                    return _ts_generator(this, function(_state) {
-                        switch(_state.label){
-                            case 0:
-                                _state.trys.push([
-                                    0,
-                                    2,
-                                    ,
-                                    3
-                                ]);
-                                return [
-                                    4,
-                                    PersonService.personModel.findOne(filter).populate("user_id")
-                                ];
-                            case 1:
-                                person = _state.sent();
-                                if (!person) {
-                                    throw ErrorFactory.createPersonError("Person not found");
-                                }
-                                return [
-                                    2,
-                                    person
-                                ];
-                            case 2:
-                                error = _state.sent();
-                                throw ErrorFactory.createPersonError("Error retrieving person by filter");
-                            case 3:
-                                return [
-                                    2
-                                ];
-                        }
-                    });
-                })();
-            }
-        },
-        {
-            key: "deletePerson",
-            value: function deletePerson(personId) {
-                return _async_to_generator(function() {
-                    var updatedPerson, error;
-                    return _ts_generator(this, function(_state) {
-                        switch(_state.label){
-                            case 0:
-                                _state.trys.push([
-                                    0,
-                                    2,
-                                    ,
-                                    3
-                                ]);
-                                return [
-                                    4,
-                                    ModelPerson.findByIdAndUpdate(personId, {
-                                        ancient: true
-                                    })
-                                ];
-                            case 1:
-                                updatedPerson = _state.sent();
-                                if (!updatedPerson) {
-                                    return [
-                                        2,
-                                        null
-                                    ];
-                                // throw ErrorFactory.createPersonNotFoundError("Person not found for deletion");
-                                }
-                                return [
-                                    2,
-                                    updatedPerson._id
-                                ];
-                            case 2:
-                                error = _state.sent();
                                 return [
                                     3,
                                     3
@@ -381,9 +212,284 @@ var PersonService = /*#__PURE__*/ function() {
                     });
                 })();
             }
+        },
+        {
+            key: "getAllSubmissionsByEvaluationId",
+            value: /**
+   * Get all submissions by evaluation ID.
+   * @param evaluationId - ID of the evaluation.
+   * @returns Array of submission documents.
+   */ function getAllSubmissionsByEvaluationId(evaluationId) {
+                var _this = this;
+                return _async_to_generator(function() {
+                    var submissions, error;
+                    return _ts_generator(this, function(_state) {
+                        switch(_state.label){
+                            case 0:
+                                _state.trys.push([
+                                    0,
+                                    2,
+                                    ,
+                                    3
+                                ]);
+                                return [
+                                    4,
+                                    _this.modelSubmission.find({
+                                        evaluation_id: evaluationId
+                                    }).exec()
+                                ];
+                            case 1:
+                                submissions = _state.sent();
+                                return [
+                                    2,
+                                    submissions
+                                ];
+                            case 2:
+                                error = _state.sent();
+                                throw new Error("Error getting submissions by evaluation ID: ".concat(error.message));
+                            case 3:
+                                return [
+                                    2
+                                ];
+                        }
+                    });
+                })();
+            }
+        },
+        {
+            key: "editEvaluation",
+            value: /**
+   * Edit an existing evaluation.
+   * @param evaluationId - ID of the evaluation to edit.
+   * @param updatedData - Updated data for the evaluation.
+   * @returns Updated evaluation document or null if not found.
+   */ function editEvaluation(evaluationId, updatedData) {
+                var _this = this;
+                return _async_to_generator(function() {
+                    var updatedEvaluation, error;
+                    return _ts_generator(this, function(_state) {
+                        switch(_state.label){
+                            case 0:
+                                _state.trys.push([
+                                    0,
+                                    2,
+                                    ,
+                                    3
+                                ]);
+                                return [
+                                    4,
+                                    _this.modelEvaluation.findByIdAndUpdate(evaluationId, updatedData, {
+                                        new: true
+                                    }).exec()
+                                ];
+                            case 1:
+                                updatedEvaluation = _state.sent();
+                                if (!updatedEvaluation) {
+                                    throw new Error("Evaluation with ID ".concat(evaluationId, " not found"));
+                                }
+                                return [
+                                    2,
+                                    updatedEvaluation
+                                ];
+                            case 2:
+                                error = _state.sent();
+                                throw new Error("Error editing evaluation: ".concat(error.message));
+                            case 3:
+                                return [
+                                    2
+                                ];
+                        }
+                    });
+                })();
+            }
+        },
+        {
+            key: "getStudentSubmission",
+            value: /**
+   * Get the student's submission of an especific evaluation.
+   * @param studentId - ID of the student.
+   *  @param eval_id - ID of the evaluation.
+   * @returns A submission document.
+   */ function getStudentSubmission(studentId, eval_id) {
+                var _this = this;
+                return _async_to_generator(function() {
+                    var submission, error;
+                    return _ts_generator(this, function(_state) {
+                        switch(_state.label){
+                            case 0:
+                                _state.trys.push([
+                                    0,
+                                    2,
+                                    ,
+                                    3
+                                ]);
+                                return [
+                                    4,
+                                    _this.modelSubmission.findOne({
+                                        student_id: studentId,
+                                        evaluation_id: eval_id
+                                    }).exec()
+                                ];
+                            case 1:
+                                submission = _state.sent();
+                                if (!submission) {
+                                    throw new Error("Submission not found");
+                                }
+                                return [
+                                    2,
+                                    submission
+                                ];
+                            case 2:
+                                error = _state.sent();
+                                throw new Error("Error getting submissions by student ID: ".concat(error.message));
+                            case 3:
+                                return [
+                                    2
+                                ];
+                        }
+                    });
+                })();
+            }
+        },
+        {
+            key: "getAllEvaluations",
+            value: /**
+   * Get all evaluations.
+   * @returns Array of evaluation documents.
+   */ function getAllEvaluations() {
+                var _this = this;
+                return _async_to_generator(function() {
+                    var evaluations, error;
+                    return _ts_generator(this, function(_state) {
+                        switch(_state.label){
+                            case 0:
+                                _state.trys.push([
+                                    0,
+                                    2,
+                                    ,
+                                    3
+                                ]);
+                                return [
+                                    4,
+                                    _this.modelEvaluation.find().exec()
+                                ];
+                            case 1:
+                                evaluations = _state.sent();
+                                return [
+                                    2,
+                                    evaluations
+                                ];
+                            case 2:
+                                error = _state.sent();
+                                throw new Error("Error getting all evaluations: ".concat(error.message));
+                            case 3:
+                                return [
+                                    2
+                                ];
+                        }
+                    });
+                })();
+            }
+        },
+        {
+            key: "createSubmission",
+            value: // Submissions
+            /**
+   * Create a new submission for a specific evaluation.
+   * @param submissionData - Data for creating the submission.
+   * @returns Created submission document.
+   */ function createSubmission(submissionData) {
+                var _this = this;
+                return _async_to_generator(function() {
+                    var newSubmission, error;
+                    return _ts_generator(this, function(_state) {
+                        switch(_state.label){
+                            case 0:
+                                _state.trys.push([
+                                    0,
+                                    2,
+                                    ,
+                                    3
+                                ]);
+                                return [
+                                    4,
+                                    _this.modelSubmission.create(submissionData)
+                                ];
+                            case 1:
+                                newSubmission = _state.sent();
+                                return [
+                                    2,
+                                    newSubmission
+                                ];
+                            case 2:
+                                error = _state.sent();
+                                if (error.name === "ValidationError") {
+                                    throw new Error("Validation Error: ".concat(error.message));
+                                } else {
+                                    throw new Error("Error creating submission: ".concat(error.message));
+                                }
+                                return [
+                                    3,
+                                    3
+                                ];
+                            case 3:
+                                return [
+                                    2
+                                ];
+                        }
+                    });
+                })();
+            }
+        },
+        {
+            key: "editSubmission",
+            value: /**
+   * Edit an existing submission.
+   * @param submissionId - ID of the submission to edit.
+   * @param updatedData - Updated data for the submission.
+   * @returns Updated submission document or null if not found.
+   */ function editSubmission(submissionId, updatedData) {
+                var _this = this;
+                return _async_to_generator(function() {
+                    var updatedSubmission, error;
+                    return _ts_generator(this, function(_state) {
+                        switch(_state.label){
+                            case 0:
+                                _state.trys.push([
+                                    0,
+                                    2,
+                                    ,
+                                    3
+                                ]);
+                                return [
+                                    4,
+                                    _this.modelSubmission.findByIdAndUpdate(submissionId, updatedData, {
+                                        new: true
+                                    }).exec()
+                                ];
+                            case 1:
+                                updatedSubmission = _state.sent();
+                                if (!updatedSubmission) {
+                                    throw new Error("Submission with ID ".concat(submissionId, " not found"));
+                                }
+                                return [
+                                    2,
+                                    updatedSubmission
+                                ];
+                            case 2:
+                                error = _state.sent();
+                                throw new Error("Error editing submission: ".concat(error.message));
+                            case 3:
+                                return [
+                                    2
+                                ];
+                        }
+                    });
+                })();
+            }
         }
     ]);
-    return PersonService;
+    return EvaluationService;
 }();
-_define_property(PersonService, "personModel", ModelPerson);
-export { PersonService as default };
+_define_property(EvaluationService, "modelEvaluation", ModelEvaluation);
+_define_property(EvaluationService, "modelSubmission", ModelSubmission);

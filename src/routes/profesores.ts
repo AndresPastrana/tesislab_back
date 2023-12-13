@@ -142,6 +142,9 @@ const updateProfesorValidation = [
 
   body("sex").optional().isIn(Object.values(Sex)),
   body("academic_rank").optional().isIn(Object.values(RangoAcademico)),
+  body("user_id")
+    .isMongoId()
+    .customSanitizer((id) => new Types.ObjectId(id)),
 ];
 const validateIdParam = [
   param("id")
@@ -159,10 +162,10 @@ const validateIdParam = [
 // Role: admin
 router.post(
   "/",
-  [...authValidations, ...createProfesorValidations, validateRequest],
+  [...createProfesorValidations, validateRequest],
   ProfesorController.createProfesor
 );
-router.get("/", ProfesorController.getProfesores);
+router.get("/", [...authValidations], ProfesorController.getProfesores);
 
 router.put(
   "/:id",

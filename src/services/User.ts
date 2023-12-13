@@ -5,6 +5,9 @@ import { ErrorHandlerFactory } from "../errors/error.js";
 import { generateSecurePassword } from "../helpers/hash.js";
 import { UserRole } from "../const.js";
 import { log } from "console";
+import { ProfesorService } from "./ProfesorsService.js";
+import { ModelProfesor } from "../models/Profesor.js";
+import { ModelStudent } from "../models/Student.js";
 interface LoginUserInput {
   username: string;
   password: string;
@@ -65,8 +68,20 @@ export class UserService {
 
     if (!isValidPassword) throw new Error("Invalid username or password");
 
+    let userId = {};
+    // Get the real id of the student or the professor
+    if (user.role === UserRole.Profesor || UserRole.Admin) {
+      const professor = await ModelProfesor.findOne({ user_id: user._id });
+      userId = professor?.id;
+    }
+
+    if (user.role === UserRole.Student) {
+      const student = await ModelStudent.findOne({ user_id: user._id });
+      userId = student?.id;
+    }
+
     const token = await createJWTAsync({
-      userId: user._id,
+      userId,
       username: user.username,
       role: user.role,
     });
@@ -124,7 +139,7 @@ export class UserService {
       const newUsername = newEmail.split("@")[0];
 
       // Generate a new secure password
-      const { stringPassword } = generateSecurePassword();
+      const { stringPassword, hashedpassword } = generateSecurePassword();
 
       // Update the user with the new email and password
       const updatedUser = await this.ModelUser.findByIdAndUpdate(
@@ -132,7 +147,7 @@ export class UserService {
         {
           email: newEmail,
           username: newUsername,
-          password: stringPassword,
+          password: hashedpassword,
         },
         { new: true, runValidators: true }
       );

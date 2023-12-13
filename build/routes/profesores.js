@@ -115,7 +115,10 @@ var updateProfesorValidation = [
         max: 8
     }).withMessage("phone must 8 characters lenght"),
     body("sex").optional().isIn(Object.values(Sex)),
-    body("academic_rank").optional().isIn(Object.values(RangoAcademico))
+    body("academic_rank").optional().isIn(Object.values(RangoAcademico)),
+    body("user_id").isMongoId().customSanitizer(function(id) {
+        return new Types.ObjectId(id);
+    })
 ];
 var validateIdParam = [
     param("id").isMongoId().withMessage("Invalid id format").if(function(id) {
@@ -128,10 +131,10 @@ var validateIdParam = [
 ];
 // Private routes
 // Role: admin
-router.post("/", _to_consumable_array(authValidations).concat(_to_consumable_array(createProfesorValidations), [
+router.post("/", _to_consumable_array(createProfesorValidations).concat([
     validateRequest
 ]), ProfesorController.createProfesor);
-router.get("/", ProfesorController.getProfesores);
+router.get("/", _to_consumable_array(authValidations), ProfesorController.getProfesores);
 router.put("/:id", _to_consumable_array(authValidations).concat(_to_consumable_array(validateIdParam), _to_consumable_array(updateProfesorValidation), [
     validateRequest
 ]), ProfesorController.updateProfesor);

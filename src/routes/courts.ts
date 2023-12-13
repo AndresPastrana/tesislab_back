@@ -1,4 +1,4 @@
-import express, { Router } from "express";
+import { Router } from "express";
 import { body, param } from "express-validator";
 import { CourtsController } from "../controllers/courts.js";
 import { isValidDoc } from "../middleware/dbValidators.js";
@@ -6,10 +6,10 @@ import { ModelCourt } from "../models/Court.js";
 import { validateRequest } from "../middleware/validate.js";
 import { CourtRole, UserRole } from "../const.js";
 import { ModelProfesor } from "../models/Profesor.js";
-import { ModelTesisProject } from "../models/TesisProject.js";
-import { Schema, Types } from "mongoose";
+
 import { isValidToken } from "../middleware/jwt.js";
 import { protectRouteByRole } from "../middleware/protectRouteByRole.js";
+import { Types } from "mongoose";
 
 export const router: Router = Router();
 
@@ -104,6 +104,12 @@ router.put(
   "/:courtId",
   [...authValidations, ...validateCourtId, ...validateUpdateCourt],
   CourtsController.updateCourt
+);
+
+router.get(
+  "/",
+  [...authValidations, validateRequest],
+  CourtsController.getAllCourts
 );
 router.get(
   "/:courtId",

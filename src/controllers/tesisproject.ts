@@ -7,6 +7,8 @@ import { ErrorHandlerFactory } from "../errors/error.js";
 
 import { matchedData } from "express-validator";
 import { handleResponse } from "../middleware/handleResponse.js";
+import { UserRole } from "../const.js";
+import { Schema } from "mongoose";
 
 export class TesisProjectController {
   static async createTesisProject(req: Request, res: Response) {
@@ -82,9 +84,13 @@ export class TesisProjectController {
 
   static async getTesisProjectInfo(req: Request, res: Response): Promise<void> {
     try {
-      const projectId = req.params.id;
+      const { id: projectId, active } = matchedData(req, {
+        locations: ["params", "query"],
+      }) as { id: Schema.Types.ObjectId; active: boolean | string };
+
       const tesisProject = await TesisProjectService.getTesisProjectInfo(
-        projectId
+        projectId,
+        active as string
       );
       handleResponse({
         statusCode: 200,
@@ -126,9 +132,13 @@ export class TesisProjectController {
     res: Response
   ): Promise<void> {
     try {
-      const projectId = req.params.id;
-      const functionalRequirements = req.body
-        .functionalRequirements as string[];
+      const { id: projectId } = matchedData(req, { locations: ["params"] }) as {
+        id: string;
+      };
+      const { functionalRequirements } = matchedData(req, {
+        locations: ["body"],
+      }) as { functionalRequirements: string[] };
+
       const updatedTesisProject =
         await TesisProjectService.updateFunctionalRequirements(
           projectId,
@@ -151,7 +161,37 @@ export class TesisProjectController {
 
   static async getAllProjects(req: Request, res: Response): Promise<void> {
     try {
-      const { old = false } = matchedData(req, { locations: ["query"] });
-    } catch (error) {}
+      const { active = true } = matchedData(req, { locations: ["query"] });
+      const projects = await TesisProjectService.getAllProjects(active);
+      handleResponse({ res, statusCode: 200, data: projects });
+    } catch (error) {
+      const customError = ErrorHandlerFactory.createError(error as any);
+      handleResponse({ res, statusCode: 500, error: customError });
+    }
+  }
+  static async getProjectsByMemberId(
+    req: Request,
+    res: Response
+  ): Promise<void> {
+    try {
+      const { memberId, memberType, active } = matchedData(req, {
+        locations: ["query"],
+      }) as {
+        active: string;
+        memberId: Schema.Types.ObjectId;
+        memberType: UserRole.Profesor | UserRole.Profesor;
+      };
+
+      const projects = await TesisProjectService.getProjectsByMemberId(
+        active,
+        memberId,
+        memberType
+      );
+
+      handleResponse({ res, statusCode: 200, data: projects });
+    } catch (error) {
+      const customError = ErrorHandlerFactory.createError(error as any);
+      handleResponse({ res, statusCode: 500, error: customError });
+    }
   }
 }

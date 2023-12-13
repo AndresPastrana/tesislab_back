@@ -1,14 +1,11 @@
-// No endpoint 403
-
 import { Response } from "express";
 import { CustomError } from "../errors/error.js";
 
 interface HandleResponseParam {
   statusCode: number;
   msg?: string;
-  // rome-ignore lint/suspicious/noExplicitAny: <explanation>
+
   data?: any | null | Object;
-  // rome-ignore lint/suspicious/noExplicitAny: <explanation>
   error?: CustomError | null;
   res: Response;
 }

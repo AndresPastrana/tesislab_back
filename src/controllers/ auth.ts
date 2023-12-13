@@ -17,7 +17,7 @@ export const AuthController = {
       });
     } catch (error: any) {
       handleResponse({
-        statusCode: 500,
+        statusCode: 400,
         error: ErrorHandlerFactory.createError(error),
         res,
       });

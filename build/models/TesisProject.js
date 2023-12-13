@@ -121,11 +121,8 @@ var TesisProjectSchema = new Schema({
                 default: false
             },
             recommendations: {
-                type: [
-                    String
-                ],
-                required: false,
-                default: []
+                type: String,
+                required: false
             },
             approvedBy: {
                 type: Schema.Types.ObjectId,
@@ -133,9 +130,12 @@ var TesisProjectSchema = new Schema({
                 required: false
             },
             date: {
-                type: Date
+                type: Date,
+                required: false
             }
-        }
+        },
+        required: false,
+        default: null
     },
     ancient: {
         type: Boolean,

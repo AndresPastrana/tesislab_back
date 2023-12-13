@@ -400,6 +400,8 @@ export var ProfesorController = {
                                 "body"
                             ]
                         });
+                        console.log(id);
+                        console.log(profesorData);
                         if (!(Object.keys(profesorData).length >= 1)) return [
                             3,
                             5
@@ -417,7 +419,7 @@ export var ProfesorController = {
                         return [
                             4,
                             UserService.updateUser({
-                                userId: id,
+                                userId: profesorData.user_id,
                                 newEmail: profesorData.email
                             })
                         ];

@@ -1,35 +1,25 @@
 export interface CustomError {
-  error: {
-    name: string;
-    message: string;
-  };
+  name: string;
+  message: string;
 }
 
 class ValidationError implements CustomError {
-  error: {
-    name: string;
-    message: string;
-  };
+  name: string;
+  message: string;
 
   constructor(validationErrors: Record<string, string>) {
-    this.error = {
-      name: "ValidationError",
-      message: JSON.stringify(validationErrors),
-    };
+    this.name = "ValidationError";
+    this.message = JSON.stringify(validationErrors);
   }
 }
 
 class MongoDBError implements CustomError {
-  error: {
-    name: string;
-    message: string;
-  };
+  name: string;
+  message: string;
 
   constructor(errorMessage: string) {
-    this.error = {
-      name: "MongoDBError",
-      message: errorMessage,
-    };
+    this.name = "MongoDBError";
+    this.message = errorMessage;
   }
 }
 

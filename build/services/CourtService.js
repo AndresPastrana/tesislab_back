@@ -163,7 +163,8 @@ export var CourtsService = /*#__PURE__*/ function() {
     _create_class(CourtsService, null, [
         {
             key: "isRoleUniqueWithinCourt",
-            value: function isRoleUniqueWithinCourt(courtId, role) {
+            value: //TODO: Get all courts info with the professor populated info
+            function isRoleUniqueWithinCourt(courtId, role) {
                 var _this = this;
                 return _async_to_generator(function() {
                     var existingCourt;
@@ -212,6 +213,49 @@ export var CourtsService = /*#__PURE__*/ function() {
                                 return [
                                     2,
                                     createdCourt.toObject()
+                                ];
+                            case 2:
+                                error = _state.sent();
+                                throw new Error("Error in the Court Service: ".concat(error.message));
+                            case 3:
+                                return [
+                                    2
+                                ];
+                        }
+                    });
+                })();
+            }
+        },
+        {
+            key: "getAllCourts",
+            value: function getAllCourts() {
+                var _this = this;
+                return _async_to_generator(function() {
+                    var courts, error;
+                    return _ts_generator(this, function(_state) {
+                        switch(_state.label){
+                            case 0:
+                                _state.trys.push([
+                                    0,
+                                    2,
+                                    ,
+                                    3
+                                ]);
+                                return [
+                                    4,
+                                    _this.CourtModel.find().populate({
+                                        path: "members.profesor",
+                                        model: "Profesor",
+                                        select: "name lastname"
+                                    }).exec()
+                                ];
+                            case 1:
+                                courts = _state.sent();
+                                return [
+                                    2,
+                                    courts ? courts.map(function(court) {
+                                        return court.toJSON();
+                                    }) : null
                                 ];
                             case 2:
                                 error = _state.sent();
