@@ -19,25 +19,24 @@ export const generateDocUrl = ({
   bucket_name,
   file_name,
 }: {
-  bucket_name: string;
+  bucket_name: BucketsS3;
   file_name: string;
 }) => {
   const path = `http://localhost:23274${Routes.files}/${bucket_name}/${file_name}`;
   return path;
 };
 
-export const uploadFile = async (file: Express.Multer.File) => {
+export const uploadFile = async (
+  file: Express.Multer.File,
+  bucket: BucketsS3
+) => {
   // Rename file with a unique name
   file.originalname = getUniqueFileName(file);
 
   const minio = MinioService.getInstance();
-  await minio.uploadFile(
-    BucketsS3.Evaluaciones,
-    file.originalname,
-    file.buffer
-  );
+  await minio.uploadFile(bucket, file.originalname, file.buffer);
   return generateDocUrl({
-    bucket_name: BucketsS3.Evaluaciones,
+    bucket_name: bucket,
     file_name: file.originalname,
   });
 };

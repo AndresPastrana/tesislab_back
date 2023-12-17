@@ -97,6 +97,7 @@ export var Routes;
     Routes["search"] = "/api/search";
     Routes["eval"] = "/api/evaluaciones";
     Routes["files"] = "/api/files";
+    Routes["defense"] = "/api/defense";
 })(Routes || (Routes = {}));
 export var Allowedcollections;
 (function(Allowedcollections) {

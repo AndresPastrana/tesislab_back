@@ -62,8 +62,8 @@ var getSubmissionsByStudentIdValidation = [
     query("studentId").isString().notEmpty().withMessage("Student ID is required")
 ];
 var createSubmissionValidations = [
-    body("evaluationId").isMongoId().withMessage("Invalid evaluationId format"),
-    body("studentId").isMongoId().withMessage("Invalid studentId format")
+    body("evaluation_id").isMongoId().withMessage("Invalid evaluationId format"),
+    body("student_id").isMongoId().withMessage("Invalid studentId format")
 ];
 // Routes
 router.post("/", _to_consumable_array(authValidations).concat(_to_consumable_array(createEvaluationValidation), [
@@ -72,7 +72,8 @@ router.post("/", _to_consumable_array(authValidations).concat(_to_consumable_arr
 router.get("/:id/submissions", _to_consumable_array(authValidations).concat(_to_consumable_array(getSubmissionsByEvaluationIdValidation), [
     validateRequest
 ]), EvaluationController.getAllSubmissionsByEvaluationId);
-router.post("/submissions", _to_consumable_array(authValidations).concat(_to_consumable_array(createSubmissionValidations), [
+router.post("/submissions", _to_consumable_array(authValidations).concat([
+    // ...createSubmissionValidations,
     multerMiddleware.single("form_file")
 ]), EvaluationController.createSubmission);
 router.put("/submissions/:id", _to_consumable_array(authValidations).concat([
@@ -85,3 +86,6 @@ router.get("/:eval_id/student_submissions/:student_id", _to_consumable_array(get
 router.get("/", _to_consumable_array(authValidations).concat([
     validateRequest
 ]), EvaluationController.getAllEvaluations);
+router.get("/submissions/:student_id", [
+    param("student_id").isMongoId().withMessage("Inavlid id")
+], EvaluationController.getAllEvaluationsWithSub);

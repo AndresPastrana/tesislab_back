@@ -1,4 +1,4 @@
-import express, { Router } from "express";
+import express, { NextFunction, Request, Response, Router } from "express";
 import { body, param, query } from "express-validator";
 import { EvaluationController } from "../controllers/evaluation.js";
 import { EvalStatus, EvalType, UserRole } from "../const.js";
@@ -64,8 +64,8 @@ const getSubmissionsByStudentIdValidation = [
 ];
 
 const createSubmissionValidations = [
-  body("evaluationId").isMongoId().withMessage("Invalid evaluationId format"),
-  body("studentId").isMongoId().withMessage("Invalid studentId format"),
+  body("evaluation_id").isMongoId().withMessage("Invalid evaluationId format"),
+  body("student_id").isMongoId().withMessage("Invalid studentId format"),
 ];
 // Routes
 router.post(
@@ -88,8 +88,9 @@ router.post(
   "/submissions",
   [
     ...authValidations,
-    ...createSubmissionValidations,
+    // ...createSubmissionValidations,
     multerMiddleware.single("form_file"),
+    // validateRequest,
   ],
 
   EvaluationController.createSubmission
@@ -118,4 +119,10 @@ router.get(
   "/",
   [...authValidations, validateRequest],
   EvaluationController.getAllEvaluations
+);
+
+router.get(
+  "/submissions/:student_id",
+  [param("student_id").isMongoId().withMessage("Inavlid id")],
+  EvaluationController.getAllEvaluationsWithSub
 );

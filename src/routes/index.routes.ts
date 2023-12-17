@@ -6,3 +6,4 @@ export { router as CourtRouter } from "./courts.js";
 export { router as SearchRouter } from "./search.js";
 export { router as EvalRouter } from "./evaluation.js";
 export { router as FilesRouter } from "./files.js";
+export { router as DefenseRouter } from "./defense.js";

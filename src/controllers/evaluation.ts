@@ -1,4 +1,3 @@
-import { log } from "console";
 import { Request, Response } from "express";
 import { matchedData } from "express-validator";
 import { EvaluationService } from "../services/EvaluationService.js";
@@ -7,8 +6,6 @@ import { EvaluationType } from "../models/Evaluations.js";
 import { CustomError, ErrorHandlerFactory } from "../errors/error.js";
 import { BucketsS3, EvalType } from "../const.js";
 import { SubmissionType } from "../models/Submission.js";
-import { getUniqueFileName } from "../helpers/files.js";
-import MinioService from "../services/MinioService.js";
 import { uploadFile } from "../helpers/minio.js";
 
 export class EvaluationController {
@@ -116,17 +113,18 @@ export class EvaluationController {
   }
 
   // Create a new submission for a specific evaluation
-  static async createSubmission(req: Request, res: Response): Promise<void> {
+  static async createSubmission(req: Request, res: Response) {
     try {
-      const submissionData = matchedData(req) as Partial<SubmissionType>;
+      const submissionData = req.body as Partial<SubmissionType>;
 
       // Get the submsion file
       const file = req.file;
+
       if (!file) {
         return;
       }
 
-      const file_url = await uploadFile(file);
+      const file_url = await uploadFile(file, BucketsS3.Evaluaciones);
 
       const createdSubmission = await EvaluationService.createSubmission({
         ...submissionData,
@@ -164,6 +162,28 @@ export class EvaluationController {
           res,
         });
       }
+    } catch (error: any) {
+      const customError: CustomError = ErrorHandlerFactory.createError(error);
+      handleResponse({ statusCode: 500, error: customError, res });
+    }
+  }
+
+  // Get all evaluations and their corresponding submissions for a given student
+  static async getAllEvaluationsWithSub(
+    req: Request,
+    res: Response
+  ): Promise<void> {
+    try {
+      const { student_id } = matchedData(req, {
+        locations: ["params"],
+      }) as {
+        student_id: string;
+      }; // Assuming the student ID is in the query params
+      console.log(student_id);
+      const evaluationSubmissions =
+        await EvaluationService.getAllEvaluationsWithSub(student_id);
+
+      handleResponse({ statusCode: 200, data: evaluationSubmissions, res });
     } catch (error: any) {
       const customError: CustomError = ErrorHandlerFactory.createError(error);
       handleResponse({ statusCode: 500, error: customError, res });

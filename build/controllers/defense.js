@@ -1,3 +1,11 @@
+function _array_like_to_array(arr, len) {
+    if (len == null || len > arr.length) len = arr.length;
+    for(var i = 0, arr2 = new Array(len); i < len; i++)arr2[i] = arr[i];
+    return arr2;
+}
+function _array_with_holes(arr) {
+    if (Array.isArray(arr)) return arr;
+}
 function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) {
     try {
         var info = gen[key](arg);
@@ -45,6 +53,44 @@ function _create_class(Constructor, protoProps, staticProps) {
     if (protoProps) _defineProperties(Constructor.prototype, protoProps);
     if (staticProps) _defineProperties(Constructor, staticProps);
     return Constructor;
+}
+function _iterable_to_array_limit(arr, i) {
+    var _i = arr == null ? null : typeof Symbol !== "undefined" && arr[Symbol.iterator] || arr["@@iterator"];
+    if (_i == null) return;
+    var _arr = [];
+    var _n = true;
+    var _d = false;
+    var _s, _e;
+    try {
+        for(_i = _i.call(arr); !(_n = (_s = _i.next()).done); _n = true){
+            _arr.push(_s.value);
+            if (i && _arr.length === i) break;
+        }
+    } catch (err) {
+        _d = true;
+        _e = err;
+    } finally{
+        try {
+            if (!_n && _i["return"] != null) _i["return"]();
+        } finally{
+            if (_d) throw _e;
+        }
+    }
+    return _arr;
+}
+function _non_iterable_rest() {
+    throw new TypeError("Invalid attempt to destructure non-iterable instance.\\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+}
+function _sliced_to_array(arr, i) {
+    return _array_with_holes(arr) || _iterable_to_array_limit(arr, i) || _unsupported_iterable_to_array(arr, i) || _non_iterable_rest();
+}
+function _unsupported_iterable_to_array(o, minLen) {
+    if (!o) return;
+    if (typeof o === "string") return _array_like_to_array(o, minLen);
+    var n = Object.prototype.toString.call(o).slice(8, -1);
+    if (n === "Object" && o.constructor) n = o.constructor.name;
+    if (n === "Map" || n === "Set") return Array.from(n);
+    if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _array_like_to_array(o, minLen);
 }
 function _ts_generator(thisArg, body) {
     var f, y, t, g, _ = {
@@ -141,32 +187,25 @@ function _ts_generator(thisArg, body) {
         };
     }
 }
-import { UserRole } from "../const.js";
-import { ModelDefense } from "../models/Defensa.js";
-import { TesisProjectService } from "./TesisProject.js";
-export var DefenseService = /*#__PURE__*/ function() {
+import { BucketsS3 } from "../const.js";
+import { DefenseService } from "../services/Defense.js";
+import { uploadFile } from "../helpers/minio.js"; // Import the uploadFile function
+export var DefenseController = /*#__PURE__*/ function() {
     "use strict";
-    function DefenseService() {
-        _class_call_check(this, DefenseService);
+    function DefenseController() {
+        _class_call_check(this, DefenseController);
     }
-    _create_class(DefenseService, null, [
+    _create_class(DefenseController, null, [
         {
             key: "createDefense",
             value: /**
-   * Creates a new defense record based on the provided data.
+   * Handles the creation of a new defense record.
    *
-   * @param {Object} defenseData - Data for creating the defense record.
-   * @param {Schema.Types.ObjectId} defenseData.studentId - ID of the student.
-   * @param {string[]} defenseData.key_words - Keywords associated with the defense.
-   * @param {string} defenseData.recoms - Recommendations from the defense.
-   * @param {number} defenseData.evaluation - Evaluation score for the defense.
-   * @param {string} defenseData.doc_url - URL of the document related to the defense.
-   * @param {string} defenseData.pres_url - URL of the presentation related to the defense.
-   * @param {string[]} defenseData.court - Names of the court members.
-   * @throws {Error} Throws an error if there's an issue creating the defense.
-   */ function createDefense(defenseData) {
+   * @param {Request} req - Express request object.
+   * @param {Response} res - Express response object.
+   */ function createDefense(req, res) {
                 return _async_to_generator(function() {
-                    var studentId, key_words, recoms, evaluation, doc_url, pres_url, court, project_info, general_target, functional_requirements, scientific_problem, topic, student, tutors, tutors_names, student_name, newDefense, createdDefense, error;
+                    var _req_body, studentId, key_words, recoms, evaluation, court, docFiles, presFiles, doc, pres, _ref, doc_url, pres_url, error;
                     return _ts_generator(this, function(_state) {
                         switch(_state.label){
                             case 0:
@@ -176,55 +215,65 @@ export var DefenseService = /*#__PURE__*/ function() {
                                     ,
                                     4
                                 ]);
-                                studentId = defenseData.studentId, key_words = defenseData.key_words, recoms = defenseData.recoms, evaluation = defenseData.evaluation, doc_url = defenseData.doc_url, pres_url = defenseData.pres_url, court = defenseData.court;
+                                // Extract necessary data from the request body
+                                _req_body = req.body, studentId = _req_body.studentId, key_words = _req_body.key_words, recoms = _req_body.recoms, evaluation = _req_body.evaluation, court = _req_body.court;
+                                docFiles = req.files["docFile"];
+                                presFiles = req.files["presFile"];
+                                // Ensure there is at least one file for each type
+                                if (!docFiles || !presFiles) {
+                                    throw new Error("Both 'docFile' and 'presFile' are required.");
+                                }
+                                // Select the first file for each type
+                                doc = docFiles[0];
+                                pres = presFiles[0];
                                 return [
                                     4,
-                                    TesisProjectService.getProjectsByMemberId("true", studentId, UserRole.Student)
+                                    Promise.all([
+                                        uploadFile(doc, BucketsS3.AcademicDocs),
+                                        uploadFile(pres, BucketsS3.AcademicDocs)
+                                    ])
                                 ];
                             case 1:
-                                project_info = _state.sent();
-                                general_target = project_info.general_target, functional_requirements = project_info.functional_requirements, scientific_problem = project_info.scientific_problem, topic = project_info.topic, student = project_info.student, tutors = project_info.tutors;
-                                // Extract names from tutors
-                                tutors_names = tutors.map(function(t) {
-                                    return t.name.concat(" ").concat(t.lastname);
-                                });
-                                student_name = student.name.concat(" ").concat(student.lastname);
-                                // Create a new Defense
-                                newDefense = {
-                                    doc_url: doc_url,
-                                    pres_url: pres_url,
-                                    metadata: {
-                                        general_target: general_target,
-                                        functional_requirements: functional_requirements,
-                                        topic: topic,
-                                        tutors: tutors_names,
-                                        student: student_name,
-                                        court: court,
-                                        key_words: key_words,
-                                        scientific_problem: scientific_problem
-                                    },
-                                    eval: evaluation,
-                                    recomns: recoms,
-                                    date: new Date()
-                                };
+                                _ref = _sliced_to_array.apply(void 0, [
+                                    _state.sent(),
+                                    2
+                                ]), doc_url = _ref[0], pres_url = _ref[1];
+                                console.log(doc_url);
+                                console.log(pres_url);
+                                // Call the DefenseService to create a new defense record
                                 return [
                                     4,
-                                    ModelDefense.create(newDefense)
+                                    DefenseService.createDefense({
+                                        studentId: studentId,
+                                        key_words: key_words,
+                                        recoms: recoms,
+                                        evaluation: evaluation,
+                                        doc_url: doc_url,
+                                        pres_url: pres_url,
+                                        court: court
+                                    })
                                 ];
                             case 2:
-                                createdDefense = _state.sent();
-                                // Log the created defense
-                                console.log("Created Defense:", createdDefense);
+                                _state.sent();
+                                // Send a success response
+                                res.status(201).json({
+                                    message: "Defense record created successfully."
+                                });
                                 return [
                                     3,
                                     4
                                 ];
                             case 3:
                                 error = _state.sent();
-                                // Log the error for debugging purposes
-                                console.error("Error creating defense:", error);
-                                // Rethrow the error with a specific message
-                                throw new Error("Error creating defense: ".concat(error.message));
+                                // Handle errors and send an error response
+                                console.error("Error in createDefense controller:", error.message);
+                                res.status(500).json({
+                                    error: "Internal server error"
+                                });
+                                return [
+                                    3,
+                                    4
+                                ];
                             case 4:
                                 return [
                                     2
@@ -235,5 +284,5 @@ export var DefenseService = /*#__PURE__*/ function() {
             }
         }
     ]);
-    return DefenseService;
+    return DefenseController;
 }();

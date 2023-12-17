@@ -12,6 +12,7 @@ import {
   SearchRouter,
   EvalRouter,
   FilesRouter,
+  DefenseRouter,
 } from "../routes/index.routes.js";
 export function gracefulShutdown(server: Server) {
   console.log("Received shutdown signal. Shutting down gracefully...");
@@ -53,4 +54,5 @@ export function defineMiddlewares(app: Application) {
   app.use(Routes.auth, AuthRouter);
   app.use(Routes.eval, EvalRouter);
   app.use(Routes.files, FilesRouter);
+  app.use(Routes.defense, DefenseRouter);
 }

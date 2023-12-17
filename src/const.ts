@@ -96,6 +96,7 @@ export enum Routes {
   search = "/api/search",
   eval = "/api/evaluaciones",
   files = "/api/files",
+  defense = "/api/defense",
 }
 
 export enum Allowedcollections {

@@ -124,7 +124,7 @@ function _ts_generator(thisArg, body) {
 }
 import { getUniqueFileName } from "./files.js";
 import MinioService from "../services/MinioService.js";
-import { BucketsS3, Routes } from "../const.js";
+import { Routes } from "../const.js";
 export var getMinioConfig = function() {
     var endPoint = process.env.MINIO_SERVER_URL;
     var port = process.env.MINIO_SERVER_PORT;
@@ -143,7 +143,7 @@ export var generateDocUrl = function(param) {
     return path;
 };
 export var uploadFile = function() {
-    var _ref = _async_to_generator(function(file) {
+    var _ref = _async_to_generator(function(file, bucket) {
         var minio;
         return _ts_generator(this, function(_state) {
             switch(_state.label){
@@ -153,21 +153,21 @@ export var uploadFile = function() {
                     minio = MinioService.getInstance();
                     return [
                         4,
-                        minio.uploadFile(BucketsS3.Evaluaciones, file.originalname, file.buffer)
+                        minio.uploadFile(bucket, file.originalname, file.buffer)
                     ];
                 case 1:
                     _state.sent();
                     return [
                         2,
                         generateDocUrl({
-                            bucket_name: BucketsS3.Evaluaciones,
+                            bucket_name: bucket,
                             file_name: file.originalname
                         })
                     ];
             }
         });
     });
-    return function uploadFile(file) {
+    return function uploadFile(file, bucket) {
         return _ref.apply(this, arguments);
     };
 }();

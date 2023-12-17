@@ -222,7 +222,7 @@ import { ModelSubmission } from "../models/Submission.js";
    */ function getAllSubmissionsByEvaluationId(evaluationId) {
                 var _this = this;
                 return _async_to_generator(function() {
-                    var submissions, error;
+                    var submissions, mappedSubmissions, error;
                     return _ts_generator(this, function(_state) {
                         switch(_state.label){
                             case 0:
@@ -236,13 +236,35 @@ import { ModelSubmission } from "../models/Submission.js";
                                     4,
                                     _this.modelSubmission.find({
                                         evaluation_id: evaluationId
-                                    }).exec()
+                                    }).populate("student_id", "name lastname").exec()
                                 ];
                             case 1:
                                 submissions = _state.sent();
+                                if (submissions) {
+                                    mappedSubmissions = submissions.map(function(submission) {
+                                        return {
+                                            id: submission._id.toString(),
+                                            evaluation_id: submission.evaluation_id,
+                                            student: {
+                                                id: submission.student_id._id,
+                                                name: submission.student_id.name,
+                                                lastname: submission.student_id.lastname
+                                            },
+                                            file: submission.file,
+                                            score: submission.score,
+                                            recoms: submission.recoms,
+                                            createdAt: submission.createdAt,
+                                            updatedAt: submission.updatedAt
+                                        };
+                                    });
+                                    return [
+                                        2,
+                                        mappedSubmissions
+                                    ];
+                                }
                                 return [
                                     2,
-                                    submissions
+                                    []
                                 ];
                             case 2:
                                 error = _state.sent();
@@ -411,6 +433,7 @@ import { ModelSubmission } from "../models/Submission.js";
                                     ,
                                     3
                                 ]);
+                                console.log(submissionData);
                                 return [
                                     4,
                                     _this.modelSubmission.create(submissionData)
@@ -480,6 +503,113 @@ import { ModelSubmission } from "../models/Submission.js";
                                 error = _state.sent();
                                 throw new Error("Error editing submission: ".concat(error.message));
                             case 3:
+                                return [
+                                    2
+                                ];
+                        }
+                    });
+                })();
+            }
+        },
+        {
+            key: "getAllEvaluationsWithSub",
+            value: /**
+   * Get all evaluations and their corresponding submissions for a given student.
+   * @param studentId - ID of the student.
+   * @returns Array of objects with evaluation and corresponding submission.
+   */ function getAllEvaluationsWithSub(studentId) {
+                var _this = this;
+                return _async_to_generator(function() {
+                    var evaluations, evaluationSubmissions, _iteratorNormalCompletion, _didIteratorError, _iteratorError, _iterator, _step, evaluation, submission, err, error;
+                    return _ts_generator(this, function(_state) {
+                        switch(_state.label){
+                            case 0:
+                                _state.trys.push([
+                                    0,
+                                    10,
+                                    ,
+                                    11
+                                ]);
+                                return [
+                                    4,
+                                    _this.modelEvaluation.find().exec()
+                                ];
+                            case 1:
+                                evaluations = _state.sent();
+                                evaluationSubmissions = [];
+                                _iteratorNormalCompletion = true, _didIteratorError = false, _iteratorError = undefined;
+                                _state.label = 2;
+                            case 2:
+                                _state.trys.push([
+                                    2,
+                                    7,
+                                    8,
+                                    9
+                                ]);
+                                _iterator = evaluations[Symbol.iterator]();
+                                _state.label = 3;
+                            case 3:
+                                if (!!(_iteratorNormalCompletion = (_step = _iterator.next()).done)) return [
+                                    3,
+                                    6
+                                ];
+                                evaluation = _step.value;
+                                console.log(evaluation._id);
+                                return [
+                                    4,
+                                    _this.modelSubmission.findOne({
+                                        student_id: studentId,
+                                        evaluation_id: evaluation._id
+                                    }).exec()
+                                ];
+                            case 4:
+                                submission = _state.sent();
+                                evaluationSubmissions.push({
+                                    evaluation: evaluation,
+                                    submission: submission || null
+                                });
+                                _state.label = 5;
+                            case 5:
+                                _iteratorNormalCompletion = true;
+                                return [
+                                    3,
+                                    3
+                                ];
+                            case 6:
+                                return [
+                                    3,
+                                    9
+                                ];
+                            case 7:
+                                err = _state.sent();
+                                _didIteratorError = true;
+                                _iteratorError = err;
+                                return [
+                                    3,
+                                    9
+                                ];
+                            case 8:
+                                try {
+                                    if (!_iteratorNormalCompletion && _iterator.return != null) {
+                                        _iterator.return();
+                                    }
+                                } finally{
+                                    if (_didIteratorError) {
+                                        throw _iteratorError;
+                                    }
+                                }
+                                return [
+                                    7
+                                ];
+                            case 9:
+                                return [
+                                    2,
+                                    evaluationSubmissions
+                                ];
+                            case 10:
+                                error = _state.sent();
+                                throw new Error("Error getting evaluations with submissions for student: ".concat(error.message));
+                            case 11:
                                 return [
                                     2
                                 ];

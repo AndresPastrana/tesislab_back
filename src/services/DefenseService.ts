@@ -72,7 +72,7 @@ export class DefenseService {
           student: student_name,
           court,
           key_words,
-          scientific_problem, // Added scientific_problem to metadata
+          scientific_problem,
         },
         eval: evaluation,
         recomns: recoms,

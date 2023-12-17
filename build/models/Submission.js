@@ -73,12 +73,14 @@ var SubmissionSchema = new Schema({
         type: Number,
         required: false,
         min: 0,
-        max: 5
+        max: 5,
+        default: null
     },
     recoms: {
         type: String,
         required: false,
-        minlength: 10
+        minlength: 10,
+        default: null
     }
 }, {
     methods: {

@@ -2,6 +2,34 @@ import { EvaluationDocument, ModelEvaluation } from "../models/Evaluations.js";
 import { EvaluationType } from "../models/Evaluations.js";
 import { ModelSubmission, SubmissionDocument } from "../models/Submission.js";
 
+interface PersonInfo {
+  _id: string;
+  name: string;
+  lastname: string;
+}
+
+interface SubmissionPopoulatedStudentInfo {
+  id: string;
+  evaluation_id: string;
+  student_id: PersonInfo;
+  file: string;
+  score: number | null;
+  recoms: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+interface SubmissionWithStudentInfo {
+  id: string;
+  evaluation_id: string;
+  student: Omit<PersonInfo, "_id"> & { id: string };
+  file: string;
+  score: number | null;
+  recoms: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 /**
  * Service class for handling evaluations and submissions.
  */
@@ -36,19 +64,41 @@ export class EvaluationService {
    */
   static async getAllSubmissionsByEvaluationId(
     evaluationId: string
-  ): Promise<SubmissionDocument[]> {
+  ): Promise<SubmissionWithStudentInfo[]> {
     try {
       const submissions = await this.modelSubmission
         .find({ evaluation_id: evaluationId })
+        .populate("student_id", "name lastname")
         .exec();
-      return submissions;
+
+      if (submissions) {
+        const mappedSubmissions: SubmissionWithStudentInfo[] = submissions.map(
+          (submission: any) => ({
+            id: submission._id.toString(),
+            evaluation_id: submission.evaluation_id,
+            student: {
+              id: submission.student_id._id,
+              name: submission.student_id.name,
+              lastname: submission.student_id.lastname,
+            },
+            file: submission.file,
+            score: submission.score,
+            recoms: submission.recoms,
+            createdAt: submission.createdAt,
+            updatedAt: submission.updatedAt,
+          })
+        );
+
+        return mappedSubmissions;
+      }
+
+      return [];
     } catch (error: any) {
       throw new Error(
         `Error getting submissions by evaluation ID: ${error.message}`
       );
     }
   }
-
   /**
    * Edit an existing evaluation.
    * @param evaluationId - ID of the evaluation to edit.
@@ -121,6 +171,8 @@ export class EvaluationService {
     submissionData: Partial<SubmissionDocument>
   ): Promise<SubmissionDocument> {
     try {
+      console.log(submissionData);
+
       const newSubmission = await this.modelSubmission.create(submissionData);
       return newSubmission;
     } catch (error: any) {
@@ -154,6 +206,44 @@ export class EvaluationService {
       return updatedSubmission;
     } catch (error: any) {
       throw new Error(`Error editing submission: ${error.message}`);
+    }
+  }
+
+  /**
+   * Get all evaluations and their corresponding submissions for a given student.
+   * @param studentId - ID of the student.
+   * @returns Array of objects with evaluation and corresponding submission.
+   */
+  static async getAllEvaluationsWithSub(
+    studentId: string
+  ): Promise<
+    { evaluation: EvaluationDocument; submission: SubmissionDocument | null }[]
+  > {
+    try {
+      const evaluations = await this.modelEvaluation.find().exec();
+      const evaluationSubmissions: {
+        evaluation: EvaluationDocument;
+        submission: SubmissionDocument | null;
+      }[] = [];
+
+      for (const evaluation of evaluations) {
+        console.log(evaluation._id);
+
+        const submission = await this.modelSubmission
+          .findOne({ student_id: studentId, evaluation_id: evaluation._id })
+          .exec();
+
+        evaluationSubmissions.push({
+          evaluation,
+          submission: submission || null, // If submission not found, set it to null
+        });
+      }
+
+      return evaluationSubmissions;
+    } catch (error: any) {
+      throw new Error(
+        `Error getting evaluations with submissions for student: ${error.message}`
+      );
     }
   }
 }

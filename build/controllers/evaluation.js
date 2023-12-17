@@ -197,6 +197,7 @@ import { matchedData } from "express-validator";
 import { EvaluationService } from "../services/EvaluationService.js";
 import { handleResponse } from "../middleware/handleResponse.js"; // Update the path accordingly
 import { ErrorHandlerFactory } from "../errors/error.js";
+import { BucketsS3 } from "../const.js";
 import { uploadFile } from "../helpers/minio.js";
 export var EvaluationController = /*#__PURE__*/ function() {
     "use strict";
@@ -499,7 +500,7 @@ export var EvaluationController = /*#__PURE__*/ function() {
                                     ,
                                     4
                                 ]);
-                                submissionData = matchedData(req);
+                                submissionData = req.body;
                                 // Get the submsion file
                                 file = req.file;
                                 if (!file) {
@@ -509,7 +510,7 @@ export var EvaluationController = /*#__PURE__*/ function() {
                                 }
                                 return [
                                     4,
-                                    uploadFile(file)
+                                    uploadFile(file, BucketsS3.Evaluaciones)
                                 ];
                             case 1:
                                 file_url = _state.sent();
@@ -591,6 +592,63 @@ export var EvaluationController = /*#__PURE__*/ function() {
                                         res: res
                                     });
                                 }
+                                return [
+                                    3,
+                                    3
+                                ];
+                            case 2:
+                                error = _state.sent();
+                                customError = ErrorHandlerFactory.createError(error);
+                                handleResponse({
+                                    statusCode: 500,
+                                    error: customError,
+                                    res: res
+                                });
+                                return [
+                                    3,
+                                    3
+                                ];
+                            case 3:
+                                return [
+                                    2
+                                ];
+                        }
+                    });
+                })();
+            }
+        },
+        {
+            key: "getAllEvaluationsWithSub",
+            value: // Get all evaluations and their corresponding submissions for a given student
+            function getAllEvaluationsWithSub(req, res) {
+                return _async_to_generator(function() {
+                    var student_id, evaluationSubmissions, error, customError;
+                    return _ts_generator(this, function(_state) {
+                        switch(_state.label){
+                            case 0:
+                                _state.trys.push([
+                                    0,
+                                    2,
+                                    ,
+                                    3
+                                ]);
+                                student_id = matchedData(req, {
+                                    locations: [
+                                        "params"
+                                    ]
+                                }).student_id; // Assuming the student ID is in the query params
+                                console.log(student_id);
+                                return [
+                                    4,
+                                    EvaluationService.getAllEvaluationsWithSub(student_id)
+                                ];
+                            case 1:
+                                evaluationSubmissions = _state.sent();
+                                handleResponse({
+                                    statusCode: 200,
+                                    data: evaluationSubmissions,
+                                    res: res
+                                });
                                 return [
                                     3,
                                     3

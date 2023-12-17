@@ -2,10 +2,18 @@ import { Document, Schema, model } from "mongoose";
 
 export interface SubmissionType {
   evaluation_id: Schema.Types.ObjectId; // Reference to the evaluation it belongs to
-  student_id: Schema.Types.ObjectId; // Reference to the student (foreign key)
+  student_id:
+    | Schema.Types.ObjectId
+    | {
+        id: string;
+        name: string;
+        lastname: string;
+      }; // Reference to the student (foreign key)
   file: string;
   score: number;
   recoms: string;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export interface SubmissionDocument extends SubmissionType, Document {}
@@ -19,8 +27,8 @@ const SubmissionSchema = new Schema<SubmissionDocument>(
     },
     student_id: { type: Schema.Types.ObjectId, ref: "Student", required: true },
     file: { type: String, required: true },
-    score: { type: Number, required: false, min: 0, max: 5 },
-    recoms: { type: String, required: false, minlength: 10 },
+    score: { type: Number, required: false, min: 0, max: 5, default: null },
+    recoms: { type: String, required: false, minlength: 10, default: null },
   },
   {
     methods: {

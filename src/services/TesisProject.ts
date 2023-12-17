@@ -36,7 +36,7 @@ interface TesisProjectResponse {
   ancient: boolean;
 }
 
-type PopulatedTesisResponse = Omit<
+export type PopulatedTesisResponse = Omit<
   TesisProjectResponse,
   "tutors" | "student"
 > & {
