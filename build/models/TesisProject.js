@@ -131,7 +131,8 @@ var TesisProjectSchema = new Schema({
             },
             date: {
                 type: Date,
-                required: false
+                required: false,
+                default: new Date()
             }
         },
         required: false,

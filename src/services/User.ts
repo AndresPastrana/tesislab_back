@@ -4,8 +4,7 @@ import { createJWTAsync } from "../helpers/jwt.js";
 import { ErrorHandlerFactory } from "../errors/error.js";
 import { generateSecurePassword } from "../helpers/hash.js";
 import { UserRole } from "../const.js";
-import { log } from "console";
-import { ProfesorService } from "./ProfesorsService.js";
+
 import { ModelProfesor } from "../models/Profesor.js";
 import { ModelStudent } from "../models/Student.js";
 interface LoginUserInput {

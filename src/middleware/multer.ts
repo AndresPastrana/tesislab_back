@@ -1,6 +1,6 @@
 import { Request } from "express";
 import multer, { Options } from "multer";
-import { getFileExtension, isValidFile } from "../helpers/files.js";
+import { isValidFile } from "../helpers/files.js";
 import { EvalAllowedExtensions } from "../const.js";
 
 // Set up multer storage for file uploads
@@ -17,6 +17,10 @@ const fileFilter = (
   file: Express.Multer.File,
   callback: multer.FileFilterCallback
 ) => {
+  console.log("Inside multer");
+
+  console.log(file);
+
   if (isValidFile(EvalAllowedExtensions, file)) {
     callback(null, true);
   } else {

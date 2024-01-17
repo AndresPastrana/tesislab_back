@@ -1,6 +1,10 @@
 import { EvaluationDocument, ModelEvaluation } from "../models/Evaluations.js";
 import { EvaluationType } from "../models/Evaluations.js";
-import { ModelSubmission, SubmissionDocument } from "../models/Submission.js";
+import {
+  ModelSubmission,
+  SubmissionDocument,
+  SubmissionType,
+} from "../models/Submission.js";
 
 interface PersonInfo {
   _id: string;
@@ -168,7 +172,7 @@ export class EvaluationService {
    * @returns Created submission document.
    */
   static async createSubmission(
-    submissionData: Partial<SubmissionDocument>
+    submissionData: Partial<SubmissionType>
   ): Promise<SubmissionDocument> {
     try {
       console.log(submissionData);

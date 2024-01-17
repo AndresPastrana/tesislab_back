@@ -8,6 +8,8 @@ import { BucketsS3, EvalType } from "../const.js";
 import { SubmissionType } from "../models/Submission.js";
 import { uploadFile } from "../helpers/minio.js";
 
+import { validateEditSubmissionFields } from "../helpers/others.js";
+
 export class EvaluationController {
   // Get all evaluations
   static async getAllEvaluations(req: Request, res: Response): Promise<void> {
@@ -115,45 +117,101 @@ export class EvaluationController {
   // Create a new submission for a specific evaluation
   static async createSubmission(req: Request, res: Response) {
     try {
-      const submissionData = req.body as Partial<SubmissionType>;
-
-      // Get the submsion file
+      const { evaluation_id } = req.body as Partial<SubmissionType>;
       const file = req.file;
 
       if (!file) {
-        return;
+        return handleResponse({
+          res,
+          error: ErrorHandlerFactory.createError(new Error("")),
+          statusCode: 400,
+        });
       }
 
       const file_url = await uploadFile(file, BucketsS3.Evaluaciones);
 
       const createdSubmission = await EvaluationService.createSubmission({
-        ...submissionData,
+        evaluation_id,
+        student_id: new Types.ObjectId(req.user?.userId as string),
         file: file_url,
       });
 
-      handleResponse({ statusCode: 201, data: createdSubmission, res });
+      return handleResponse({ statusCode: 201, data: createdSubmission, res });
     } catch (error: any) {
       console.log(error);
 
       const customError: CustomError = ErrorHandlerFactory.createError(error);
-      handleResponse({ statusCode: 500, error: customError, res });
+      return handleResponse({ statusCode: 500, error: customError, res });
     }
   }
 
   // Edit an existing submission
-  static async editSubmission(req: Request, res: Response): Promise<void> {
+  static async editSubmission(req: Request, res: Response) {
     try {
-      const submissionId = req.params.submissionId; // Assuming the submission ID is in the route params
-      const updatedData = matchedData(req) as Partial<SubmissionType>;
+      const { id: submissionId } = matchedData(req, {
+        locations: ["params"],
+      }) as { id: string };
+
+      // The fileds that can be edited are the "recoms" , "score" , "file"
+      const body = req.body as Pick<SubmissionType, "recoms" | "score">;
+      const file = req.file;
+
+      // TODO: If has file.
+      let updatedData: Partial<
+        Pick<SubmissionType, "file" | "score" | "recoms">
+      >;
+      updatedData = { ...body, score: Number(body.score) };
+      console.log("Data");
+      console.log(updatedData);
+
+      // TODO: Edit the file url
+      // if (file) {
+      //   // TODO: This code can only be executed if the loged user is an student
+      //   //  -Get the previous file name and bucket
+      //   const subInfo = await ModelSubmission.findById(submissionId);
+      //   const parserurl = parseFileUrl(subInfo?.file as string);
+
+      //   //
+      //   const fileServer = MinioService.getInstance();
+      //   //  -Delete the prev file of the minio server
+      //   await fileServer.deleteFile(parserurl.bucketName, parserurl.objectName);
+      //   //  -Upload the new file and get the url
+      //   const newFileUrl = await uploadFile(file, BucketsS3.Evaluaciones);
+
+      //   // Appedn the new file to the updated data
+      //   updatedData.file = newFileUrl;
+      // }
+
+      const validationErrors = validateEditSubmissionFields({
+        recoms: updatedData.recoms,
+        score: updatedData.score,
+      });
+
+      if (validationErrors.length > 0) {
+        return handleResponse({
+          statusCode: 400,
+          error: {
+            name: "Validation Error",
+            message: `Errors: ${validationErrors.join(", ")}`,
+          },
+          res,
+        });
+      }
+
+      // Edit the submission
       const updatedSubmission = await EvaluationService.editSubmission(
         submissionId,
         updatedData
       );
 
       if (updatedSubmission) {
-        handleResponse({ statusCode: 200, data: updatedSubmission, res });
+        return handleResponse({
+          statusCode: 200,
+          data: updatedSubmission,
+          res,
+        });
       } else {
-        handleResponse({
+        return handleResponse({
           statusCode: 404,
           error: {
             name: "NotFoundError",

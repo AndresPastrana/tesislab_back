@@ -5,7 +5,9 @@ export const getFileExtension = (file: Express.Multer.File) => {
   if (!file) {
     throw new Error("Invalid function params");
   }
-  const fileExtension = (file.mimetype || "").split("/").pop();
+  const fileExtension = (file.originalname || "").split(".").pop();
+  console.log(fileExtension);
+
   return fileExtension;
 };
 

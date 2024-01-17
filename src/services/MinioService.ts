@@ -1,8 +1,8 @@
-import { allowed_formats } from "../const.js";
 import { getMinioConfig } from "../helpers/minio.js";
-import { Client, ClientOptions, ItemBucketMetadata } from "minio";
+import { Client, ClientOptions } from "minio";
 import { Readable } from "stream";
 import * as zlib from "zlib";
+import { BucketsS3 } from "../const.js";
 
 export default class MinioService {
   private static instance: MinioService;
@@ -59,7 +59,7 @@ export default class MinioService {
   }
 
   async uploadFile(
-    bucketName: string,
+    bucketName: BucketsS3,
     fileName: string,
     file: Buffer
   ): Promise<void> {
@@ -70,7 +70,10 @@ export default class MinioService {
     }
   }
 
-  async getFile(bucketName: string, fileName: string): Promise<Buffer | null> {
+  async getFile(
+    bucketName: BucketsS3,
+    fileName: string
+  ): Promise<Buffer | null> {
     try {
       const fileStream = await this.minioClient.getObject(bucketName, fileName);
       const chunks: Buffer[] = [];
@@ -84,8 +87,20 @@ export default class MinioService {
       this.handleError("getting file", error);
     }
   }
+  async deleteFile(bucketName: BucketsS3, fileName: string) {
+    try {
+      await this.minioClient.removeObject(bucketName, fileName, {
+        forceDelete: true,
+      });
+    } catch (error) {
+      console.log(error);
+      throw new Error(
+        `Error deleting file ${fileName} in the bucket ${bucketName} in th  MinIO Server`
+      );
+    }
+  }
 
-  private async getFiles(bucketName: string) {
+  private async getFiles(bucketName: BucketsS3) {
     try {
       const files = this.minioClient.listObjects(bucketName, "", true);
       return files;

@@ -1,7 +1,11 @@
 import { Request, Response, response } from "express";
 import { matchedData } from "express-validator";
 import { UserRole } from "../const.js";
-import { ProfesorType } from "../models/Profesor.js";
+import {
+  ModelProfesor,
+  ProfesorDocument,
+  ProfesorType,
+} from "../models/Profesor.js";
 import { ErrorHandlerFactory } from "../errors/error.js";
 import {
   ProfesorService,
@@ -17,6 +21,10 @@ import {
 
 import { caluculateAge } from "../helpers/age.js";
 import { TesisProjectService } from "../services/TesisProject.js";
+import { ModelCourt } from "../models/Court.js";
+import { Document, Types } from "mongoose";
+import { CourtsService } from "../services/CourtService.js";
+import { ModelTesisProject } from "../models/TesisProject.js";
 
 export const ProfesorController = {
   createProfesor: async (req: Request, res: Response) => {
@@ -116,6 +124,90 @@ export const ProfesorController = {
     }
   },
 
+  getCourtByProfessorId: async (req: Request, res: Response) => {
+    try {
+      // Extract professor ID from the authenticated user
+      const professorId = req.user?.userId;
+
+      // Find the professor based on the provided ID
+      const professor = (await ModelProfesor.findById(
+        professorId
+      )) as ProfesorDocument;
+
+      // Check if the professor was found
+      if (!professor) {
+        return handleResponse({
+          res,
+          statusCode: 404,
+          error: ErrorHandlerFactory.createError(
+            new Error("Professor not found")
+          ),
+        });
+      }
+
+      // Find the court that includes the specified professor in the members array
+      const court = await ModelCourt.findOne({
+        "members.profesor": new Types.ObjectId(professorId),
+      });
+
+      const courtInfo = await CourtsService.getCourtInfoById(court?._id);
+
+      // Check if the court was found
+
+      // Populate the professor details in the court
+      const populatedCourt = await court?.populate(
+        "members.profesor",
+        "name lastname academic_rank"
+      );
+
+      // Combine professor and court information
+      const professorAndCourtData = {
+        professor: professor.toJSON(),
+        court: courtInfo,
+      };
+
+      // Return the combined data as a JSON response
+      return handleResponse({
+        res,
+        data: { ...professorAndCourtData },
+        statusCode: 200,
+      });
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({ message: "Internal Server Error" });
+    }
+  },
+
+  obtenerProyectosYAprobadosPorProfesor: async (
+    req: Request,
+    res: Response
+  ): Promise<void> => {
+    try {
+      // Extract professor ID from the authenticated user
+      const professorId = req.user?.userId;
+
+      // Use Promise.all to run both queries concurrently
+      const [totalProyectos, proyectosAprobados] = await Promise.all([
+        ModelTesisProject.countDocuments({ tutors: professorId }),
+        ModelTesisProject.countDocuments({
+          tutors: professorId,
+          "approval.isApprove": true,
+        }),
+      ]);
+
+      // Enviar la respuesta
+      handleResponse({
+        res,
+        statusCode: 200,
+        data: { totalProyectos, proyectosAprobados },
+      });
+      return;
+    } catch (error) {
+      // Manejar errores en la solicitud
+      console.error(error);
+      res.status(500).json({ error: "Error al procesar la solicitud" });
+    }
+  },
   updateProfesor: async (req: Request, res: Response) => {
     try {
       const { id } = matchedData(req, { locations: ["params"] });

@@ -1,16 +1,17 @@
-import { log } from "console";
-import { Schema, Document } from "mongoose";
+import { Schema, Document, Types } from "mongoose";
 import { TesisProjectStatus, UserRole } from "../const.js";
 import { ModelTesisProject } from "../models/TesisProject.js";
 import { ErrorHandlerFactory } from "../errors/error.js";
 import { ModelProfesor } from "../models/Profesor.js";
 
 export interface TesisProjectInput {
-  topic: string;
-  general_target: string;
-  scientific_problem: string;
+  topic?: string;
+  general_target?: string;
+  scientific_problem?: string;
   tutors?: Array<Schema.Types.ObjectId>;
   student?: Schema.Types.ObjectId;
+  ancient?: boolean;
+  status?: TesisProjectStatus;
 }
 
 type BasicPersonInfo = { id: string; name: string; lastname: string };
@@ -62,7 +63,7 @@ export class TesisProjectService {
   }
 
   static async editTesisProject(
-    projectId: string,
+    projectId: string | Types.ObjectId,
     data: TesisProjectInput
   ): Promise<TesisProjectResponse> {
     try {
@@ -96,12 +97,11 @@ export class TesisProjectService {
   }
 
   static async getTesisProjectInfo(
-    projectId: Schema.Types.ObjectId,
+    projectId: Types.ObjectId,
     active: string
   ): Promise<PopulatedTesisResponse> {
     try {
       const status_filter = this.buildStatusFilter(active);
-      console.log(status_filter);
 
       const tesisProject = await this.ModelTesisProject.findOne({
         ...status_filter,
@@ -187,15 +187,25 @@ export class TesisProjectService {
   }
 
   static async approveTesisProject(
-    projectId: string
+    projectId: string,
+    recoms: string,
+    uid: string
   ): Promise<TesisProjectResponse> {
     try {
       const approvedTesisProject =
         await this.ModelTesisProject.findByIdAndUpdate(
           projectId,
-          { "approval.isApprove": true },
+          {
+            status: TesisProjectStatus.Approved,
+            approval: {
+              isApprove: true,
+              recommendations: recoms,
+              approvedBy: uid,
+            },
+          },
           { new: true }
         );
+
       if (!approvedTesisProject) {
         throw new Error("Error approving tesis project");
       }

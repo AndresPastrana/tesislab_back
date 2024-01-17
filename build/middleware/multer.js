@@ -9,6 +9,8 @@ var limits = {
 };
 // Define a reusable file filter function
 var fileFilter = function(req, file, callback) {
+    console.log("Inside multer");
+    console.log(file);
     if (isValidFile(EvalAllowedExtensions, file)) {
         callback(null, true);
     } else {

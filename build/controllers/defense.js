@@ -188,8 +188,10 @@ function _ts_generator(thisArg, body) {
     }
 }
 import { BucketsS3 } from "../const.js";
-import { DefenseService } from "../services/Defense.js";
 import { uploadFile } from "../helpers/minio.js"; // Import the uploadFile function
+import { matchedData } from "express-validator";
+import { DefenseService } from "../services/Defense.js";
+import { handleResponse } from "../middleware/handleResponse.js";
 export var DefenseController = /*#__PURE__*/ function() {
     "use strict";
     function DefenseController() {
@@ -205,7 +207,7 @@ export var DefenseController = /*#__PURE__*/ function() {
    * @param {Response} res - Express response object.
    */ function createDefense(req, res) {
                 return _async_to_generator(function() {
-                    var _req_body, studentId, key_words, recoms, evaluation, court, docFiles, presFiles, doc, pres, _ref, doc_url, pres_url, error;
+                    var data, keyWords, project, recoms, evaluation, court, date, docFiles, presFiles, doc, pres, _ref, doc_url, pres_url, error;
                     return _ts_generator(this, function(_state) {
                         switch(_state.label){
                             case 0:
@@ -215,8 +217,12 @@ export var DefenseController = /*#__PURE__*/ function() {
                                     ,
                                     4
                                 ]);
-                                // Extract necessary data from the request body
-                                _req_body = req.body, studentId = _req_body.studentId, key_words = _req_body.key_words, recoms = _req_body.recoms, evaluation = _req_body.evaluation, court = _req_body.court;
+                                data = matchedData(req, {
+                                    locations: [
+                                        "body"
+                                    ]
+                                });
+                                keyWords = data.keyWords, project = data.project, recoms = data.recoms, evaluation = data.evaluation, court = data.court, date = data.date;
                                 docFiles = req.files["docFile"];
                                 presFiles = req.files["presFile"];
                                 // Ensure there is at least one file for each type
@@ -238,41 +244,96 @@ export var DefenseController = /*#__PURE__*/ function() {
                                     _state.sent(),
                                     2
                                 ]), doc_url = _ref[0], pres_url = _ref[1];
-                                console.log(doc_url);
-                                console.log(pres_url);
                                 // Call the DefenseService to create a new defense record
                                 return [
                                     4,
                                     DefenseService.createDefense({
-                                        studentId: studentId,
-                                        key_words: key_words,
-                                        recoms: recoms,
-                                        evaluation: evaluation,
+                                        court: court,
                                         doc_url: doc_url,
                                         pres_url: pres_url,
-                                        court: court
+                                        evaluation: evaluation,
+                                        keyWords: keyWords,
+                                        project: project,
+                                        recoms: recoms,
+                                        date: date
                                     })
                                 ];
                             case 2:
                                 _state.sent();
                                 // Send a success response
-                                res.status(201).json({
-                                    message: "Defense record created successfully."
-                                });
                                 return [
-                                    3,
-                                    4
+                                    2,
+                                    handleResponse({
+                                        statusCode: 201,
+                                        res: res,
+                                        data: null
+                                    })
                                 ];
                             case 3:
                                 error = _state.sent();
                                 // Handle errors and send an error response
-                                console.error("Error in createDefense controller:", error.message);
+                                console.error("Error in createDefense controller:", error === null || error === void 0 ? void 0 : error.message);
                                 res.status(500).json({
                                     error: "Internal server error"
                                 });
                                 return [
                                     3,
                                     4
+                                ];
+                            case 4:
+                                return [
+                                    2
+                                ];
+                        }
+                    });
+                })();
+            }
+        },
+        {
+            key: "search",
+            value: function search(req, res) {
+                return _async_to_generator(function() {
+                    var _matchedData, _matchedData_query, query, results, error;
+                    return _ts_generator(this, function(_state) {
+                        switch(_state.label){
+                            case 0:
+                                _matchedData = matchedData(req, {
+                                    locations: [
+                                        "query"
+                                    ]
+                                }), _matchedData_query = _matchedData.query, query = _matchedData_query === void 0 ? "" : _matchedData_query;
+                                _state.label = 1;
+                            case 1:
+                                _state.trys.push([
+                                    1,
+                                    3,
+                                    ,
+                                    4
+                                ]);
+                                return [
+                                    4,
+                                    DefenseService.search(query)
+                                ];
+                            case 2:
+                                results = _state.sent();
+                                // const results = DefenseService.search(query);
+                                return [
+                                    2,
+                                    handleResponse({
+                                        res: res,
+                                        statusCode: 200,
+                                        data: results
+                                    })
+                                ];
+                            case 3:
+                                error = _state.sent();
+                                return [
+                                    2,
+                                    handleResponse({
+                                        res: res,
+                                        error: null,
+                                        statusCode: 500
+                                    })
                                 ];
                             case 4:
                                 return [

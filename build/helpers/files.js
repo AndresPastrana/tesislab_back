@@ -3,7 +3,8 @@ export var getFileExtension = function(file) {
     if (!file) {
         throw new Error("Invalid function params");
     }
-    var fileExtension = (file.mimetype || "").split("/").pop();
+    var fileExtension = (file.originalname || "").split(".").pop();
+    console.log(fileExtension);
     return fileExtension;
 };
 export var getUniqueFileName = function(file) {

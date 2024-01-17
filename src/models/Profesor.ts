@@ -15,7 +15,7 @@ export interface ProfesorType {
   ancient: boolean;
 }
 
-interface ProfesorDocument extends ProfesorType, Document {}
+export interface ProfesorDocument extends ProfesorType, Document {}
 
 const ProfesorSchema = new Schema<ProfesorDocument>(
   {

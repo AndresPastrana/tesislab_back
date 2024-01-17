@@ -31,6 +31,7 @@ import { validateRequest } from "../middleware/validate.js";
 import { protectRouteByRole } from "../middleware/protectRouteByRole.js";
 import { isValidToken } from "../middleware/jwt.js";
 import { multerMiddleware } from "../middleware/multer.js";
+import { Types, isValidObjectId } from "mongoose";
 export var router = express.Router();
 var authValidations = [
     isValidToken,
@@ -61,9 +62,15 @@ var editEvaluationValidation = [
 var getSubmissionsByStudentIdValidation = [
     query("studentId").isString().notEmpty().withMessage("Student ID is required")
 ];
+var editSubmissionvalidation = [
+    param("id").isMongoId().withMessage("Invalid Submission id").if(function(id) {
+        return isValidObjectId(id);
+    }).customSanitizer(function(id) {
+        return new Types.ObjectId(id);
+    })
+];
 var createSubmissionValidations = [
-    body("evaluation_id").isMongoId().withMessage("Invalid evaluationId format"),
-    body("student_id").isMongoId().withMessage("Invalid studentId format")
+    body("evaluation_id").isMongoId().withMessage("Invalid evaluationId format")
 ];
 // Routes
 router.post("/", _to_consumable_array(authValidations).concat(_to_consumable_array(createEvaluationValidation), [
@@ -73,10 +80,10 @@ router.get("/:id/submissions", _to_consumable_array(authValidations).concat(_to_
     validateRequest
 ]), EvaluationController.getAllSubmissionsByEvaluationId);
 router.post("/submissions", _to_consumable_array(authValidations).concat([
-    // ...createSubmissionValidations,
-    multerMiddleware.single("form_file")
+    multerMiddleware.single("submissionFile")
 ]), EvaluationController.createSubmission);
-router.put("/submissions/:id", _to_consumable_array(authValidations).concat([
+router.put("/submissions/:id", _to_consumable_array(authValidations).concat(_to_consumable_array(editSubmissionvalidation), [
+    multerMiddleware.single("submissionFile"),
     validateRequest
 ]), EvaluationController.editSubmission);
 router.put("/:evaluationId", _to_consumable_array(authValidations).concat(_to_consumable_array(editEvaluationValidation), [

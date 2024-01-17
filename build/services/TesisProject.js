@@ -369,7 +369,6 @@ export var TesisProjectService = /*#__PURE__*/ function() {
                                     3
                                 ]);
                                 status_filter = _this.buildStatusFilter(active);
-                                console.log(status_filter);
                                 return [
                                     4,
                                     _this.ModelTesisProject.findOne(_object_spread_props(_object_spread({}, status_filter), {
@@ -530,7 +529,7 @@ export var TesisProjectService = /*#__PURE__*/ function() {
         },
         {
             key: "approveTesisProject",
-            value: function approveTesisProject(projectId) {
+            value: function approveTesisProject(projectId, recoms, uid) {
                 var _this = this;
                 return _async_to_generator(function() {
                     var approvedTesisProject, error;
@@ -546,7 +545,12 @@ export var TesisProjectService = /*#__PURE__*/ function() {
                                 return [
                                     4,
                                     _this.ModelTesisProject.findByIdAndUpdate(projectId, {
-                                        "approval.isApprove": true
+                                        status: TesisProjectStatus.Approved,
+                                        approval: {
+                                            isApprove: true,
+                                            recommendations: recoms,
+                                            approvedBy: uid
+                                        }
                                     }, {
                                         new: true
                                     })

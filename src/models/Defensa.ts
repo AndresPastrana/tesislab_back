@@ -1,4 +1,5 @@
 import { Document, Schema, model } from "mongoose";
+import { CourtRole } from "../const.js";
 export interface Defense {
   doc_url: string;
   pres_url: string;
@@ -11,13 +12,22 @@ export interface Defense {
     topic: string;
     tutors: string[];
     student: string;
-    court: string[];
+    court: { fullname: string; role: CourtRole }[];
     key_words: string[]; // Added field
   };
   eval: number;
   recomns: string;
   date: Date;
 }
+
+export type DefenseData = {
+  keyWords: string[];
+  recoms: string;
+  evaluation: number; // Assuming 'evaluation' is a number
+  court: string;
+  project: string;
+  date: Date;
+};
 
 export interface DefenseType extends Defense, Document {}
 
@@ -71,6 +81,27 @@ const DefensaSchema = new Schema<DefenseType>({
       type: String,
       required: true,
     },
+    court: {
+      type: [
+        {
+          fullname: {
+            type: String,
+            required: true,
+          },
+          role: {
+            type: String,
+            enum: Object.values(CourtRole),
+            required: true,
+          },
+        },
+      ],
+      required: true,
+    },
+  },
+  date: {
+    type: Date,
+    required: false,
+    default: new Date(),
   },
 });
 

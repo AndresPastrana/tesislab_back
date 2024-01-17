@@ -141,9 +141,13 @@ function _ts_generator(thisArg, body) {
         };
     }
 }
-import { UserRole } from "../const.js";
+import { Types } from "mongoose";
 import { ModelDefense } from "../models/Defensa.js";
 import { TesisProjectService } from "./TesisProject.js";
+import { CourtsService } from "./CourtService.js";
+import { TesisProjectStatus } from "../const.js";
+import { StudentService } from "./StudentsService.js";
+import { UserService } from "./User.js";
 export var DefenseService = /*#__PURE__*/ function() {
     "use strict";
     function DefenseService() {
@@ -166,23 +170,46 @@ export var DefenseService = /*#__PURE__*/ function() {
    * @throws {Error} Throws an error if there's an issue creating the defense.
    */ function createDefense(defenseData) {
                 return _async_to_generator(function() {
-                    var studentId, key_words, recoms, evaluation, doc_url, pres_url, court, project_info, general_target, functional_requirements, scientific_problem, topic, student, tutors, tutors_names, student_name, newDefense, createdDefense, error;
+                    var court, keyWords, recoms, evaluation, doc_url, pres_url, project, date, projectId, project_info, courtinfo, courtMembers, general_target, functional_requirements, scientific_problem, topic, student, tutors, tutors_names, student_name, newDefense, p, studentInfo, error;
                     return _ts_generator(this, function(_state) {
                         switch(_state.label){
                             case 0:
                                 _state.trys.push([
                                     0,
-                                    3,
+                                    8,
                                     ,
-                                    4
+                                    9
                                 ]);
-                                studentId = defenseData.studentId, key_words = defenseData.key_words, recoms = defenseData.recoms, evaluation = defenseData.evaluation, doc_url = defenseData.doc_url, pres_url = defenseData.pres_url, court = defenseData.court;
+                                court = defenseData.court, keyWords = defenseData.keyWords, recoms = defenseData.recoms, evaluation = defenseData.evaluation, doc_url = defenseData.doc_url, pres_url = defenseData.pres_url, project = defenseData.project, date = defenseData.date;
+                                // Get the info of the project
+                                projectId = new Types.ObjectId(project);
                                 return [
                                     4,
-                                    TesisProjectService.getProjectsByMemberId("true", studentId, UserRole.Student)
+                                    TesisProjectService.getTesisProjectInfo(projectId, "true")
                                 ];
                             case 1:
                                 project_info = _state.sent();
+                                // The project is not active , has been closed or does not exist
+                                if (!project_info) {
+                                    return [
+                                        2,
+                                        null
+                                    ];
+                                }
+                                return [
+                                    4,
+                                    CourtsService.getCourtInfoById(court)
+                                ];
+                            case 2:
+                                courtinfo = _state.sent();
+                                courtMembers = courtinfo === null || courtinfo === void 0 ? void 0 : courtinfo.members.map(function(param) {
+                                    var profesor = param.profesor, role = param.role;
+                                    return {
+                                        fullname: "".concat(profesor.name, " ").concat(profesor.lastname),
+                                        role: role
+                                    };
+                                });
+                                // Extract the info  that we need of the project
                                 general_target = project_info.general_target, functional_requirements = project_info.functional_requirements, scientific_problem = project_info.scientific_problem, topic = project_info.topic, student = project_info.student, tutors = project_info.tutors;
                                 // Extract names from tutors
                                 tutors_names = tutors.map(function(t) {
@@ -199,33 +226,162 @@ export var DefenseService = /*#__PURE__*/ function() {
                                         topic: topic,
                                         tutors: tutors_names,
                                         student: student_name,
-                                        court: court,
-                                        key_words: key_words,
+                                        court: courtMembers || [],
+                                        key_words: keyWords || [],
                                         scientific_problem: scientific_problem
                                     },
                                     eval: evaluation,
                                     recomns: recoms,
-                                    date: new Date()
+                                    date: date
                                 };
                                 return [
                                     4,
                                     ModelDefense.create(newDefense)
                                 ];
-                            case 2:
-                                createdDefense = _state.sent();
-                                // Log the created defense
-                                console.log("Created Defense:", createdDefense);
-                                return [
-                                    3,
-                                    4
-                                ];
                             case 3:
+                                p = _state.sent();
+                                // ************* CLEAN UP *************************** //
+                                // Set the project as an old and not active project
+                                return [
+                                    4,
+                                    TesisProjectService.editTesisProject(projectId, {
+                                        ancient: true,
+                                        status: TesisProjectStatus.Closed
+                                    })
+                                ];
+                            case 4:
+                                _state.sent();
+                                // Set then student as ancient
+                                return [
+                                    4,
+                                    StudentService.updateStudent(project_info.student.id, {
+                                        ancient: true
+                                    })
+                                ];
+                            case 5:
+                                _state.sent();
+                                return [
+                                    4,
+                                    StudentService.getStudentById(project_info.student.id)
+                                ];
+                            case 6:
+                                studentInfo = _state.sent();
+                                if (!studentInfo) {
+                                    throw new Error("Error creating the defense, Student not found");
+                                }
+                                return [
+                                    4,
+                                    UserService.deactivateUser({
+                                        userId: studentInfo.user_id
+                                    })
+                                ];
+                            case 7:
+                                _state.sent();
+                                return [
+                                    2
+                                ];
+                            case 8:
                                 error = _state.sent();
                                 // Log the error for debugging purposes
                                 console.error("Error creating defense:", error);
                                 // Rethrow the error with a specific message
                                 throw new Error("Error creating defense: ".concat(error.message));
-                            case 4:
+                            case 9:
+                                return [
+                                    2
+                                ];
+                        }
+                    });
+                })();
+            }
+        },
+        {
+            key: "search",
+            value: function search(term) {
+                return _async_to_generator(function() {
+                    var searchTermRegExp, searchFilter, searchResults, error;
+                    return _ts_generator(this, function(_state) {
+                        switch(_state.label){
+                            case 0:
+                                _state.trys.push([
+                                    0,
+                                    2,
+                                    ,
+                                    3
+                                ]);
+                                searchTermRegExp = new RegExp(term, "i");
+                                // Define a filter object for the search
+                                searchFilter = {
+                                    $or: [
+                                        {
+                                            "metadata.general_target": searchTermRegExp
+                                        },
+                                        {
+                                            "metadata.functional_requirements": {
+                                                $in: [
+                                                    searchTermRegExp
+                                                ]
+                                            }
+                                        },
+                                        {
+                                            "metadata.scientific_problem": searchTermRegExp
+                                        },
+                                        {
+                                            "metadata.topic": searchTermRegExp
+                                        },
+                                        {
+                                            "metadata.tutors": {
+                                                $in: [
+                                                    searchTermRegExp
+                                                ]
+                                            }
+                                        },
+                                        {
+                                            "metadata.student": searchTermRegExp
+                                        },
+                                        {
+                                            "metadata.court": {
+                                                $elemMatch: {
+                                                    $or: [
+                                                        {
+                                                            fullname: searchTermRegExp
+                                                        }
+                                                    ]
+                                                }
+                                            }
+                                        },
+                                        {
+                                            "metadata.key_words": {
+                                                $in: [
+                                                    searchTermRegExp
+                                                ]
+                                            }
+                                        },
+                                        {
+                                            recomns: searchTermRegExp
+                                        }
+                                    ]
+                                };
+                                console.log("Filter terms");
+                                console.log(searchFilter);
+                                return [
+                                    4,
+                                    ModelDefense.find(searchFilter)
+                                ];
+                            case 1:
+                                searchResults = _state.sent();
+                                // Log the search results
+                                console.log("Search Results:", searchResults);
+                                return [
+                                    2,
+                                    searchResults
+                                ];
+                            case 2:
+                                error = _state.sent();
+                                console.log(error);
+                                console.error("Error during search:", error);
+                                throw new Error("Error during search: ".concat(error.message));
+                            case 3:
                                 return [
                                     2
                                 ];

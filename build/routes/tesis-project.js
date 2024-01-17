@@ -325,7 +325,15 @@ router.get("/byMember", [
 router.get("/:id", _to_consumable_array(authValidations).concat(_to_consumable_array(ancientValidations), _to_consumable_array(validateProjectId), [
     validateRequest
 ]), TesisProjectController.getTesisProjectInfo);
-router.put("/approve/:id", _to_consumable_array(authValidations).concat(_to_consumable_array(validateProjectId), [
+router.put("/approve/:id", [
+    isValidToken,
+    protectRouteByRole([
+        UserRole.Profesor
+    ])
+].concat(_to_consumable_array(validateProjectId), [
+    body("recoms").notEmpty().withMessage("recomns is required").isString().withMessage("recoms msut be a string").isLength({
+        max: 50
+    }),
     validateRequest
 ]), TesisProjectController.approveTesisProject);
 router.put("/update-functional/:id", [

@@ -184,7 +184,16 @@ router.delete(
   [...authValidations, param("id").isMongoId()],
   ProfesorController.deleteProfesor
 );
-
+router.get(
+  "/info",
+  [isValidToken, validateRequest],
+  ProfesorController.getCourtByProfessorId
+);
+router.get(
+  "/stats",
+  [isValidToken, validateRequest],
+  ProfesorController.obtenerProyectosYAprobadosPorProfesor
+);
 router.get(
   "/:id",
   [

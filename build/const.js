@@ -105,6 +105,8 @@ export var Allowedcollections;
     Allowedcollections["docs"] = "docs";
 })(Allowedcollections || (Allowedcollections = {}));
 export var EvalAllowedExtensions = [
+    "ppt",
+    "pptx",
     "pdf",
     "doc",
     "docx"

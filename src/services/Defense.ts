@@ -1,7 +1,11 @@
-import { Schema } from "mongoose";
-import { UserRole } from "../const.js";
-import { Defense, ModelDefense } from "../models/Defensa.js";
+import { Types } from "mongoose";
+
+import { Defense, DefenseData, ModelDefense } from "../models/Defensa.js";
 import { TesisProjectService, PopulatedTesisResponse } from "./TesisProject.js";
+import { CourtsService } from "./CourtService.js";
+import { TesisProjectStatus } from "../const.js";
+import { StudentService } from "./StudentsService.js";
+import { UserService } from "./User.js";
 
 export class DefenseService {
   /**
@@ -17,33 +21,42 @@ export class DefenseService {
    * @param {string[]} defenseData.court - Names of the court members.
    * @throws {Error} Throws an error if there's an issue creating the defense.
    */
-  static async createDefense(defenseData: {
-    studentId: Schema.Types.ObjectId;
-    key_words: string[];
-    recoms: string;
-    evaluation: number;
-    doc_url: string;
-    pres_url: string;
-    court: string[];
-  }): Promise<void> {
+  static async createDefense(
+    defenseData: DefenseData & { doc_url: string; pres_url: string }
+  ): Promise<void | null> {
     try {
       const {
-        studentId,
-        key_words,
+        court,
+        keyWords,
         recoms,
         evaluation,
         doc_url,
         pres_url,
-        court,
+        project,
+        date,
       } = defenseData;
 
       // Get the info of the project
-      const project_info = (await TesisProjectService.getProjectsByMemberId(
-        "true",
-        studentId,
-        UserRole.Student
-      )) as PopulatedTesisResponse;
+      const projectId = new Types.ObjectId(project);
+      const project_info = await TesisProjectService.getTesisProjectInfo(
+        projectId,
+        "true"
+      );
 
+      // The project is not active , has been closed or does not exist
+      if (!project_info) {
+        return null;
+      }
+
+      // Get the info of the court
+      const courtinfo = await CourtsService.getCourtInfoById(court);
+
+      const courtMembers = courtinfo?.members.map(({ profesor, role }) => ({
+        fullname: `${profesor.name} ${profesor.lastname}`,
+        role,
+      }));
+
+      // Extract the info  that we need of the project
       const {
         general_target,
         functional_requirements,
@@ -70,26 +83,91 @@ export class DefenseService {
           topic,
           tutors: tutors_names,
           student: student_name,
-          court,
-          key_words,
+          court: courtMembers || [],
+          key_words: keyWords || [],
           scientific_problem, // Added scientific_problem to metadata
         },
         eval: evaluation,
         recomns: recoms,
-        date: new Date(),
+        date,
       };
 
       // Save the new defense record
-      const createdDefense = await ModelDefense.create(newDefense);
+      const p = await ModelDefense.create(newDefense);
 
-      // Log the created defense
-      console.log("Created Defense:", createdDefense);
+      // ************* CLEAN UP *************************** //
+      // Set the project as an old and not active project
+      await TesisProjectService.editTesisProject(projectId, {
+        ancient: true,
+        status: TesisProjectStatus.Closed,
+      });
+
+      // Set then student as ancient
+      await StudentService.updateStudent(project_info.student.id, {
+        ancient: true,
+      });
+
+      const studentInfo = await StudentService.getStudentById(
+        project_info.student.id
+      );
+      if (!studentInfo) {
+        throw new Error("Error creating the defense, Student not found");
+      }
+
+      await UserService.deactivateUser({ userId: studentInfo.user_id });
+
+      return;
+
+      // TODO: // set the student as inactive
     } catch (error: any) {
       // Log the error for debugging purposes
       console.error("Error creating defense:", error);
 
       // Rethrow the error with a specific message
       throw new Error(`Error creating defense: ${error.message}`);
+    }
+  }
+
+  static async search(term: string): Promise<Defense[]> {
+    try {
+      const searchTermRegExp = new RegExp(term, "i");
+
+      // Define a filter object for the search
+      const searchFilter = {
+        $or: [
+          { "metadata.general_target": searchTermRegExp },
+          { "metadata.functional_requirements": { $in: [searchTermRegExp] } },
+          { "metadata.scientific_problem": searchTermRegExp },
+          { "metadata.topic": searchTermRegExp },
+          { "metadata.tutors": { $in: [searchTermRegExp] } },
+          { "metadata.student": searchTermRegExp },
+          {
+            "metadata.court": {
+              $elemMatch: {
+                $or: [{ fullname: searchTermRegExp }],
+              },
+            },
+          },
+          { "metadata.key_words": { $in: [searchTermRegExp] } },
+          { recomns: searchTermRegExp },
+        ],
+      };
+
+      console.log("Filter terms");
+      console.log(searchFilter);
+
+      // Perform the search using the filter
+      const searchResults = await ModelDefense.find(searchFilter);
+
+      // Log the search results
+      console.log("Search Results:", searchResults);
+
+      return searchResults;
+    } catch (error: any) {
+      console.log(error);
+
+      console.error("Error during search:", error);
+      throw new Error(`Error during search: ${error.message}`);
     }
   }
 }

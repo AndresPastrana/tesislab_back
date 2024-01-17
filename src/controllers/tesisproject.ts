@@ -5,7 +5,7 @@ import {
 } from "../services/TesisProject.js";
 import { ErrorHandlerFactory } from "../errors/error.js";
 
-import { matchedData } from "express-validator";
+import { body, matchedData } from "express-validator";
 import { handleResponse } from "../middleware/handleResponse.js";
 import { UserRole } from "../const.js";
 import { Schema } from "mongoose";
@@ -107,11 +107,20 @@ export class TesisProjectController {
     }
   }
 
-  static async approveTesisProject(req: Request, res: Response): Promise<void> {
+  static async approveTesisProject(
+    req: Request & { user?: { userId: string } },
+    res: Response
+  ): Promise<void> {
     try {
-      const projectId = req.params.id;
+      const { id, recoms } = matchedData(req, {
+        locations: ["params", "body"],
+      }) as {
+        id: string;
+        recoms: string;
+      };
+      const uid = req.user?.userId as string;
       const approvedTesisProject =
-        await TesisProjectService.approveTesisProject(projectId);
+        await TesisProjectService.approveTesisProject(id, recoms, uid);
       handleResponse({
         statusCode: 200,
         data: approvedTesisProject,

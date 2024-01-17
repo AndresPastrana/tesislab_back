@@ -199,6 +199,7 @@ import { handleResponse } from "../middleware/handleResponse.js"; // Update the 
 import { ErrorHandlerFactory } from "../errors/error.js";
 import { BucketsS3 } from "../const.js";
 import { uploadFile } from "../helpers/minio.js";
+import { validateEditSubmissionFields } from "../helpers/others.js";
 export var EvaluationController = /*#__PURE__*/ function() {
     "use strict";
     function EvaluationController() {
@@ -490,7 +491,7 @@ export var EvaluationController = /*#__PURE__*/ function() {
             value: // Create a new submission for a specific evaluation
             function createSubmission(req, res) {
                 return _async_to_generator(function() {
-                    var submissionData, file, file_url, createdSubmission, error, customError;
+                    var _req_user, evaluation_id, file, file_url, createdSubmission, error, customError;
                     return _ts_generator(this, function(_state) {
                         switch(_state.label){
                             case 0:
@@ -500,12 +501,16 @@ export var EvaluationController = /*#__PURE__*/ function() {
                                     ,
                                     4
                                 ]);
-                                submissionData = req.body;
-                                // Get the submsion file
+                                evaluation_id = req.body.evaluation_id;
                                 file = req.file;
                                 if (!file) {
                                     return [
-                                        2
+                                        2,
+                                        handleResponse({
+                                            res: res,
+                                            error: ErrorHandlerFactory.createError(new Error("")),
+                                            statusCode: 400
+                                        })
                                     ];
                                 }
                                 return [
@@ -516,33 +521,33 @@ export var EvaluationController = /*#__PURE__*/ function() {
                                 file_url = _state.sent();
                                 return [
                                     4,
-                                    EvaluationService.createSubmission(_object_spread_props(_object_spread({}, submissionData), {
+                                    EvaluationService.createSubmission({
+                                        evaluation_id: evaluation_id,
+                                        student_id: new Types.ObjectId((_req_user = req.user) === null || _req_user === void 0 ? void 0 : _req_user.userId),
                                         file: file_url
-                                    }))
+                                    })
                                 ];
                             case 2:
                                 createdSubmission = _state.sent();
-                                handleResponse({
-                                    statusCode: 201,
-                                    data: createdSubmission,
-                                    res: res
-                                });
                                 return [
-                                    3,
-                                    4
+                                    2,
+                                    handleResponse({
+                                        statusCode: 201,
+                                        data: createdSubmission,
+                                        res: res
+                                    })
                                 ];
                             case 3:
                                 error = _state.sent();
                                 console.log(error);
                                 customError = ErrorHandlerFactory.createError(error);
-                                handleResponse({
-                                    statusCode: 500,
-                                    error: customError,
-                                    res: res
-                                });
                                 return [
-                                    3,
-                                    4
+                                    2,
+                                    handleResponse({
+                                        statusCode: 500,
+                                        error: customError,
+                                        res: res
+                                    })
                                 ];
                             case 4:
                                 return [
@@ -558,7 +563,7 @@ export var EvaluationController = /*#__PURE__*/ function() {
             value: // Edit an existing submission
             function editSubmission(req, res) {
                 return _async_to_generator(function() {
-                    var submissionId, updatedData, updatedSubmission, error, customError;
+                    var _matchedData, submissionId, body, file, updatedData, validationErrors, updatedSubmission, error, customError;
                     return _ts_generator(this, function(_state) {
                         switch(_state.label){
                             case 0:
@@ -568,8 +573,51 @@ export var EvaluationController = /*#__PURE__*/ function() {
                                     ,
                                     3
                                 ]);
-                                submissionId = req.params.submissionId; // Assuming the submission ID is in the route params
-                                updatedData = matchedData(req);
+                                _matchedData = matchedData(req, {
+                                    locations: [
+                                        "params"
+                                    ]
+                                }), submissionId = _matchedData.id;
+                                // The fileds that can be edited are the "recoms" , "score" , "file"
+                                body = req.body;
+                                file = req.file;
+                                updatedData = _object_spread_props(_object_spread({}, body), {
+                                    score: Number(body.score)
+                                });
+                                console.log("Data");
+                                console.log(updatedData);
+                                // TODO: Edit the file url
+                                // if (file) {
+                                //   // TODO: This code can only be executed if the loged user is an student
+                                //   //  -Get the previous file name and bucket
+                                //   const subInfo = await ModelSubmission.findById(submissionId);
+                                //   const parserurl = parseFileUrl(subInfo?.file as string);
+                                //   //
+                                //   const fileServer = MinioService.getInstance();
+                                //   //  -Delete the prev file of the minio server
+                                //   await fileServer.deleteFile(parserurl.bucketName, parserurl.objectName);
+                                //   //  -Upload the new file and get the url
+                                //   const newFileUrl = await uploadFile(file, BucketsS3.Evaluaciones);
+                                //   // Appedn the new file to the updated data
+                                //   updatedData.file = newFileUrl;
+                                // }
+                                validationErrors = validateEditSubmissionFields({
+                                    recoms: updatedData.recoms,
+                                    score: updatedData.score
+                                });
+                                if (validationErrors.length > 0) {
+                                    return [
+                                        2,
+                                        handleResponse({
+                                            statusCode: 400,
+                                            error: {
+                                                name: "Validation Error",
+                                                message: "Errors: ".concat(validationErrors.join(", "))
+                                            },
+                                            res: res
+                                        })
+                                    ];
+                                }
                                 return [
                                     4,
                                     EvaluationService.editSubmission(submissionId, updatedData)
@@ -577,20 +625,26 @@ export var EvaluationController = /*#__PURE__*/ function() {
                             case 1:
                                 updatedSubmission = _state.sent();
                                 if (updatedSubmission) {
-                                    handleResponse({
-                                        statusCode: 200,
-                                        data: updatedSubmission,
-                                        res: res
-                                    });
+                                    return [
+                                        2,
+                                        handleResponse({
+                                            statusCode: 200,
+                                            data: updatedSubmission,
+                                            res: res
+                                        })
+                                    ];
                                 } else {
-                                    handleResponse({
-                                        statusCode: 404,
-                                        error: {
-                                            name: "NotFoundError",
-                                            message: "Submission with ID ".concat(submissionId, " not found")
-                                        },
-                                        res: res
-                                    });
+                                    return [
+                                        2,
+                                        handleResponse({
+                                            statusCode: 404,
+                                            error: {
+                                                name: "NotFoundError",
+                                                message: "Submission with ID ".concat(submissionId, " not found")
+                                            },
+                                            res: res
+                                        })
+                                    ];
                                 }
                                 return [
                                     3,

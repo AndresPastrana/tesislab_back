@@ -1,14 +1,8 @@
-import { Document, Schema, model } from "mongoose";
+import { Document, Schema, Types, model } from "mongoose";
 
 export interface SubmissionType {
   evaluation_id: Schema.Types.ObjectId; // Reference to the evaluation it belongs to
-  student_id:
-    | Schema.Types.ObjectId
-    | {
-        id: string;
-        name: string;
-        lastname: string;
-      }; // Reference to the student (foreign key)
+  student_id: Types.ObjectId;
   file: string;
   score: number;
   recoms: string;

@@ -37,7 +37,7 @@ export class StudentService {
 
   static async updateStudent(
     studentId: string,
-    studentData: StudentType
+    studentData: Partial<StudentType>
   ): Promise<StudentType | null> {
     try {
       const updatedStudent = await this.Student.findByIdAndUpdate(

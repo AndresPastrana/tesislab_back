@@ -382,6 +382,46 @@ var MinioService = /*#__PURE__*/ function() {
             }
         },
         {
+            key: "deleteFile",
+            value: function deleteFile(bucketName, fileName) {
+                var _this = this;
+                return _async_to_generator(function() {
+                    var error;
+                    return _ts_generator(this, function(_state) {
+                        switch(_state.label){
+                            case 0:
+                                _state.trys.push([
+                                    0,
+                                    2,
+                                    ,
+                                    3
+                                ]);
+                                return [
+                                    4,
+                                    _this.minioClient.removeObject(bucketName, fileName, {
+                                        forceDelete: true
+                                    })
+                                ];
+                            case 1:
+                                _state.sent();
+                                return [
+                                    3,
+                                    3
+                                ];
+                            case 2:
+                                error = _state.sent();
+                                console.log(error);
+                                throw new Error("Error deleting file ".concat(fileName, " in the bucket ").concat(bucketName, " in th  MinIO Server"));
+                            case 3:
+                                return [
+                                    2
+                                ];
+                        }
+                    });
+                })();
+            }
+        },
+        {
             key: "getFiles",
             value: function getFiles(bucketName) {
                 var _this = this;

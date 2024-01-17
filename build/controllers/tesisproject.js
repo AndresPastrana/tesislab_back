@@ -375,7 +375,7 @@ export var TesisProjectController = /*#__PURE__*/ function() {
             key: "approveTesisProject",
             value: function approveTesisProject(req, res) {
                 return _async_to_generator(function() {
-                    var projectId, approvedTesisProject, error, customError;
+                    var _req_user, _matchedData, id, recoms, uid, approvedTesisProject, error, customError;
                     return _ts_generator(this, function(_state) {
                         switch(_state.label){
                             case 0:
@@ -385,10 +385,16 @@ export var TesisProjectController = /*#__PURE__*/ function() {
                                     ,
                                     3
                                 ]);
-                                projectId = req.params.id;
+                                _matchedData = matchedData(req, {
+                                    locations: [
+                                        "params",
+                                        "body"
+                                    ]
+                                }), id = _matchedData.id, recoms = _matchedData.recoms;
+                                uid = (_req_user = req.user) === null || _req_user === void 0 ? void 0 : _req_user.userId;
                                 return [
                                     4,
-                                    TesisProjectService.approveTesisProject(projectId)
+                                    TesisProjectService.approveTesisProject(id, recoms, uid)
                                 ];
                             case 1:
                                 approvedTesisProject = _state.sent();

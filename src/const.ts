@@ -104,7 +104,7 @@ export enum Allowedcollections {
   docs = "docs",
 }
 
-export const EvalAllowedExtensions = ["pdf", "doc", "docx"];
+export const EvalAllowedExtensions = ["ppt", "pptx", "pdf", "doc", "docx"];
 
 export enum BucketsS3 {
   Evaluaciones = "evaluaciones",

@@ -79,7 +79,7 @@ const TesisProjectSchema = new Schema<TesisProject>(
           ref: "Profesor",
           required: false,
         },
-        date: { type: Date, required: false },
+        date: { type: Date, required: false, default: new Date() },
       },
       required: false,
       default: null,

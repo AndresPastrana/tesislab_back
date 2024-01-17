@@ -141,6 +141,14 @@ router.put("/:id", _to_consumable_array(authValidations).concat(_to_consumable_a
 router.delete("/:id", _to_consumable_array(authValidations).concat([
     param("id").isMongoId()
 ]), ProfesorController.deleteProfesor);
+router.get("/info", [
+    isValidToken,
+    validateRequest
+], ProfesorController.getCourtByProfessorId);
+router.get("/stats", [
+    isValidToken,
+    validateRequest
+], ProfesorController.obtenerProyectosYAprobadosPorProfesor);
 router.get("/:id", [
     authValidations[0],
     protectRouteByRole([

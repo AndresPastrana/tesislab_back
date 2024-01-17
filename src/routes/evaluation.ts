@@ -6,6 +6,8 @@ import { validateRequest } from "../middleware/validate.js";
 import { protectRouteByRole } from "../middleware/protectRouteByRole.js";
 import { isValidToken } from "../middleware/jwt.js";
 import { multerMiddleware } from "../middleware/multer.js";
+import multer from "multer";
+import { Types, isValidObjectId } from "mongoose";
 
 export const router: Router = express.Router();
 
@@ -63,9 +65,16 @@ const getSubmissionsByStudentIdValidation = [
     .withMessage("Student ID is required"),
 ];
 
+const editSubmissionvalidation = [
+  param("id")
+    .isMongoId()
+    .withMessage("Invalid Submission id")
+    .if((id) => isValidObjectId(id))
+    .customSanitizer((id) => new Types.ObjectId(id)),
+];
+
 const createSubmissionValidations = [
   body("evaluation_id").isMongoId().withMessage("Invalid evaluationId format"),
-  body("student_id").isMongoId().withMessage("Invalid studentId format"),
 ];
 // Routes
 router.post(
@@ -88,9 +97,8 @@ router.post(
   "/submissions",
   [
     ...authValidations,
+    multerMiddleware.single("submissionFile"),
     // ...createSubmissionValidations,
-    multerMiddleware.single("form_file"),
-    // validateRequest,
   ],
 
   EvaluationController.createSubmission
@@ -98,7 +106,12 @@ router.post(
 
 router.put(
   "/submissions/:id",
-  [...authValidations, validateRequest],
+  [
+    ...authValidations,
+    ...editSubmissionvalidation,
+    multerMiddleware.single("submissionFile"),
+    validateRequest,
+  ],
 
   EvaluationController.editSubmission
 );

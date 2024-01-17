@@ -216,7 +216,18 @@ router.get(
 
 router.put(
   "/approve/:id",
-  [...authValidations, ...validateProjectId, validateRequest],
+  [
+    isValidToken,
+    protectRouteByRole([UserRole.Profesor]),
+    ...validateProjectId,
+    body("recoms")
+      .notEmpty()
+      .withMessage("recomns is required")
+      .isString()
+      .withMessage("recoms msut be a string")
+      .isLength({ max: 50 }),
+    validateRequest,
+  ],
   TesisProjectController.approveTesisProject
 );
 

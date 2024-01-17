@@ -1,4 +1,5 @@
 import { Schema, model } from "mongoose";
+import { CourtRole } from "../const.js";
 var DefensaSchema = new Schema({
     doc_url: {
         type: String,
@@ -54,7 +55,28 @@ var DefensaSchema = new Schema({
         scientific_problem: {
             type: String,
             required: true
+        },
+        court: {
+            type: [
+                {
+                    fullname: {
+                        type: String,
+                        required: true
+                    },
+                    role: {
+                        type: String,
+                        enum: Object.values(CourtRole),
+                        required: true
+                    }
+                }
+            ],
+            required: true
         }
+    },
+    date: {
+        type: Date,
+        required: false,
+        default: new Date()
     }
 });
 export var ModelDefense = model("Defense", DefensaSchema);
