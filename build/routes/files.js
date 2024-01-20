@@ -26,8 +26,11 @@ function _unsupported_iterable_to_array(o, minLen) {
 import express from "express";
 import { FilesController } from "../controllers/files.js"; // Update the path accordingly
 import { BucketsS3 } from "../const.js";
-import { param } from "express-validator";
 import { validateRequest } from "../middleware/validate.js";
+import { param } from "express-validator";
+import { Types, isValidObjectId } from "mongoose";
+import { isValidDoc } from "../middleware/dbValidators.js";
+import { ModelDefense } from "../models/Defensa.js";
 export var router = express.Router();
 var validations = [
     //   isValidToken,
@@ -36,5 +39,17 @@ var validations = [
     param("filename").isString().withMessage("Invalid filename"),
     validateRequest
 ];
+router.get("/shared/:id", [
+    param("id").isMongoId(),
+    param("id").custom(function(id) {
+        return isValidDoc(id, ModelDefense);
+    }),
+    param("id").if(function(id) {
+        return isValidObjectId(id);
+    }).customSanitizer(function(id) {
+        return new Types.ObjectId(id);
+    }),
+    validateRequest
+], FilesController.getRarTesisInfo);
 // Define a route to get a file
 router.get("/:bucket/:filename", _to_consumable_array(validations), FilesController.getFile);

@@ -1,3 +1,11 @@
+function _array_like_to_array(arr, len) {
+    if (len == null || len > arr.length) len = arr.length;
+    for(var i = 0, arr2 = new Array(len); i < len; i++)arr2[i] = arr[i];
+    return arr2;
+}
+function _array_with_holes(arr) {
+    if (Array.isArray(arr)) return arr;
+}
 function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) {
     try {
         var info = gen[key](arg);
@@ -58,6 +66,33 @@ function _define_property(obj, key, value) {
         obj[key] = value;
     }
     return obj;
+}
+function _iterable_to_array_limit(arr, i) {
+    var _i = arr == null ? null : typeof Symbol !== "undefined" && arr[Symbol.iterator] || arr["@@iterator"];
+    if (_i == null) return;
+    var _arr = [];
+    var _n = true;
+    var _d = false;
+    var _s, _e;
+    try {
+        for(_i = _i.call(arr); !(_n = (_s = _i.next()).done); _n = true){
+            _arr.push(_s.value);
+            if (i && _arr.length === i) break;
+        }
+    } catch (err) {
+        _d = true;
+        _e = err;
+    } finally{
+        try {
+            if (!_n && _i["return"] != null) _i["return"]();
+        } finally{
+            if (_d) throw _e;
+        }
+    }
+    return _arr;
+}
+function _non_iterable_rest() {
+    throw new TypeError("Invalid attempt to destructure non-iterable instance.\\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
 }
 function _object_spread(target) {
     for(var i = 1; i < arguments.length; i++){
@@ -124,6 +159,17 @@ function _object_without_properties_loose(source, excluded) {
         target[key] = source[key];
     }
     return target;
+}
+function _sliced_to_array(arr, i) {
+    return _array_with_holes(arr) || _iterable_to_array_limit(arr, i) || _unsupported_iterable_to_array(arr, i) || _non_iterable_rest();
+}
+function _unsupported_iterable_to_array(o, minLen) {
+    if (!o) return;
+    if (typeof o === "string") return _array_like_to_array(o, minLen);
+    var n = Object.prototype.toString.call(o).slice(8, -1);
+    if (n === "Object" && o.constructor) n = o.constructor.name;
+    if (n === "Map" || n === "Set") return Array.from(n);
+    if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _array_like_to_array(o, minLen);
 }
 function _ts_generator(thisArg, body) {
     var f, y, t, g, _ = {
@@ -758,6 +804,71 @@ export var TesisProjectService = /*#__PURE__*/ function() {
                                 err = error;
                                 throw new Error("Error in TesisProjectServices: ".concat(err.message));
                             case 6:
+                                return [
+                                    2
+                                ];
+                        }
+                    });
+                })();
+            }
+        },
+        {
+            key: "getTotalProjectsStatus",
+            value: function getTotalProjectsStatus() {
+                return _async_to_generator(function() {
+                    var _ref, totalProjects, defendedProjects, activeProjects, approvedProjects, pendingProjects, error;
+                    return _ts_generator(this, function(_state) {
+                        switch(_state.label){
+                            case 0:
+                                _state.trys.push([
+                                    0,
+                                    2,
+                                    ,
+                                    3
+                                ]);
+                                return [
+                                    4,
+                                    Promise.all([
+                                        ModelTesisProject.countDocuments(),
+                                        ModelTesisProject.countDocuments({
+                                            ancient: true
+                                        }),
+                                        ModelTesisProject.find({
+                                            ancient: false
+                                        })
+                                    ])
+                                ];
+                            case 1:
+                                _ref = _sliced_to_array.apply(void 0, [
+                                    _state.sent(),
+                                    3
+                                ]), totalProjects = _ref[0], defendedProjects = _ref[1], activeProjects = _ref[2];
+                                // Count approved and pending projects among active projects
+                                approvedProjects = activeProjects.filter(function(project) {
+                                    var _project_approval;
+                                    return ((_project_approval = project.approval) === null || _project_approval === void 0 ? void 0 : _project_approval.isApprove) === true;
+                                }).length;
+                                pendingProjects = activeProjects.filter(function(project) {
+                                    var _project_approval;
+                                    return ((_project_approval = project.approval) === null || _project_approval === void 0 ? void 0 : _project_approval.isApprove) === false || !project.approval;
+                                }).length;
+                                return [
+                                    2,
+                                    {
+                                        totalProjects: totalProjects,
+                                        defendedProjects: defendedProjects,
+                                        activeProjects: {
+                                            total: activeProjects.length,
+                                            approved: approvedProjects,
+                                            pending: pendingProjects
+                                        }
+                                    }
+                                ];
+                            case 2:
+                                error = _state.sent();
+                                console.error("Error retrieving projects stadistics:", error);
+                                throw error;
+                            case 3:
                                 return [
                                     2
                                 ];

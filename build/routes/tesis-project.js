@@ -62,13 +62,13 @@ function _ts_generator(thisArg, body) {
         trys: [],
         ops: []
     };
-    return(g = {
+    return g = {
         next: verb(0),
         "throw": verb(1),
         "return": verb(2)
     }, typeof Symbol === "function" && (g[Symbol.iterator] = function() {
         return this;
-    }), g);
+    }), g;
     function verb(n) {
         return function(v) {
             return step([
@@ -314,6 +314,10 @@ router.put("/close/:id", _to_consumable_array(authValidations).concat(_to_consum
 router.get("/", _to_consumable_array(authValidations).concat(_to_consumable_array(ancientValidations), [
     validateRequest
 ]), TesisProjectController.getAllProjects);
+// get stats of all the proyects
+router.get("/stats", _to_consumable_array(authValidations).concat([
+    validateRequest
+]), TesisProjectController.getProjectsStats);
 // Get TesisProject Info by member id
 router.get("/byMember", [
     authValidations[0],

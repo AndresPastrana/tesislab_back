@@ -1,3 +1,11 @@
+function _array_like_to_array(arr, len) {
+    if (len == null || len > arr.length) len = arr.length;
+    for(var i = 0, arr2 = new Array(len); i < len; i++)arr2[i] = arr[i];
+    return arr2;
+}
+function _array_with_holes(arr) {
+    if (Array.isArray(arr)) return arr;
+}
 function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) {
     try {
         var info = gen[key](arg);
@@ -26,6 +34,44 @@ function _async_to_generator(fn) {
             _next(undefined);
         });
     };
+}
+function _iterable_to_array_limit(arr, i) {
+    var _i = arr == null ? null : typeof Symbol !== "undefined" && arr[Symbol.iterator] || arr["@@iterator"];
+    if (_i == null) return;
+    var _arr = [];
+    var _n = true;
+    var _d = false;
+    var _s, _e;
+    try {
+        for(_i = _i.call(arr); !(_n = (_s = _i.next()).done); _n = true){
+            _arr.push(_s.value);
+            if (i && _arr.length === i) break;
+        }
+    } catch (err) {
+        _d = true;
+        _e = err;
+    } finally{
+        try {
+            if (!_n && _i["return"] != null) _i["return"]();
+        } finally{
+            if (_d) throw _e;
+        }
+    }
+    return _arr;
+}
+function _non_iterable_rest() {
+    throw new TypeError("Invalid attempt to destructure non-iterable instance.\\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+}
+function _sliced_to_array(arr, i) {
+    return _array_with_holes(arr) || _iterable_to_array_limit(arr, i) || _unsupported_iterable_to_array(arr, i) || _non_iterable_rest();
+}
+function _unsupported_iterable_to_array(o, minLen) {
+    if (!o) return;
+    if (typeof o === "string") return _array_like_to_array(o, minLen);
+    var n = Object.prototype.toString.call(o).slice(8, -1);
+    if (n === "Object" && o.constructor) n = o.constructor.name;
+    if (n === "Map" || n === "Set") return Array.from(n);
+    if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _array_like_to_array(o, minLen);
 }
 function _ts_generator(thisArg, body) {
     var f, y, t, g, _ = {
@@ -122,8 +168,13 @@ function _ts_generator(thisArg, body) {
         };
     }
 }
+import { handleResponse } from "./../middleware/handleResponse.js";
 import MinioService from "../services/MinioService.js";
 import { matchedData } from "express-validator";
+import { DefenseService } from "../services/Defense.js";
+import { ErrorHandlerFactory } from "../errors/error.js";
+import { BucketsS3 } from "../const.js";
+import * as AdmZip from "adm-zip";
 export var FilesController = {
     getFile: function getFile(req, res) {
         return _async_to_generator(function() {
@@ -176,6 +227,106 @@ export var FilesController = {
                             3
                         ];
                     case 3:
+                        return [
+                            2
+                        ];
+                }
+            });
+        })();
+    },
+    getRarTesisInfo: function getRarTesisInfo(req, res) {
+        return _async_to_generator(function() {
+            var id, defense, err, doc_url, pres_url, regex, doc_match, doc_name, pres_match, pres_name, minioInstance, _ref, docBuffer, presBuffer, zip, zipBuffer, error;
+            return _ts_generator(this, function(_state) {
+                switch(_state.label){
+                    case 0:
+                        _state.trys.push([
+                            0,
+                            4,
+                            ,
+                            5
+                        ]);
+                        id = matchedData(req, {
+                            locations: [
+                                "params"
+                            ]
+                        }).id;
+                        return [
+                            4,
+                            DefenseService.getDefenseById(id)
+                        ];
+                    case 1:
+                        defense = _state.sent();
+                        if (!defense) {
+                            err = ErrorHandlerFactory.createError(new Error("Defense not found"));
+                            return [
+                                2,
+                                handleResponse({
+                                    res: res,
+                                    statusCode: 404,
+                                    error: err
+                                })
+                            ];
+                        }
+                        // TODO: Get the links of the doc and the pres file
+                        doc_url = defense.doc_url, pres_url = defense.pres_url;
+                        console.log(doc_url, pres_url);
+                        // Define a regular expression to match the pattern
+                        regex = /\/api\/files\/(\w+)\/([\w-]+\.pdf|[\w-]+\.pptx)/;
+                        // Use the regex to extract the values for doc_url
+                        doc_match = doc_url.match(regex);
+                        doc_name = doc_match ? doc_match[2] : null;
+                        // Use the regex to extract the values for pres_url
+                        pres_match = pres_url.match(regex);
+                        pres_name = pres_match ? pres_match[2] : null;
+                        if (!(doc_name && pres_name)) return [
+                            3,
+                            3
+                        ];
+                        minioInstance = MinioService.getInstance();
+                        return [
+                            4,
+                            Promise.all([
+                                minioInstance.getFile(BucketsS3.AcademicDocs, doc_name),
+                                minioInstance.getFile(BucketsS3.AcademicDocs, pres_name)
+                            ])
+                        ];
+                    case 2:
+                        _ref = _sliced_to_array.apply(void 0, [
+                            _state.sent(),
+                            2
+                        ]), docBuffer = _ref[0], presBuffer = _ref[1];
+                        if (docBuffer && presBuffer) {
+                            // Create a .zip file using adm-zip
+                            zip = new AdmZip.default();
+                            zip.addFile(doc_name, docBuffer, "Document");
+                            zip.addFile(pres_name, presBuffer, "Presentation");
+                            zipBuffer = zip.toBuffer();
+                            // Set the response headers for a zip file
+                            res.setHeader("Content-Type", "application/zip");
+                            res.setHeader("Content-Disposition", "attachment; filename=tesis.zip");
+                            // TODO: End the response and send the zip
+                            // Send the zip file as the response
+                            res.end(zipBuffer);
+                        }
+                        _state.label = 3;
+                    case 3:
+                        return [
+                            3,
+                            5
+                        ];
+                    case 4:
+                        error = _state.sent();
+                        // Handle other errors (e.g., log and send an error response)
+                        console.error(error);
+                        res.status(500).json({
+                            error: "Internal server error"
+                        });
+                        return [
+                            3,
+                            5
+                        ];
+                    case 5:
                         return [
                             2
                         ];

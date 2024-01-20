@@ -389,6 +389,29 @@ export var DefenseService = /*#__PURE__*/ function() {
                     });
                 })();
             }
+        },
+        {
+            key: "getDefenseById",
+            value: function getDefenseById(id) {
+                return _async_to_generator(function() {
+                    var defenseDoc;
+                    return _ts_generator(this, function(_state) {
+                        switch(_state.label){
+                            case 0:
+                                return [
+                                    4,
+                                    ModelDefense.findById(id)
+                                ];
+                            case 1:
+                                defenseDoc = _state.sent();
+                                return [
+                                    2,
+                                    defenseDoc
+                                ];
+                        }
+                    });
+                })();
+            }
         }
     ]);
     return DefenseService;

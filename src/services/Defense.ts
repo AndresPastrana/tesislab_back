@@ -1,6 +1,11 @@
-import { Types } from "mongoose";
+import { ObjectId, Types } from "mongoose";
 
-import { Defense, DefenseData, ModelDefense } from "../models/Defensa.js";
+import {
+  Defense,
+  DefenseData,
+  DefenseType,
+  ModelDefense,
+} from "../models/Defensa.js";
 import { TesisProjectService, PopulatedTesisResponse } from "./TesisProject.js";
 import { CourtsService } from "./CourtService.js";
 import { TesisProjectStatus } from "../const.js";
@@ -169,5 +174,10 @@ export class DefenseService {
       console.error("Error during search:", error);
       throw new Error(`Error during search: ${error.message}`);
     }
+  }
+
+  static async getDefenseById(id: ObjectId) {
+    const defenseDoc = await ModelDefense.findById(id);
+    return defenseDoc;
   }
 }

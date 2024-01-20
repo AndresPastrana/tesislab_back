@@ -203,4 +203,15 @@ export class TesisProjectController {
       handleResponse({ res, statusCode: 500, error: customError });
     }
   }
+
+  static async getProjectsStats(req: Request, res: Response) {
+    try {
+      const projectStats = await TesisProjectService.getTotalProjectsStatus();
+      return handleResponse({ res, data: projectStats, statusCode: 200 });
+    } catch (error) {
+      const err = ErrorHandlerFactory.createError(error as Error);
+
+      return handleResponse({ res, error: err, statusCode: 500 });
+    }
+  }
 }

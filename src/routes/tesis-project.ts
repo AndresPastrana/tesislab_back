@@ -5,7 +5,7 @@ import { validateRequest } from "../middleware/validate.js";
 import { isValidDoc } from "../middleware/dbValidators.js";
 import { ModelStudent } from "../models/Student.js";
 import { ModelTesisProject } from "../models/TesisProject.js";
-import { Schema, Types, isValidObjectId } from "mongoose";
+import { Types, isValidObjectId } from "mongoose";
 import { ModelProfesor } from "../models/Profesor.js";
 import { isValidToken } from "../middleware/jwt.js";
 import { protectRouteByRole } from "../middleware/protectRouteByRole.js";
@@ -187,6 +187,13 @@ router.get(
   "/",
   [...authValidations, ...ancientValidations, validateRequest],
   TesisProjectController.getAllProjects
+);
+
+// get stats of all the proyects
+router.get(
+  "/stats",
+  [...authValidations, validateRequest],
+  TesisProjectController.getProjectsStats
 );
 
 // Get TesisProject Info by member id

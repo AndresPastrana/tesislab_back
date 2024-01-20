@@ -338,6 +338,46 @@ export class TesisProjectService {
     }
   }
 
+  static async getTotalProjectsStatus(): Promise<{
+    totalProjects: number;
+    defendedProjects: number;
+    activeProjects: {
+      total: number;
+      approved: number;
+      pending: number;
+    };
+  }> {
+    try {
+      const [totalProjects, defendedProjects, activeProjects] =
+        await Promise.all([
+          ModelTesisProject.countDocuments(),
+          ModelTesisProject.countDocuments({ ancient: true }),
+          ModelTesisProject.find({ ancient: false }),
+        ]);
+
+      // Count approved and pending projects among active projects
+      const approvedProjects = activeProjects.filter(
+        (project) => project.approval?.isApprove === true
+      ).length;
+      const pendingProjects = activeProjects.filter(
+        (project) => project.approval?.isApprove === false || !project.approval
+      ).length;
+
+      return {
+        totalProjects,
+        defendedProjects,
+        activeProjects: {
+          total: activeProjects.length,
+          approved: approvedProjects,
+          pending: pendingProjects,
+        },
+      };
+    } catch (error) {
+      console.error("Error retrieving projects stadistics:", error);
+      throw error;
+    }
+  }
+
   static async getApprovalInfo(studentId: Schema.Types.ObjectId) {
     try {
       const tesisProject = await ModelTesisProject.findOne(

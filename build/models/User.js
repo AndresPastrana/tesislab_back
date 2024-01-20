@@ -92,13 +92,13 @@ function _ts_generator(thisArg, body) {
         trys: [],
         ops: []
     };
-    return(g = {
+    return g = {
         next: verb(0),
         "throw": verb(1),
         "return": verb(2)
     }, typeof Symbol === "function" && (g[Symbol.iterator] = function() {
         return this;
-    }), g);
+    }), g;
     function verb(n) {
         return function(v) {
             return step([

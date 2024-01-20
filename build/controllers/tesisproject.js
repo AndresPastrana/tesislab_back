@@ -597,6 +597,54 @@ export var TesisProjectController = /*#__PURE__*/ function() {
                     });
                 })();
             }
+        },
+        {
+            key: "getProjectsStats",
+            value: function getProjectsStats(req, res) {
+                return _async_to_generator(function() {
+                    var projectStats, error, err;
+                    return _ts_generator(this, function(_state) {
+                        switch(_state.label){
+                            case 0:
+                                _state.trys.push([
+                                    0,
+                                    2,
+                                    ,
+                                    3
+                                ]);
+                                return [
+                                    4,
+                                    TesisProjectService.getTotalProjectsStatus()
+                                ];
+                            case 1:
+                                projectStats = _state.sent();
+                                return [
+                                    2,
+                                    handleResponse({
+                                        res: res,
+                                        data: projectStats,
+                                        statusCode: 200
+                                    })
+                                ];
+                            case 2:
+                                error = _state.sent();
+                                err = ErrorHandlerFactory.createError(error);
+                                return [
+                                    2,
+                                    handleResponse({
+                                        res: res,
+                                        error: err,
+                                        statusCode: 500
+                                    })
+                                ];
+                            case 3:
+                                return [
+                                    2
+                                ];
+                        }
+                    });
+                })();
+            }
         }
     ]);
     return TesisProjectController;
