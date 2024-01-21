@@ -13,6 +13,7 @@ import { isValidDoc } from "../middleware/dbValidators.js";
 import { ModelStudent } from "../models/Student.js";
 import { Types, isValidObjectId } from "mongoose";
 import { ModelUser } from "../models/User.js";
+import { getStudentHistory } from "../controllers/others.js";
 
 //   GET   /student/project-tesis/:id
 //   GET   /student/historial/:id
@@ -136,6 +137,17 @@ router.get(
     ...validateIdParam,
   ],
   StudentController.getStudentById
+);
+
+router.get(
+  "/history/:id",
+  [
+    param("id")
+      .isMongoId()
+      .customSanitizer((id) => new Types.ObjectId(id)),
+    validateRequest,
+  ],
+  getStudentHistory
 );
 
 // A falg is required to list only the ancient user or not

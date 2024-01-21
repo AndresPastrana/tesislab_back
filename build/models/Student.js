@@ -115,6 +115,7 @@ var studentSchema = new Schema({
                 id: _id.toString()
             }, rest);
         }
-    }
+    },
+    timestamps: true
 });
 export var ModelStudent = model("Student", studentSchema);

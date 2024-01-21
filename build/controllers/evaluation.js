@@ -200,6 +200,7 @@ import { ErrorHandlerFactory } from "../errors/error.js";
 import { BucketsS3 } from "../const.js";
 import { uploadFile } from "../helpers/minio.js";
 import { validateEditSubmissionFields } from "../helpers/others.js";
+import { Types } from "mongoose";
 export var EvaluationController = /*#__PURE__*/ function() {
     "use strict";
     function EvaluationController() {
@@ -503,6 +504,7 @@ export var EvaluationController = /*#__PURE__*/ function() {
                                 ]);
                                 evaluation_id = req.body.evaluation_id;
                                 file = req.file;
+                                console.log(file);
                                 if (!file) {
                                     return [
                                         2,

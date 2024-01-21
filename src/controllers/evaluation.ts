@@ -9,6 +9,7 @@ import { SubmissionType } from "../models/Submission.js";
 import { uploadFile } from "../helpers/minio.js";
 
 import { validateEditSubmissionFields } from "../helpers/others.js";
+import { Types } from "mongoose";
 
 export class EvaluationController {
   // Get all evaluations
@@ -119,6 +120,7 @@ export class EvaluationController {
     try {
       const { evaluation_id } = req.body as Partial<SubmissionType>;
       const file = req.file;
+      console.log(file);
 
       if (!file) {
         return handleResponse({

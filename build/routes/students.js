@@ -161,6 +161,7 @@ import { isValidDoc } from "../middleware/dbValidators.js";
 import { ModelStudent } from "../models/Student.js";
 import { Types, isValidObjectId } from "mongoose";
 import { ModelUser } from "../models/User.js";
+import { getStudentHistory } from "../controllers/others.js";
 //   GET   /student/project-tesis/:id
 //   GET   /student/historial/:id
 //   GET   /student/evaluations/
@@ -288,6 +289,12 @@ router.get("/:id", [
         UserRole.Student
     ])
 ].concat(_to_consumable_array(validateIdParam)), StudentController.getStudentById);
+router.get("/history/:id", [
+    param("id").isMongoId().customSanitizer(function(id) {
+        return new Types.ObjectId(id);
+    }),
+    validateRequest
+], getStudentHistory);
 // A falg is required to list only the ancient user or not
 router.get("/", _to_consumable_array(authValidations).concat([
     query("active").isBoolean().withMessage("?active=boolean is required"),

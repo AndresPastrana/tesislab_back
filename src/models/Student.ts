@@ -75,6 +75,7 @@ const studentSchema = new Schema<StudentDocument>(
         return { id: _id.toString(), ...rest };
       },
     },
+    timestamps: true,
   }
 );
 

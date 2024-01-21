@@ -109,7 +109,9 @@ export var EvalAllowedExtensions = [
     "pptx",
     "pdf",
     "doc",
-    "docx"
+    "docx",
+    "zip",
+    "rar"
 ];
 export var BucketsS3;
 (function(BucketsS3) {
