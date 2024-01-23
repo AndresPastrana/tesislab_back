@@ -46,19 +46,6 @@ function _create_class(Constructor, protoProps, staticProps) {
     if (staticProps) _defineProperties(Constructor, staticProps);
     return Constructor;
 }
-function _define_property(obj, key, value) {
-    if (key in obj) {
-        Object.defineProperty(obj, key, {
-            value: value,
-            enumerable: true,
-            configurable: true,
-            writable: true
-        });
-    } else {
-        obj[key] = value;
-    }
-    return obj;
-}
 function _ts_generator(thisArg, body) {
     var f, y, t, g, _ = {
         label: 0,
@@ -154,151 +141,36 @@ function _ts_generator(thisArg, body) {
         };
     }
 }
-import { ErrorHandlerFactory } from "../errors/error.js";
-import { ModelProfesor } from "../models/Profesor.js";
-export var ProfesorService = /*#__PURE__*/ function() {
+import { AcademicRankModel } from "../models/AcademicRankModel.js";
+var AcademicRankService = /*#__PURE__*/ function() {
     "use strict";
-    function ProfesorService() {
-        _class_call_check(this, ProfesorService);
+    function AcademicRankService() {
+        _class_call_check(this, AcademicRankService);
     }
-    _create_class(ProfesorService, null, [
+    _create_class(AcademicRankService, null, [
         {
-            key: "createProfesor",
-            value: function createProfesor(profesorData) {
-                var _this = this;
+            key: "validateUniqueness",
+            value: // ...
+            // Validate uniqueness before saving or updating
+            function validateUniqueness(rank, currentRankId) {
                 return _async_to_generator(function() {
-                    var isUnique, createdProfesor;
+                    var existingRank;
                     return _ts_generator(this, function(_state) {
                         switch(_state.label){
                             case 0:
                                 return [
                                     4,
-                                    _this.isProfessorUnique(profesorData.email, profesorData.ci)
-                                ];
-                            case 1:
-                                isUnique = _state.sent();
-                                if (!isUnique) throw new Error("Duplicated email or ci");
-                                return [
-                                    4,
-                                    _this.Profesor.create(profesorData)
-                                ];
-                            case 2:
-                                createdProfesor = _state.sent();
-                                return [
-                                    2,
-                                    createdProfesor.toObject()
-                                ];
-                        }
-                    });
-                })();
-            }
-        },
-        {
-            key: "getProfesores",
-            value: function getProfesores() {
-                var _this = this;
-                return _async_to_generator(function() {
-                    var profesores;
-                    return _ts_generator(this, function(_state) {
-                        switch(_state.label){
-                            case 0:
-                                return [
-                                    4,
-                                    _this.Profesor.find().populate("academic_rank")
-                                ];
-                            case 1:
-                                profesores = _state.sent();
-                                return [
-                                    2,
-                                    profesores.map(function(profesor) {
-                                        return profesor.toJSON();
-                                    })
-                                ];
-                        }
-                    });
-                })();
-            }
-        },
-        {
-            key: "getProfesorById",
-            value: function getProfesorById(profesorId) {
-                var _this = this;
-                return _async_to_generator(function() {
-                    var profesor;
-                    return _ts_generator(this, function(_state) {
-                        switch(_state.label){
-                            case 0:
-                                return [
-                                    4,
-                                    _this.Profesor.findById(profesorId)
-                                ];
-                            case 1:
-                                profesor = _state.sent();
-                                return [
-                                    2,
-                                    profesor ? profesor.toObject() : null
-                                ];
-                        }
-                    });
-                })();
-            }
-        },
-        {
-            key: "updateProfesor",
-            value: function updateProfesor(profesorId, profesorData) {
-                var _this = this;
-                return _async_to_generator(function() {
-                    var isUnique, updatedProfesor;
-                    return _ts_generator(this, function(_state) {
-                        switch(_state.label){
-                            case 0:
-                                return [
-                                    4,
-                                    _this.isProfessorUnique(profesorData.email, profesorData.ci, profesorId)
-                                ];
-                            case 1:
-                                isUnique = _state.sent();
-                                if (!isUnique) throw new Error("Duplicated email or ci");
-                                return [
-                                    4,
-                                    _this.Profesor.findByIdAndUpdate(profesorId, profesorData, {
-                                        new: true
-                                    })
-                                ];
-                            case 2:
-                                updatedProfesor = _state.sent();
-                                return [
-                                    2,
-                                    updatedProfesor ? updatedProfesor.toObject() : null
-                                ];
-                        }
-                    });
-                })();
-            }
-        },
-        {
-            key: "deleteProfesor",
-            value: function deleteProfesor(profesorId) {
-                var _this = this;
-                return _async_to_generator(function() {
-                    var deletedProfesor;
-                    return _ts_generator(this, function(_state) {
-                        switch(_state.label){
-                            case 0:
-                                return [
-                                    4,
-                                    _this.Profesor.findByIdAndUpdate(profesorId, {
-                                        ancient: true
-                                    }, {
-                                        new: true
+                                    AcademicRankModel.findOne({
+                                        rank: rank
                                     })
                                 ];
                             case 1:
-                                deletedProfesor = _state.sent();
-                                if (!deletedProfesor) throw new Error("Professor not found for deletion");
+                                existingRank = _state.sent();
+                                if (existingRank && existingRank._id.toString() !== currentRankId) {
+                                    throw new Error("Academic rank '".concat(rank, "' already exists."));
+                                }
                                 return [
-                                    2,
-                                    deletedProfesor._id
+                                    2
                                 ];
                         }
                     });
@@ -306,11 +178,11 @@ export var ProfesorService = /*#__PURE__*/ function() {
             }
         },
         {
-            key: "isProfessorUnique",
-            value: function isProfessorUnique(email, ci, excludeProfessorId) {
-                var _this = this;
+            key: "getAllAcademicRanks",
+            value: // Get all academic ranks
+            function getAllAcademicRanks() {
                 return _async_to_generator(function() {
-                    var existingProfessor, error;
+                    var ranks, error;
                     return _ts_generator(this, function(_state) {
                         switch(_state.label){
                             case 0:
@@ -322,31 +194,17 @@ export var ProfesorService = /*#__PURE__*/ function() {
                                 ]);
                                 return [
                                     4,
-                                    _this.Profesor.findOne({
-                                        $or: [
-                                            {
-                                                email: email === null || email === void 0 ? void 0 : email.toLowerCase()
-                                            },
-                                            {
-                                                ci: ci === null || ci === void 0 ? void 0 : ci.toLowerCase()
-                                            }
-                                        ],
-                                        _id: {
-                                            $ne: excludeProfessorId
-                                        }
-                                    })
+                                    AcademicRankModel.find()
                                 ];
                             case 1:
-                                existingProfessor = _state.sent();
-                                // If there's an existing professor, it's not unique
+                                ranks = _state.sent();
                                 return [
                                     2,
-                                    !existingProfessor
+                                    ranks
                                 ];
                             case 2:
                                 error = _state.sent();
-                                console.log(error);
-                                throw _this.ErrorFactory.createError(new Error("Error checking professor uniqueness"));
+                                throw new Error("Error getting academic ranks: ".concat(error));
                             case 3:
                                 return [
                                     2
@@ -357,11 +215,11 @@ export var ProfesorService = /*#__PURE__*/ function() {
             }
         },
         {
-            key: "doesProfessorExist",
-            value: function doesProfessorExist(filter) {
-                var _this = this;
+            key: "getAcademicRankById",
+            value: // Get academic rank by ID
+            function getAcademicRankById(id) {
                 return _async_to_generator(function() {
-                    var existingProfessor, error;
+                    var rank, error;
                     return _ts_generator(this, function(_state) {
                         switch(_state.label){
                             case 0:
@@ -373,17 +231,154 @@ export var ProfesorService = /*#__PURE__*/ function() {
                                 ]);
                                 return [
                                     4,
-                                    _this.Profesor.findOne(filter)
+                                    AcademicRankModel.findById(id)
                                 ];
                             case 1:
-                                existingProfessor = _state.sent();
+                                rank = _state.sent();
                                 return [
                                     2,
-                                    !!existingProfessor
-                                ]; // Returns true if the professor exists, false otherwise
+                                    rank
+                                ];
                             case 2:
                                 error = _state.sent();
-                                throw _this.ErrorFactory.createError(new Error("Error checking professor existence"));
+                                throw new Error("Error getting academic rank by ID: ".concat(error));
+                            case 3:
+                                return [
+                                    2
+                                ];
+                        }
+                    });
+                })();
+            }
+        },
+        {
+            key: "createAcademicRank",
+            value: // Create a new academic rank
+            function createAcademicRank(rank) {
+                return _async_to_generator(function() {
+                    var newRank, savedRank, error;
+                    return _ts_generator(this, function(_state) {
+                        switch(_state.label){
+                            case 0:
+                                _state.trys.push([
+                                    0,
+                                    3,
+                                    ,
+                                    4
+                                ]);
+                                return [
+                                    4,
+                                    AcademicRankService.validateUniqueness(rank)
+                                ];
+                            case 1:
+                                _state.sent();
+                                newRank = new AcademicRankModel({
+                                    rank: rank
+                                });
+                                return [
+                                    4,
+                                    newRank.save()
+                                ];
+                            case 2:
+                                savedRank = _state.sent();
+                                return [
+                                    2,
+                                    savedRank
+                                ];
+                            case 3:
+                                error = _state.sent();
+                                throw new Error("Error creating academic rank: ".concat(error));
+                            case 4:
+                                return [
+                                    2
+                                ];
+                        }
+                    });
+                })();
+            }
+        },
+        {
+            key: "updateAcademicRank",
+            value: // Update academic rank by ID
+            function updateAcademicRank(id, updatedRank) {
+                return _async_to_generator(function() {
+                    var currentRank, rank, error;
+                    return _ts_generator(this, function(_state) {
+                        switch(_state.label){
+                            case 0:
+                                _state.trys.push([
+                                    0,
+                                    4,
+                                    ,
+                                    5
+                                ]);
+                                return [
+                                    4,
+                                    AcademicRankModel.findById(id)
+                                ];
+                            case 1:
+                                currentRank = _state.sent();
+                                if (!currentRank) {
+                                    throw new Error("Academic rank with ID '".concat(id, "' not found."));
+                                }
+                                return [
+                                    4,
+                                    AcademicRankService.validateUniqueness(updatedRank.rank, id)
+                                ];
+                            case 2:
+                                _state.sent();
+                                return [
+                                    4,
+                                    AcademicRankModel.findByIdAndUpdate(id, updatedRank, {
+                                        new: true
+                                    })
+                                ];
+                            case 3:
+                                rank = _state.sent();
+                                return [
+                                    2,
+                                    rank
+                                ];
+                            case 4:
+                                error = _state.sent();
+                                throw new Error("Error updating academic rank: ".concat(error));
+                            case 5:
+                                return [
+                                    2
+                                ];
+                        }
+                    });
+                })();
+            }
+        },
+        {
+            key: "deleteAcademicRank",
+            value: // Delete academic rank by ID
+            function deleteAcademicRank(id) {
+                return _async_to_generator(function() {
+                    var error;
+                    return _ts_generator(this, function(_state) {
+                        switch(_state.label){
+                            case 0:
+                                _state.trys.push([
+                                    0,
+                                    2,
+                                    ,
+                                    3
+                                ]);
+                                return [
+                                    4,
+                                    AcademicRankModel.findByIdAndDelete(id)
+                                ];
+                            case 1:
+                                _state.sent();
+                                return [
+                                    3,
+                                    3
+                                ];
+                            case 2:
+                                error = _state.sent();
+                                throw new Error("Error deleting academic rank: ".concat(error));
                             case 3:
                                 return [
                                     2
@@ -394,7 +389,6 @@ export var ProfesorService = /*#__PURE__*/ function() {
             }
         }
     ]);
-    return ProfesorService;
+    return AcademicRankService;
 }();
-_define_property(ProfesorService, "Profesor", ModelProfesor);
-_define_property(ProfesorService, "ErrorFactory", ErrorHandlerFactory);
+export default AcademicRankService;

@@ -53,91 +53,30 @@ function _object_without_properties_loose(source, excluded) {
     }
     return target;
 }
-import { Schema, model } from "mongoose";
-import { Sex } from "../const.js";
-var ProfesorSchema = new Schema({
-    user_id: {
-        type: Schema.Types.ObjectId,
-        ref: "User",
+import mongoose, { Schema } from "mongoose";
+import { RangoAcademico } from "../const.js";
+// Mongoose schema
+var AcademicRankSchema = new Schema({
+    rank: {
+        type: String,
+        enum: Object.values(RangoAcademico),
         required: true
-    },
-    ci: {
-        type: String,
-        required: true,
-        minlength: 11,
-        maxlength: 11,
-        trim: true,
-        lowercase: true
-    },
-    name: {
-        type: String,
-        required: true,
-        trim: true,
-        lowercase: true,
-        minlength: 1,
-        maxlength: 50
-    },
-    lastname: {
-        type: String,
-        required: true,
-        trim: true,
-        lowercase: true,
-        minlength: 1,
-        maxlength: 50
-    },
-    address: {
-        type: String,
-        required: true,
-        trim: true,
-        lowercase: true,
-        minlength: 1,
-        maxlength: 100
-    },
-    email: {
-        type: String,
-        required: true,
-        trim: true,
-        lowercase: true
-    },
-    phone: {
-        type: String,
-        required: true,
-        minlength: 8,
-        maxlength: 8,
-        trim: true
-    },
-    sex: {
-        type: String,
-        required: true,
-        enum: Sex
-    },
-    age: {
-        type: Number,
-        required: true,
-        min: 16,
-        max: 60
-    },
-    academic_rank: {
-        type: Schema.Types.ObjectId,
-        ref: "AcademicRank",
-        required: true
-    },
-    ancient: {
-        type: Boolean,
-        required: false,
-        default: false
     }
 }, {
-    toJSON: {
-        transform: function transform(_doc, ret) {
-            var __v = ret.__v, _id = ret._id, rest = _object_without_properties(ret, [
+    methods: {
+        toJSON: function toJSON() {
+            var _this_toObject = this.toObject(), __v = _this_toObject.__v, _id = _this_toObject._id, id = _this_toObject.id, rest = _object_without_properties(_this_toObject, [
                 "__v",
-                "_id"
+                "_id",
+                "id"
             ]);
             return _object_spread({
                 id: _id.toString()
             }, rest);
         }
-    }
+    },
+    timestamps: true
 });
-export var ModelProfesor = model("Profesor", ProfesorSchema);
+// Mongoose model
+var AcademicRankModel = mongoose.model("AcademicRank", AcademicRankSchema);
+export { AcademicRankModel };

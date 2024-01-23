@@ -73,7 +73,11 @@ const createProfesorValidations = [
     .withMessage("phone must 8 characters lenght"),
 
   body("sex").isIn(Object.values(Sex)),
-  body("academic_rank").isIn(Object.values(RangoAcademico)),
+  body("academic_rank")
+    .exists({ values: "falsy" })
+    .withMessage("academic_rank is required")
+    .isMongoId()
+    .withMessage("Invalid id format"),
 ];
 const updateProfesorValidation = [
   body("ci")
@@ -141,7 +145,11 @@ const updateProfesorValidation = [
     .withMessage("phone must 8 characters lenght"),
 
   body("sex").optional().isIn(Object.values(Sex)),
-  body("academic_rank").optional().isIn(Object.values(RangoAcademico)),
+  body("academic_rank")
+    .exists({ values: "falsy" })
+    .withMessage("academic_rank is required")
+    .isMongoId()
+    .withMessage("Invalid id format"),
   body("user_id")
     .isMongoId()
     .customSanitizer((id) => new Types.ObjectId(id)),

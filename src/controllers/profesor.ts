@@ -43,8 +43,6 @@ export const ProfesorController = {
         user_id: new_user.user.id,
         age,
       });
-      console.log(createdProfesor.email);
-      console.log(new_user.user.username);
 
       // Send the email with the credentials
       const info = await EmailService.sendEmail({
@@ -251,29 +249,21 @@ export const ProfesorController = {
           ...profesorData,
           ...dynamicObject,
         });
+        console.log("Preofsoractualizado");
+        console.log(updatedProfesor);
 
         if (!updatedProfesor) {
-          handleResponse({
+          return handleResponse({
             statusCode: 404,
             msg: "Profesor not found",
             res,
           });
-          return;
         }
-
-        handleResponse({
+        return handleResponse({
           statusCode: 200,
           msg: "Profesor updated successfully",
           data: updatedProfesor,
           res,
-        });
-      } else {
-        return handleResponse({
-          res,
-          statusCode: 400,
-          error: {
-            error: { name: "ValidationError", message: "Nothing to update" },
-          },
         });
       }
     } catch (error: any) {

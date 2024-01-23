@@ -3,6 +3,7 @@ import { RangoAcademico, Sex } from "../const.js";
 
 export interface ProfesorType {
   user_id: Schema.Types.ObjectId;
+
   ci: string;
   name: string;
   lastname: string;
@@ -11,7 +12,7 @@ export interface ProfesorType {
   phone: string;
   sex: string;
   age: number;
-  academic_rank: RangoAcademico;
+  academic_rank: Schema.Types.ObjectId;
   ancient: boolean;
 }
 
@@ -21,6 +22,7 @@ const ProfesorSchema = new Schema<ProfesorDocument>(
   {
     user_id: {
       type: Schema.Types.ObjectId,
+      ref: "User",
       required: true,
     },
     ci: {
@@ -80,7 +82,11 @@ const ProfesorSchema = new Schema<ProfesorDocument>(
       max: 60,
     },
 
-    academic_rank: { type: String, required: true, enum: RangoAcademico },
+    academic_rank: {
+      type: Schema.Types.ObjectId,
+      ref: "AcademicRank",
+      required: true,
+    },
     ancient: {
       type: Boolean,
       required: false,

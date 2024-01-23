@@ -29,7 +29,7 @@ import { ProfesorController } from "../controllers/index.js";
 import { validateRequest } from "../middleware/validate.js";
 import { isValidToken } from "../middleware/jwt.js";
 import { protectRouteByRole } from "../middleware/protectRouteByRole.js";
-import { RangoAcademico, Sex, UserRole } from "../const.js";
+import { Sex, UserRole } from "../const.js";
 import { Types, isValidObjectId } from "mongoose";
 import { isValidDoc } from "../middleware/dbValidators.js";
 import { validateCi } from "../helpers/ci.js";
@@ -77,7 +77,9 @@ var createProfesorValidations = [
         max: 8
     }).withMessage("phone must 8 characters lenght"),
     body("sex").isIn(Object.values(Sex)),
-    body("academic_rank").isIn(Object.values(RangoAcademico))
+    body("academic_rank").exists({
+        values: "falsy"
+    }).withMessage("academic_rank is required").isMongoId().withMessage("Invalid id format")
 ];
 var updateProfesorValidation = [
     body("ci").optional().isLength({
@@ -115,7 +117,9 @@ var updateProfesorValidation = [
         max: 8
     }).withMessage("phone must 8 characters lenght"),
     body("sex").optional().isIn(Object.values(Sex)),
-    body("academic_rank").optional().isIn(Object.values(RangoAcademico)),
+    body("academic_rank").exists({
+        values: "falsy"
+    }).withMessage("academic_rank is required").isMongoId().withMessage("Invalid id format"),
     body("user_id").isMongoId().customSanitizer(function(id) {
         return new Types.ObjectId(id);
     })

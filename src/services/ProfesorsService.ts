@@ -21,7 +21,7 @@ export class ProfesorService {
   }
 
   static async getProfesores(): Promise<ProfesorType[]> {
-    const profesores = await this.Profesor.find();
+    const profesores = await this.Profesor.find().populate("academic_rank");
     return profesores.map((profesor) => profesor.toJSON());
   }
 

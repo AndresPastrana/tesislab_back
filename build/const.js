@@ -56,14 +56,12 @@ export var Sex;
 })(Sex || (Sex = {}));
 export var RangoAcademico;
 (function(RangoAcademico) {
-    RangoAcademico["CANDIDATO_DE_MAESTRIA"] = "Candidato de Maestr\xeda";
-    RangoAcademico["GRADUADO_DE_MAESTRIA"] = "Graduado de Maestr\xeda";
-    RangoAcademico["CANDIDATO_DE_DOCTORADO"] = "Candidato de Doctorado";
-    RangoAcademico["GRADUADO_DE_DOCTORADO"] = "Graduado de Doctorado";
-    RangoAcademico["INVESTIGADOR_POSDOCTORAL"] = "Investigador Posdoctoral";
-    RangoAcademico["PROFESOR_ASISTENTE"] = "Profesor Asistente";
-    RangoAcademico["PROFESOR_ASOCIADO"] = "Profesor Asociado";
-    RangoAcademico["PROFESOR"] = "Profesor";
+    RangoAcademico["ADIESTRADO"] = "adiestrado";
+    RangoAcademico["AUXILIAR"] = "auxiliar";
+    RangoAcademico["INSTRUCTOR"] = "instructor";
+    RangoAcademico["ASISTENTE"] = "asistente";
+    RangoAcademico["TITULAR"] = "titular";
+    RangoAcademico["NUEVO"] = "nuevo";
 })(RangoAcademico || (RangoAcademico = {}));
 export var TesisProjectStatus;
 (function(TesisProjectStatus) {
@@ -98,6 +96,7 @@ export var Routes;
     Routes["eval"] = "/api/evaluaciones";
     Routes["files"] = "/api/files";
     Routes["defense"] = "/api/defense";
+    Routes["aranks"] = "/api/academic-ranks";
 })(Routes || (Routes = {}));
 export var Allowedcollections;
 (function(Allowedcollections) {

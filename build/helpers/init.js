@@ -2,7 +2,7 @@ import cors from "cors";
 import express from "express";
 import morgan from "morgan";
 import { Routes } from "../const.js";
-import { AuthRouter, StudentRouter, ProfesoresRouter, ProjectsRouter, CourtRouter, SearchRouter, EvalRouter, FilesRouter, DefenseRouter } from "../routes/index.routes.js";
+import { AuthRouter, StudentRouter, ProfesoresRouter, ProjectsRouter, CourtRouter, SearchRouter, EvalRouter, FilesRouter, DefenseRouter, ARanksRouter } from "../routes/index.routes.js";
 export function gracefulShutdown(server) {
     console.log("Received shutdown signal. Shutting down gracefully...");
     server.close(function() {
@@ -43,4 +43,5 @@ export function defineMiddlewares(app) {
     app.use(Routes.eval, EvalRouter);
     app.use(Routes.files, FilesRouter);
     app.use(Routes.defense, DefenseRouter);
+    app.use(Routes.aranks, ARanksRouter);
 }

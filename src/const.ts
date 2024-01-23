@@ -56,14 +56,12 @@ export enum Sex {
 }
 
 export enum RangoAcademico {
-  CANDIDATO_DE_MAESTRIA = "Candidato de Maestría",
-  GRADUADO_DE_MAESTRIA = "Graduado de Maestría",
-  CANDIDATO_DE_DOCTORADO = "Candidato de Doctorado",
-  GRADUADO_DE_DOCTORADO = "Graduado de Doctorado",
-  INVESTIGADOR_POSDOCTORAL = "Investigador Posdoctoral",
-  PROFESOR_ASISTENTE = "Profesor Asistente",
-  PROFESOR_ASOCIADO = "Profesor Asociado",
-  PROFESOR = "Profesor",
+  ADIESTRADO = "adiestrado",
+  AUXILIAR = "auxiliar",
+  INSTRUCTOR = "instructor",
+  ASISTENTE = "asistente",
+  TITULAR = "titular",
+  NUEVO = "nuevo",
 }
 
 export enum TesisProjectStatus {
@@ -97,6 +95,7 @@ export enum Routes {
   eval = "/api/evaluaciones",
   files = "/api/files",
   defense = "/api/defense",
+  aranks = "/api/academic-ranks",
 }
 
 export enum Allowedcollections {

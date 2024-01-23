@@ -270,8 +270,6 @@ export var ProfesorController = {
                         ];
                     case 2:
                         createdProfesor = _state.sent();
-                        console.log(createdProfesor.email);
-                        console.log(new_user.user.username);
                         return [
                             4,
                             EmailService.sendEmail({
@@ -587,9 +585,9 @@ export var ProfesorController = {
                     case 0:
                         _state.trys.push([
                             0,
-                            7,
+                            6,
                             ,
-                            8
+                            7
                         ]);
                         id = matchedData(req, {
                             locations: [
@@ -644,46 +642,33 @@ export var ProfesorController = {
                         ];
                     case 4:
                         updatedProfesor = _state.sent();
+                        console.log("Preofsoractualizado");
+                        console.log(updatedProfesor);
                         if (!updatedProfesor) {
-                            handleResponse({
-                                statusCode: 404,
-                                msg: "Profesor not found",
-                                res: res
-                            });
                             return [
-                                2
+                                2,
+                                handleResponse({
+                                    statusCode: 404,
+                                    msg: "Profesor not found",
+                                    res: res
+                                })
                             ];
                         }
-                        handleResponse({
-                            statusCode: 200,
-                            msg: "Profesor updated successfully",
-                            data: updatedProfesor,
-                            res: res
-                        });
-                        return [
-                            3,
-                            6
-                        ];
-                    case 5:
                         return [
                             2,
                             handleResponse({
-                                res: res,
-                                statusCode: 400,
-                                error: {
-                                    error: {
-                                        name: "ValidationError",
-                                        message: "Nothing to update"
-                                    }
-                                }
+                                statusCode: 200,
+                                msg: "Profesor updated successfully",
+                                data: updatedProfesor,
+                                res: res
                             })
                         ];
-                    case 6:
+                    case 5:
                         return [
                             3,
-                            8
+                            7
                         ];
-                    case 7:
+                    case 6:
                         error = _state.sent();
                         console.log(error);
                         customError = ErrorHandlerFactory.createError(error);
@@ -695,9 +680,9 @@ export var ProfesorController = {
                         });
                         return [
                             3,
-                            8
+                            7
                         ];
-                    case 8:
+                    case 7:
                         return [
                             2
                         ];
