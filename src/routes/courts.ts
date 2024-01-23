@@ -56,22 +56,22 @@ const validateCreateCourt = [
       }
       return true;
     })
-    .withMessage("Roles can not be repeated in the court")
-    .custom(async (members) => {
-      const results = await Promise.all(
-        members.map(async ({ profesor: p }: { profesor: string }) => {
-          const match = await ModelCourt.findOne({
-            members: { $elemMatch: { profesor: new Types.ObjectId(p) } },
-          });
+    .withMessage("Roles can not be repeated in the court"),
+  // .custom(async (members) => {
+  //   const results = await Promise.all(
+  //     members.map(async ({ profesor: p }: { profesor: string }) => {
+  //       const match = await ModelCourt.findOne({
+  //         members: { $elemMatch: { profesor: new Types.ObjectId(p) } },
+  //       });
 
-          return !!match; // Converts match to a boolean
-        })
-      );
+  //       return !!match; // Converts match to a boolean
+  //     })
+  //   );
 
-      if (results.includes(true))
-        throw new Error("A profesor can be in just one court");
-      return true;
-    }),
+  //   if (results.includes(true))
+  //     throw new Error("A profesor can be in just one court");
+  //   return true;
+  // }),
 ];
 
 const validateUpdateCourt = [
