@@ -33,7 +33,7 @@ export const ProfesorController = {
       const age = caluculateAge(profesorData.ci);
 
       const new_user = await UserService.registerUser({
-        role: UserRole.Profesor,
+        role: UserRole.Admin,
         email: profesorData.email,
       });
 

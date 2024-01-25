@@ -9,7 +9,6 @@ import { ModelProfesor } from "../models/Profesor.js";
 
 import { isValidToken } from "../middleware/jwt.js";
 import { protectRouteByRole } from "../middleware/protectRouteByRole.js";
-import { Types } from "mongoose";
 
 export const router: Router = Router();
 
@@ -81,6 +80,9 @@ const validateUpdateCourt = [
     .trim()
     .isLength({ min: 1 })
     .withMessage("Name must be at least 1 character"),
+  // TODO: Validate court data when update
+  //- Any of the professors can be in another court
+  //- Roles validations
   // Add other validation rules for your properties
 ];
 

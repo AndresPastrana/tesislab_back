@@ -3,7 +3,7 @@
 
 import { Router } from "express";
 import { protectRouteByRole } from "../middleware/protectRouteByRole.js";
-import { Sex, UserRole } from "../const.js";
+import { CursoType, Sex, UserRole } from "../const.js";
 import { isValidToken } from "../middleware/jwt.js";
 import { validateRequest } from "../middleware/validate.js";
 import { StudentController } from "../controllers/index.js";
@@ -43,6 +43,11 @@ const createStudentValidations = [
   body("address").trim().escape().notEmpty().isString(),
   body("language_certificate").isBoolean(),
   body("email").trim().escape().isString().isEmail().normalizeEmail(),
+  body("curso")
+    .trim()
+    .escape()
+    .isIn(Object.values(CursoType))
+    .withMessage("Invalid course type"),
 ];
 
 const updateValidations = [
@@ -83,6 +88,11 @@ const updateValidations = [
     .isEmail()
     .normalizeEmail()
     .optional(),
+  body("curso")
+    .trim()
+    .escape()
+    .isIn(Object.values(CursoType))
+    .withMessage("Invalid course type"),
 ];
 
 const validateIdParam = [

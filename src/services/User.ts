@@ -100,9 +100,13 @@ export class UserService {
     email,
   }: RegisterUserInput): Promise<RegisterUserResponse> {
     const username = email.split("@")[0];
-    const existingUser = await this.ModelUser.findOne({ username });
+    const existingUser = await this.ModelUser.findOne({
+      username,
+      isActive: true,
+    });
 
-    if (existingUser) throw new Error("Username is already taken");
+    if (existingUser)
+      throw new Error("Username is already taken or the user is not active");
 
     const { stringPassword, hashedpassword } = generateSecurePassword();
 

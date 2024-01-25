@@ -264,12 +264,13 @@ export var UserService = /*#__PURE__*/ function() {
                                 return [
                                     4,
                                     _this.ModelUser.findOne({
-                                        username: username
+                                        username: username,
+                                        isActive: true
                                     })
                                 ];
                             case 1:
                                 existingUser = _state.sent();
-                                if (existingUser) throw new Error("Username is already taken");
+                                if (existingUser) throw new Error("Username is already taken or the user is not active");
                                 _generateSecurePassword = generateSecurePassword(), stringPassword = _generateSecurePassword.stringPassword, hashedpassword = _generateSecurePassword.hashedpassword;
                                 return [
                                     4,

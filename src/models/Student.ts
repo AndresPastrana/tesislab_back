@@ -1,5 +1,5 @@
 import { Schema, Document, model } from "mongoose";
-import { Sex } from "../const.js";
+import { CursoType, Sex } from "../const.js";
 
 export interface StudentType {
   user_id: Schema.Types.ObjectId;
@@ -13,6 +13,7 @@ export interface StudentType {
   age: number;
   ancient: boolean;
   language_certificate: boolean;
+  curso: CursoType;
 }
 
 interface StudentDocument extends StudentType, Document {}
@@ -66,6 +67,11 @@ const studentSchema = new Schema<StudentDocument>(
       type: Boolean,
       required: true,
       default: false,
+    },
+    curso: {
+      type: String,
+      required: true,
+      enum: Object.values(CursoType),
     },
   },
   {

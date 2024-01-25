@@ -54,7 +54,7 @@ function _object_without_properties_loose(source, excluded) {
     return target;
 }
 import { Schema, model } from "mongoose";
-import { Sex } from "../const.js";
+import { CursoType, Sex } from "../const.js";
 var studentSchema = new Schema({
     user_id: {
         type: Schema.Types.ObjectId,
@@ -103,6 +103,11 @@ var studentSchema = new Schema({
         type: Boolean,
         required: true,
         default: false
+    },
+    curso: {
+        type: String,
+        required: true,
+        enum: Object.values(CursoType)
     }
 }, {
     toJSON: {

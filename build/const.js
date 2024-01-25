@@ -117,3 +117,13 @@ export var BucketsS3;
     BucketsS3["Evaluaciones"] = "evaluaciones";
     BucketsS3["AcademicDocs"] = "docs";
 })(BucketsS3 || (BucketsS3 = {}));
+export var CursoType;
+(function(CursoType) {
+    CursoType["CRD"] = "curso diurno";
+    CursoType["CPE"] = "curso por encuentro";
+})(CursoType || (CursoType = {}));
+export var CursoAlias;
+(function(CursoAlias) {
+    CursoAlias["CRD"] = "CRD";
+    CursoAlias["CPE"] = "CPE";
+})(CursoAlias || (CursoAlias = {}));

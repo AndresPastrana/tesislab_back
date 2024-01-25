@@ -151,7 +151,7 @@ function _ts_generator(thisArg, body) {
 }
 import { Router } from "express";
 import { protectRouteByRole } from "../middleware/protectRouteByRole.js";
-import { Sex, UserRole } from "../const.js";
+import { CursoType, Sex, UserRole } from "../const.js";
 import { isValidToken } from "../middleware/jwt.js";
 import { validateRequest } from "../middleware/validate.js";
 import { StudentController } from "../controllers/index.js";
@@ -194,7 +194,8 @@ var createStudentValidations = [
     body("sex").trim().escape().toLowerCase().isIn(Object.values(Sex)),
     body("address").trim().escape().notEmpty().isString(),
     body("language_certificate").isBoolean(),
-    body("email").trim().escape().isString().isEmail().normalizeEmail()
+    body("email").trim().escape().isString().isEmail().normalizeEmail(),
+    body("curso").trim().escape().isIn(Object.values(CursoType)).withMessage("Invalid course type")
 ];
 var updateValidations = [
     body("user_id").exists({
@@ -238,7 +239,8 @@ var updateValidations = [
     body("sex").trim().escape().toLowerCase().isIn(Object.values(Sex)).optional(),
     body("address").trim().escape().notEmpty().isString().optional(),
     body("language_certificate").isBoolean().optional(),
-    body("email").trim().escape().isString().isEmail().normalizeEmail().optional()
+    body("email").trim().escape().isString().isEmail().normalizeEmail().optional(),
+    body("curso").trim().escape().isIn(Object.values(CursoType)).withMessage("Invalid course type")
 ];
 var validateIdParam = [
     param("id").trim().escape().exists({
