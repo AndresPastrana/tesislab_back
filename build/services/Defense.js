@@ -309,6 +309,14 @@ export var DefenseService = /*#__PURE__*/ function() {
                                     ,
                                     3
                                 ]);
+                                if (term === "all") {
+                                    return [
+                                        2,
+                                        ModelDefense.find({}).sort({
+                                            createdAt: -1
+                                        })
+                                    ];
+                                }
                                 searchTermRegExp = new RegExp(term, "i");
                                 // Define a filter object for the search
                                 searchFilter = {
@@ -362,23 +370,21 @@ export var DefenseService = /*#__PURE__*/ function() {
                                         }
                                     ]
                                 };
-                                console.log("Filter terms");
-                                console.log(searchFilter);
                                 return [
                                     4,
-                                    ModelDefense.find(searchFilter)
+                                    ModelDefense.find(searchFilter).sort({
+                                        date: "desc"
+                                    })
                                 ];
                             case 1:
                                 searchResults = _state.sent();
-                                // Log the search results
-                                console.log("Search Results:", searchResults);
+                                console.log(searchResults);
                                 return [
                                     2,
                                     searchResults
                                 ];
                             case 2:
                                 error = _state.sent();
-                                console.log(error);
                                 console.error("Error during search:", error);
                                 throw new Error("Error during search: ".concat(error.message));
                             case 3:

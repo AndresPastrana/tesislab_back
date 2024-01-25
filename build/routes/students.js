@@ -297,7 +297,6 @@ router.get("/history/:id", [
     }),
     validateRequest
 ], getStudentHistory);
-// A falg is required to list only the ancient user or not
 router.get("/", _to_consumable_array(authValidations).concat([
     query("active").isBoolean().withMessage("?active=boolean is required"),
     validateRequest

@@ -74,6 +74,10 @@ var EvaluationSchema = new Schema({
     description: {
         type: String,
         required: true
+    },
+    resourcesFile: {
+        type: String,
+        required: true
     }
 }, {
     methods: {

@@ -135,6 +135,9 @@ export class DefenseService {
 
   static async search(term: string): Promise<Defense[]> {
     try {
+      if (term === "all") {
+        return ModelDefense.find({}).sort({ createdAt: -1 });
+      }
       const searchTermRegExp = new RegExp(term, "i");
 
       // Define a filter object for the search
@@ -158,19 +161,15 @@ export class DefenseService {
         ],
       };
 
-      console.log("Filter terms");
-      console.log(searchFilter);
-
       // Perform the search using the filter
-      const searchResults = await ModelDefense.find(searchFilter);
+      const searchResults = await ModelDefense.find(searchFilter).sort({
+        date: "desc",
+      });
 
-      // Log the search results
-      console.log("Search Results:", searchResults);
+      console.log(searchResults);
 
       return searchResults;
     } catch (error: any) {
-      console.log(error);
-
       console.error("Error during search:", error);
       throw new Error(`Error during search: ${error.message}`);
     }

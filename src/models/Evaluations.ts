@@ -6,6 +6,7 @@ export interface EvaluationType {
   status: EvalStatus;
   endDate: Date;
   description: string;
+  resourcesFile: string;
 }
 
 export interface EvaluationDocument extends EvaluationType, Document {}
@@ -21,6 +22,10 @@ const EvaluationSchema = new Schema<EvaluationDocument>(
     },
     endDate: { type: Date, required: true },
     description: { type: String, required: true },
+    resourcesFile: {
+      type: String,
+      required: true,
+    },
   },
   {
     methods: {

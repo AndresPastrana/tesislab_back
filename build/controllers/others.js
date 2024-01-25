@@ -199,8 +199,6 @@ export var getStudentHistory = function() {
                         var evalauation = evalInfoResolved.find(function(ev) {
                             return (ev === null || ev === void 0 ? void 0 : ev._id.toString()) === s.evaluation_id.toString();
                         });
-                        console.log("Eval");
-                        console.log(evalauation);
                         if (!evalauation) {
                             throw new Error("Invalid eval id");
                         }
@@ -208,7 +206,8 @@ export var getStudentHistory = function() {
                             type: evalauation.type,
                             updatedAt: s.updatedAt,
                             score: s.score || null,
-                            file: s.file || null
+                            file: s.file || null,
+                            recoms: s.recoms || null
                         };
                     });
                     history = {

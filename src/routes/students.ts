@@ -160,7 +160,6 @@ router.get(
   getStudentHistory
 );
 
-// A falg is required to list only the ancient user or not
 router.get(
   "/",
   [

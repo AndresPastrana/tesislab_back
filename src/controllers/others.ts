@@ -13,6 +13,7 @@ interface StudentHistory {
     updatedAt: Date;
     score: number | null;
     file: string | null;
+    recoms: string | null;
   }>;
 }
 
@@ -50,9 +51,6 @@ export const getStudentHistory = async (req: Request, res: Response) => {
         return ev?._id.toString() === s.evaluation_id.toString();
       });
 
-      console.log("Eval");
-      console.log(evalauation);
-
       if (!evalauation) {
         throw new Error("Invalid eval id");
       }
@@ -61,6 +59,7 @@ export const getStudentHistory = async (req: Request, res: Response) => {
         updatedAt: s.updatedAt,
         score: s.score || null,
         file: s.file || null,
+        recoms: s.recoms || null,
       };
     });
 
