@@ -41,11 +41,7 @@ var authValidations = [
     ])
 ];
 // Validation middleware for creating a new evaluation
-var createEvaluationValidation = [
-    body("type").isIn(Object.values(EvalType)).withMessage("Invalid evaluation type, try with one of ".concat(Object.values(EvalType), " ")),
-    body("description").isString().notEmpty().withMessage("Description is required"),
-    body("endDate").isISO8601().toDate().withMessage("Invalid date format for endDate")
-];
+var createEvaluationValidation = [];
 // Validation middleware for getting submissions by evaluation ID
 var getSubmissionsByEvaluationIdValidation = [
     param("id").isMongoId().withMessage("Evaluation ID format not valid")
@@ -73,7 +69,9 @@ var createSubmissionValidations = [
     body("evaluation_id").isMongoId().withMessage("Invalid evaluationId format")
 ];
 // Routes
-router.post("/", _to_consumable_array(authValidations).concat(_to_consumable_array(createEvaluationValidation), [
+router.post("/", _to_consumable_array(authValidations).concat([
+    multerMiddleware.single("recurso"),
+    // ...createEvaluationValidation,
     validateRequest
 ]), EvaluationController.createEvaluation);
 router.get("/:id/submissions", _to_consumable_array(authValidations).concat(_to_consumable_array(getSubmissionsByEvaluationIdValidation), [
@@ -86,7 +84,8 @@ router.put("/submissions/:id", _to_consumable_array(authValidations).concat(_to_
     multerMiddleware.single("submissionFile"),
     validateRequest
 ]), EvaluationController.editSubmission);
-router.put("/:evaluationId", _to_consumable_array(authValidations).concat(_to_consumable_array(editEvaluationValidation), [
+router.put("/:evaluationId", _to_consumable_array(authValidations).concat([
+    multerMiddleware.single("recurso"),
     validateRequest
 ]), EvaluationController.editEvaluation);
 router.get("/:eval_id/student_submissions/:student_id", _to_consumable_array(getSubmissionsByStudentIdValidation), EvaluationController.getStudentSubmission);

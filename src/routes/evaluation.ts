@@ -18,19 +18,19 @@ const authValidations = [
 
 // Validation middleware for creating a new evaluation
 const createEvaluationValidation = [
-  body("type")
-    .isIn(Object.values(EvalType))
-    .withMessage(
-      `Invalid evaluation type, try with one of ${Object.values(EvalType)} `
-    ),
-  body("description")
-    .isString()
-    .notEmpty()
-    .withMessage("Description is required"),
-  body("endDate")
-    .isISO8601()
-    .toDate()
-    .withMessage("Invalid date format for endDate"),
+  // body("type")
+  //   .isIn(Object.values(EvalType))
+  //   .withMessage(
+  //     `Invalid evaluation type, try with one of ${Object.values(EvalType)} `
+  //   ),
+  // body("description")
+  //   .isString()
+  //   .notEmpty()
+  //   .withMessage("Description is required"),
+  // body("endDate")
+  //   .isISO8601()
+  //   .toDate()
+  //   .withMessage("Invalid date format for endDate"),
 ];
 
 // Validation middleware for getting submissions by evaluation ID
@@ -79,7 +79,12 @@ const createSubmissionValidations = [
 // Routes
 router.post(
   "/",
-  [...authValidations, ...createEvaluationValidation, validateRequest],
+  [
+    ...authValidations,
+    multerMiddleware.single("recurso"),
+    // ...createEvaluationValidation,
+    validateRequest,
+  ],
   EvaluationController.createEvaluation
 );
 
@@ -118,7 +123,7 @@ router.put(
 
 router.put(
   "/:evaluationId",
-  [...authValidations, ...editEvaluationValidation, validateRequest],
+  [...authValidations, multerMiddleware.single("recurso"), validateRequest],
   EvaluationController.editEvaluation
 );
 

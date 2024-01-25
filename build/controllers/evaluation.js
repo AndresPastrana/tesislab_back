@@ -263,22 +263,42 @@ export var EvaluationController = /*#__PURE__*/ function() {
             value: // Create a new evaluation
             function createEvaluation(req, res) {
                 return _async_to_generator(function() {
-                    var evaluationData, createdEvaluation, error, customError;
+                    var _req_body, _req_body_description, description, _req_body_endDate, endDate, _req_body_status, status, _req_body_type, type, evalData, recursoUrl, createdEvaluation, error, customError;
                     return _ts_generator(this, function(_state) {
                         switch(_state.label){
                             case 0:
                                 _state.trys.push([
                                     0,
-                                    2,
+                                    4,
                                     ,
-                                    3
+                                    5
                                 ]);
-                                evaluationData = matchedData(req);
+                                _req_body = req.body, _req_body_description = _req_body.description, description = _req_body_description === void 0 ? null : _req_body_description, _req_body_endDate = _req_body.endDate, endDate = _req_body_endDate === void 0 ? null : _req_body_endDate, _req_body_status = _req_body.status, status = _req_body_status === void 0 ? null : _req_body_status, _req_body_type = _req_body.type, type = _req_body_type === void 0 ? null : _req_body_type;
+                                evalData = {
+                                    description: description,
+                                    endDate: endDate,
+                                    status: status,
+                                    type: type,
+                                    resourcesFile: null
+                                };
+                                if (!req.file) return [
+                                    3,
+                                    2
+                                ];
                                 return [
                                     4,
-                                    EvaluationService.createEvaluation(evaluationData)
+                                    uploadFile(req.file, BucketsS3.Evaluaciones)
                                 ];
                             case 1:
+                                recursoUrl = _state.sent();
+                                evalData.resourcesFile = recursoUrl;
+                                _state.label = 2;
+                            case 2:
+                                return [
+                                    4,
+                                    EvaluationService.createEvaluation(evalData)
+                                ];
+                            case 3:
                                 createdEvaluation = _state.sent();
                                 handleResponse({
                                     statusCode: 201,
@@ -287,9 +307,9 @@ export var EvaluationController = /*#__PURE__*/ function() {
                                 });
                                 return [
                                     3,
-                                    3
+                                    5
                                 ];
-                            case 2:
+                            case 4:
                                 error = _state.sent();
                                 customError = ErrorHandlerFactory.createError(error);
                                 handleResponse({
@@ -299,9 +319,9 @@ export var EvaluationController = /*#__PURE__*/ function() {
                                 });
                                 return [
                                     3,
-                                    3
+                                    5
                                 ];
-                            case 3:
+                            case 5:
                                 return [
                                     2
                                 ];
@@ -371,23 +391,37 @@ export var EvaluationController = /*#__PURE__*/ function() {
             value: // Edit an existing evaluation
             function editEvaluation(req, res) {
                 return _async_to_generator(function() {
-                    var evaluationId, updatedData, updatedEvaluation, error, customError;
+                    var evaluationId, updatedData, file, fileUrl, updatedEvaluation, error, customError;
                     return _ts_generator(this, function(_state) {
                         switch(_state.label){
                             case 0:
                                 _state.trys.push([
                                     0,
-                                    2,
+                                    4,
                                     ,
-                                    3
+                                    5
                                 ]);
                                 evaluationId = req.params.evaluationId; // Assuming the evaluation ID is in the route params
-                                updatedData = matchedData(req);
+                                updatedData = req.body;
+                                if (!req.file) return [
+                                    3,
+                                    2
+                                ];
+                                file = req.file;
+                                return [
+                                    4,
+                                    uploadFile(file, BucketsS3.Evaluaciones)
+                                ];
+                            case 1:
+                                fileUrl = _state.sent();
+                                updatedData.resourcesFile = fileUrl;
+                                _state.label = 2;
+                            case 2:
                                 return [
                                     4,
                                     EvaluationService.editEvaluation(evaluationId, updatedData)
                                 ];
-                            case 1:
+                            case 3:
                                 updatedEvaluation = _state.sent();
                                 if (updatedEvaluation) {
                                     handleResponse({
@@ -407,9 +441,9 @@ export var EvaluationController = /*#__PURE__*/ function() {
                                 }
                                 return [
                                     3,
-                                    3
+                                    5
                                 ];
-                            case 2:
+                            case 4:
                                 error = _state.sent();
                                 customError = ErrorHandlerFactory.createError(error);
                                 handleResponse({
@@ -419,9 +453,9 @@ export var EvaluationController = /*#__PURE__*/ function() {
                                 });
                                 return [
                                     3,
-                                    3
+                                    5
                                 ];
-                            case 3:
+                            case 5:
                                 return [
                                     2
                                 ];

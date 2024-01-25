@@ -22,7 +22,7 @@ import {
 import { caluculateAge } from "../helpers/age.js";
 import { TesisProjectService } from "../services/TesisProject.js";
 import { ModelCourt } from "../models/Court.js";
-import { Document, Types } from "mongoose";
+import { Types } from "mongoose";
 import { CourtsService } from "../services/CourtService.js";
 import { ModelTesisProject } from "../models/TesisProject.js";
 
@@ -33,7 +33,7 @@ export const ProfesorController = {
       const age = caluculateAge(profesorData.ci);
 
       const new_user = await UserService.registerUser({
-        role: UserRole.Admin,
+        role: UserRole.Profesor,
         email: profesorData.email,
       });
 

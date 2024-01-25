@@ -1,5 +1,6 @@
+import { EvaluationType } from "./../models/Evaluations";
 import { Request, Response } from "express";
-import { matchedData } from "express-validator";
+import { body, matchedData } from "express-validator";
 import { EvaluationService } from "../services/EvaluationService.js";
 import { handleResponse } from "../middleware/handleResponse.js"; // Update the path accordingly
 import { EvaluationType } from "../models/Evaluations.js";
@@ -10,6 +11,8 @@ import { uploadFile } from "../helpers/minio.js";
 
 import { validateEditSubmissionFields } from "../helpers/others.js";
 import { Types } from "mongoose";
+import MinioService from "../services/MinioService.js";
+import { Multer } from "multer";
 
 export class EvaluationController {
   // Get all evaluations
@@ -26,14 +29,30 @@ export class EvaluationController {
   // Create a new evaluation
   static async createEvaluation(req: Request, res: Response): Promise<void> {
     try {
-      const evaluationData = matchedData(req) as {
-        type: EvalType;
-        description: string;
-        endDate: Date;
+      const {
+        description = null,
+        endDate = null,
+        status = null,
+        type = null,
+      } = req.body as Omit<EvaluationType, "resourcesFile">;
+
+      const evalData: EvaluationType = {
+        description,
+        endDate,
+        status,
+        type,
+        resourcesFile: null,
       };
 
+      // Upload the file if any
+      if (req.file) {
+        const recursoUrl = await uploadFile(req.file, BucketsS3.Evaluaciones);
+        evalData.resourcesFile = recursoUrl;
+      }
+
+      // Create the evaluation
       const createdEvaluation = await EvaluationService.createEvaluation(
-        evaluationData
+        evalData
       );
       handleResponse({ statusCode: 201, data: createdEvaluation, res });
     } catch (error: any) {
@@ -67,7 +86,19 @@ export class EvaluationController {
   static async editEvaluation(req: Request, res: Response): Promise<void> {
     try {
       const evaluationId = req.params.evaluationId; // Assuming the evaluation ID is in the route params
-      const updatedData = matchedData(req) as Partial<EvaluationType>;
+      const updatedData = req.body as EvaluationType;
+
+      if (req.file) {
+        const file = req.file;
+        // TODO:
+        // Delete the prev file
+        // await MinioService.getInstance().deleteFile(BucketsS3.Evaluaciones, file.filename)
+        // Upload the new file
+
+        const fileUrl = await uploadFile(file, BucketsS3.Evaluaciones);
+        updatedData.resourcesFile = fileUrl;
+      }
+
       const updatedEvaluation = await EvaluationService.editEvaluation(
         evaluationId,
         updatedData
