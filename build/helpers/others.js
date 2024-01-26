@@ -45,6 +45,7 @@ function _unsupported_iterable_to_array(o, minLen) {
     if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _array_like_to_array(o, minLen);
 }
 import { BucketsS3 } from "../const.js";
+import fs from "node:fs";
 export var validateEditSubmissionFields = function(data) {
     var errors = [];
     // Validate 'recoms'
@@ -75,4 +76,18 @@ export function parseFileUrl(fileUrl) {
     }
     // Invalid bucket name
     throw new Error("Invalid bucket name in the file URL");
+}
+export function readAppTypeKeywords(appType) {
+    try {
+        // const filePath = path.join("../data/");
+        var fileBuffer = fs.readFileSync("./src/data/keywords.json", {
+            encoding: "utf8"
+        });
+        var appTypeKeywords = JSON.parse(fileBuffer.toString());
+        return appTypeKeywords[appType] || null;
+    } catch (error) {
+        var err = error;
+        console.error("Error reading appTypeKeywords.json:", err.message);
+        return null;
+    }
 }

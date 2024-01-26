@@ -127,3 +127,12 @@ export enum CursoAlias {
   CRD = "CRD",
   CPE = "CPE",
 }
+
+// Enum-like object for App Types
+export enum AppTypes {
+  WEB_APPLICATION = "web_application",
+  MOBILE_APP = "mobile_app",
+  DESKTOP_APPLICATION = "desktop_application",
+  SERVER_SIDE_APPLICATION = "server_side_application",
+  HYBRID_APP = "hybrid_app",
+}

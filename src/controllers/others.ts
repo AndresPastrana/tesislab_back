@@ -5,7 +5,9 @@ import { ModelEvaluation } from "../models/Evaluations.js";
 import { handleResponse } from "../middleware/handleResponse.js";
 import { matchedData } from "express-validator";
 import { ObjectId } from "mongoose";
-import { EvalType } from "../const.js";
+import { AppTypes, EvalType } from "../const.js";
+import { readAppTypeKeywords } from "../helpers/others.js";
+import { log } from "console";
 
 interface StudentHistory {
   evaluaciones: Array<{
@@ -74,5 +76,23 @@ export const getStudentHistory = async (req: Request, res: Response) => {
   } catch (error) {
     console.error("Error fetching student history:", error);
     res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+export const getKeywords = async (req: Request, res: Response) => {
+  try {
+    const { app } = req.body as { app: AppTypes };
+    const keyWords = readAppTypeKeywords(app);
+    if (keyWords) {
+      return handleResponse({
+        res,
+        data: { [app]: keyWords },
+        statusCode: 200,
+      });
+    }
+
+    return handleResponse({ res, data: app, statusCode: 200 });
+  } catch (error) {
+    console.log(error);
   }
 };

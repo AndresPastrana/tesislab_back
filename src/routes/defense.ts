@@ -37,6 +37,8 @@ router.post(
     multerMiddleware.fields([
       { name: "docFile", maxCount: 1 },
       { name: "presFile", maxCount: 1 },
+      { name: "oponent_report", maxCount: 1 },
+      { name: "tutor_opinion", maxCount: 1 },
     ]),
     ...createDefenseVlidations,
     validateRequest,

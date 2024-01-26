@@ -27,6 +27,19 @@ function _async_to_generator(fn) {
         });
     };
 }
+function _define_property(obj, key, value) {
+    if (key in obj) {
+        Object.defineProperty(obj, key, {
+            value: value,
+            enumerable: true,
+            configurable: true,
+            writable: true
+        });
+    } else {
+        obj[key] = value;
+    }
+    return obj;
+}
 function _ts_generator(thisArg, body) {
     var f, y, t, g, _ = {
         label: 0,
@@ -127,6 +140,7 @@ import { ModelSubmission } from "../models/Submission.js";
 import { ModelEvaluation } from "../models/Evaluations.js";
 import { handleResponse } from "../middleware/handleResponse.js";
 import { matchedData } from "express-validator";
+import { readAppTypeKeywords } from "../helpers/others.js";
 export var getStudentHistory = function() {
     var _ref = _async_to_generator(function(req, res) {
         var _matchedData, _matchedData_id, id, student, submissions, evalInfoPromises, evalInfoResolved, mapedSubmissions, history, error;
@@ -240,6 +254,43 @@ export var getStudentHistory = function() {
         });
     });
     return function getStudentHistory(req, res) {
+        return _ref.apply(this, arguments);
+    };
+}();
+export var getKeywords = function() {
+    var _ref = _async_to_generator(function(req, res) {
+        var app, keyWords;
+        return _ts_generator(this, function(_state) {
+            try {
+                app = req.body.app;
+                keyWords = readAppTypeKeywords(app);
+                if (keyWords) {
+                    return [
+                        2,
+                        handleResponse({
+                            res: res,
+                            data: _define_property({}, app, keyWords),
+                            statusCode: 200
+                        })
+                    ];
+                }
+                return [
+                    2,
+                    handleResponse({
+                        res: res,
+                        data: app,
+                        statusCode: 200
+                    })
+                ];
+            } catch (error) {
+                console.log(error);
+            }
+            return [
+                2
+            ];
+        });
+    });
+    return function getKeywords(req, res) {
         return _ref.apply(this, arguments);
     };
 }();

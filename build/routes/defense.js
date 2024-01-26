@@ -72,6 +72,14 @@ router.post("/", [
         {
             name: "presFile",
             maxCount: 1
+        },
+        {
+            name: "oponent_report",
+            maxCount: 1
+        },
+        {
+            name: "tutor_opinion",
+            maxCount: 1
         }
     ])
 ].concat(_to_consumable_array(createDefenseVlidations), [

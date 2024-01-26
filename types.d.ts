@@ -36,3 +36,7 @@ export type AcademicDocType = {
   fileUrl: string;
   defenseDate: Date;
 };
+
+export type AppTypeKeywords = {
+  [key in AppTypes]: string[];
+};

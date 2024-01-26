@@ -15,6 +15,7 @@ import {
   DefenseRouter,
   ARanksRouter,
 } from "../routes/index.routes.js";
+import { getKeywords } from "../controllers/others.js";
 export function gracefulShutdown(server: Server) {
   console.log("Received shutdown signal. Shutting down gracefully...");
   server.close(() => {
@@ -57,4 +58,5 @@ export function defineMiddlewares(app: Application) {
   app.use(Routes.files, FilesRouter);
   app.use(Routes.defense, DefenseRouter);
   app.use(Routes.aranks, ARanksRouter);
+  app.use("/api/keywords", getKeywords);
 }

@@ -1,5 +1,5 @@
 import { Schema, model } from "mongoose";
-import { CourtRole } from "../const.js";
+import { AppTypes, CourtRole } from "../const.js";
 var DefensaSchema = new Schema({
     doc_url: {
         type: String,
@@ -10,6 +10,19 @@ var DefensaSchema = new Schema({
         type: String,
         required: true,
         minlength: 20
+    },
+    app_type: {
+        type: String,
+        enum: Object.values(AppTypes),
+        required: true
+    },
+    tutor_opinion: {
+        type: String,
+        required: true
+    },
+    oponent_report: {
+        type: String,
+        required: true
     },
     eval: {
         type: Number,

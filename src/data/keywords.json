@@ -1,0 +1,55 @@
+{
+  "web_application": [
+    "web",
+    "browser",
+    "HTML",
+    "CSS",
+    "JavaScript",
+    "responsive",
+    "internet",
+    "online",
+    "URL"
+  ],
+  "mobile_app": [
+    "mobile",
+    "app",
+    "iOS",
+    "Android",
+    "smartphone",
+    "tablet",
+    "touch",
+    "mobile development",
+    "mobile design"
+  ],
+  "desktop_application": [
+    "desktop",
+    "software",
+    "application",
+    "windows",
+    "macOS",
+    "linux",
+    "user interface",
+    "desktop development"
+  ],
+  "server_side_application": [
+    "server",
+    "backend",
+    "database",
+    "API",
+    "server-side scripting",
+    "cloud computing",
+    "remote access",
+    "scalability"
+  ],
+  "hybrid_application": [
+    "hybrid",
+    "web",
+    "native",
+    "cross-platform",
+    "cordova",
+    "react native",
+    "flutter",
+    "WebView",
+    "mobile and web integration"
+  ]
+}

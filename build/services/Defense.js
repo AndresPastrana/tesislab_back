@@ -1,3 +1,11 @@
+function _array_like_to_array(arr, len) {
+    if (len == null || len > arr.length) len = arr.length;
+    for(var i = 0, arr2 = new Array(len); i < len; i++)arr2[i] = arr[i];
+    return arr2;
+}
+function _array_without_holes(arr) {
+    if (Array.isArray(arr)) return _array_like_to_array(arr);
+}
 function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) {
     try {
         var info = gen[key](arg);
@@ -45,6 +53,23 @@ function _create_class(Constructor, protoProps, staticProps) {
     if (protoProps) _defineProperties(Constructor.prototype, protoProps);
     if (staticProps) _defineProperties(Constructor, staticProps);
     return Constructor;
+}
+function _iterable_to_array(iter) {
+    if (typeof Symbol !== "undefined" && iter[Symbol.iterator] != null || iter["@@iterator"] != null) return Array.from(iter);
+}
+function _non_iterable_spread() {
+    throw new TypeError("Invalid attempt to spread non-iterable instance.\\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+}
+function _to_consumable_array(arr) {
+    return _array_without_holes(arr) || _iterable_to_array(arr) || _unsupported_iterable_to_array(arr) || _non_iterable_spread();
+}
+function _unsupported_iterable_to_array(o, minLen) {
+    if (!o) return;
+    if (typeof o === "string") return _array_like_to_array(o, minLen);
+    var n = Object.prototype.toString.call(o).slice(8, -1);
+    if (n === "Object" && o.constructor) n = o.constructor.name;
+    if (n === "Map" || n === "Set") return Array.from(n);
+    if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _array_like_to_array(o, minLen);
 }
 function _ts_generator(thisArg, body) {
     var f, y, t, g, _ = {
@@ -148,6 +173,7 @@ import { CourtsService } from "./CourtService.js";
 import { TesisProjectStatus } from "../const.js";
 import { StudentService } from "./StudentsService.js";
 import { UserService } from "./User.js";
+import { readAppTypeKeywords } from "../helpers/others.js";
 export var DefenseService = /*#__PURE__*/ function() {
     "use strict";
     function DefenseService() {
@@ -170,7 +196,7 @@ export var DefenseService = /*#__PURE__*/ function() {
    * @throws {Error} Throws an error if there's an issue creating the defense.
    */ function createDefense(defenseData) {
                 return _async_to_generator(function() {
-                    var court, keyWords, recoms, evaluation, doc_url, pres_url, project, date, projectId, project_info, courtinfo, courtMembers, general_target, functional_requirements, scientific_problem, topic, student, tutors, tutors_names, student_name, newDefense, p, studentInfo, error;
+                    var court, keyWords, recoms, evaluation, doc_url, pres_url, project, date, app_type, oponent_report, tutor_opinion, projectId, project_info, courtinfo, courtMembers, general_target, functional_requirements, scientific_problem, topic, student, tutors, tutors_names, student_name, appTypeKeyWords, customKeyWords, newDefense, studentInfo, error;
                     return _ts_generator(this, function(_state) {
                         switch(_state.label){
                             case 0:
@@ -180,7 +206,7 @@ export var DefenseService = /*#__PURE__*/ function() {
                                     ,
                                     9
                                 ]);
-                                court = defenseData.court, keyWords = defenseData.keyWords, recoms = defenseData.recoms, evaluation = defenseData.evaluation, doc_url = defenseData.doc_url, pres_url = defenseData.pres_url, project = defenseData.project, date = defenseData.date;
+                                court = defenseData.court, keyWords = defenseData.keyWords, recoms = defenseData.recoms, evaluation = defenseData.evaluation, doc_url = defenseData.doc_url, pres_url = defenseData.pres_url, project = defenseData.project, date = defenseData.date, app_type = defenseData.app_type, oponent_report = defenseData.oponent_report, tutor_opinion = defenseData.tutor_opinion;
                                 // Get the info of the project
                                 projectId = new Types.ObjectId(project);
                                 return [
@@ -216,6 +242,16 @@ export var DefenseService = /*#__PURE__*/ function() {
                                     return t.name.concat(" ").concat(t.lastname);
                                 });
                                 student_name = student.name.concat(" ").concat(student.lastname);
+                                //  Get key words by appType
+                                appTypeKeyWords = readAppTypeKeywords(app_type);
+                                console.log("Apt keywords");
+                                console.log(appTypeKeyWords);
+                                customKeyWords = _to_consumable_array(keyWords);
+                                if (appTypeKeyWords) {
+                                    customKeyWords = _to_consumable_array(customKeyWords).concat(_to_consumable_array(appTypeKeyWords));
+                                }
+                                console.log("Mixed key words");
+                                console.log(keyWords);
                                 // Create a new Defense
                                 newDefense = {
                                     doc_url: doc_url,
@@ -227,19 +263,23 @@ export var DefenseService = /*#__PURE__*/ function() {
                                         tutors: tutors_names,
                                         student: student_name,
                                         court: courtMembers || [],
-                                        key_words: keyWords || [],
+                                        key_words: customKeyWords || [],
                                         scientific_problem: scientific_problem
                                     },
+                                    oponent_report: oponent_report,
+                                    tutor_opinion: tutor_opinion,
                                     eval: evaluation,
                                     recomns: recoms,
-                                    date: date
+                                    date: date,
+                                    app_type: app_type
                                 };
+                                // Save the new defense record
                                 return [
                                     4,
                                     ModelDefense.create(newDefense)
                                 ];
                             case 3:
-                                p = _state.sent();
+                                _state.sent();
                                 // ************* CLEAN UP *************************** //
                                 // Set the project as an old and not active project
                                 return [
@@ -322,6 +362,9 @@ export var DefenseService = /*#__PURE__*/ function() {
                                 searchFilter = {
                                     $or: [
                                         {
+                                            app_type: searchTermRegExp
+                                        },
+                                        {
                                             "metadata.general_target": searchTermRegExp
                                         },
                                         {
@@ -364,9 +407,6 @@ export var DefenseService = /*#__PURE__*/ function() {
                                                     searchTermRegExp
                                                 ]
                                             }
-                                        },
-                                        {
-                                            recomns: searchTermRegExp
                                         }
                                     ]
                                 };
@@ -378,7 +418,6 @@ export var DefenseService = /*#__PURE__*/ function() {
                                 ];
                             case 1:
                                 searchResults = _state.sent();
-                                console.log(searchResults);
                                 return [
                                     2,
                                     searchResults

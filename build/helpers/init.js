@@ -3,6 +3,7 @@ import express from "express";
 import morgan from "morgan";
 import { Routes } from "../const.js";
 import { AuthRouter, StudentRouter, ProfesoresRouter, ProjectsRouter, CourtRouter, SearchRouter, EvalRouter, FilesRouter, DefenseRouter, ARanksRouter } from "../routes/index.routes.js";
+import { getKeywords } from "../controllers/others.js";
 export function gracefulShutdown(server) {
     console.log("Received shutdown signal. Shutting down gracefully...");
     server.close(function() {
@@ -44,4 +45,5 @@ export function defineMiddlewares(app) {
     app.use(Routes.files, FilesRouter);
     app.use(Routes.defense, DefenseRouter);
     app.use(Routes.aranks, ARanksRouter);
+    app.use("/api/keywords", getKeywords);
 }

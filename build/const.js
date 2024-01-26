@@ -127,3 +127,11 @@ export var CursoAlias;
     CursoAlias["CRD"] = "CRD";
     CursoAlias["CPE"] = "CPE";
 })(CursoAlias || (CursoAlias = {}));
+export var AppTypes;
+(function(AppTypes) {
+    AppTypes["WEB_APPLICATION"] = "web_application";
+    AppTypes["MOBILE_APP"] = "mobile_app";
+    AppTypes["DESKTOP_APPLICATION"] = "desktop_application";
+    AppTypes["SERVER_SIDE_APPLICATION"] = "server_side_application";
+    AppTypes["HYBRID_APP"] = "hybrid_app";
+})(AppTypes || (AppTypes = {}));

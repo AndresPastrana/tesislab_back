@@ -1,8 +1,11 @@
 import { Document, Schema, model } from "mongoose";
-import { CourtRole } from "../const.js";
+import { AppTypes, CourtRole } from "../const.js";
 export interface Defense {
   doc_url: string;
   pres_url: string;
+  tutor_opinion: string;
+  oponent_report: string;
+  app_type: AppTypes;
 
   // Fields for search
   metadata: {
@@ -26,7 +29,10 @@ export type DefenseData = {
   evaluation: number; // Assuming 'evaluation' is a number
   court: string;
   project: string;
+  app_type: AppTypes;
   date: Date;
+  tutor_opinion: string;
+  oponent_report: string;
 };
 
 export interface DefenseType extends Defense, Document {}
@@ -41,6 +47,21 @@ const DefensaSchema = new Schema<DefenseType>({
     type: String,
     required: true,
     minlength: 20,
+  },
+  app_type: {
+    type: String,
+    enum: Object.values(AppTypes),
+    required: true,
+  },
+
+  tutor_opinion: {
+    type: String,
+    required: true,
+  },
+
+  oponent_report: {
+    type: String,
+    required: true,
   },
   eval: {
     type: Number,

@@ -8,9 +8,10 @@ import {
 } from "../models/Defensa.js";
 import { TesisProjectService, PopulatedTesisResponse } from "./TesisProject.js";
 import { CourtsService } from "./CourtService.js";
-import { TesisProjectStatus } from "../const.js";
+import { AppTypes, TesisProjectStatus } from "../const.js";
 import { StudentService } from "./StudentsService.js";
 import { UserService } from "./User.js";
+import { readAppTypeKeywords } from "../helpers/others.js";
 
 export class DefenseService {
   /**
@@ -27,7 +28,9 @@ export class DefenseService {
    * @throws {Error} Throws an error if there's an issue creating the defense.
    */
   static async createDefense(
-    defenseData: DefenseData & { doc_url: string; pres_url: string }
+    defenseData: DefenseData & { doc_url: string; pres_url: string } & {
+      app_type: AppTypes;
+    }
   ): Promise<void | null> {
     try {
       const {
@@ -39,6 +42,9 @@ export class DefenseService {
         pres_url,
         project,
         date,
+        app_type,
+        oponent_report,
+        tutor_opinion,
       } = defenseData;
 
       // Get the info of the project
@@ -78,6 +84,20 @@ export class DefenseService {
 
       const student_name = student.name.concat(" ").concat(student.lastname);
 
+      //  Get key words by appType
+      const appTypeKeyWords = readAppTypeKeywords(app_type);
+      console.log("Apt keywords");
+
+      console.log(appTypeKeyWords);
+
+      let customKeyWords = [...keyWords];
+
+      if (appTypeKeyWords) {
+        customKeyWords = [...customKeyWords, ...appTypeKeyWords];
+      }
+      console.log("Mixed key words");
+      console.log(keyWords);
+
       // Create a new Defense
       const newDefense: Defense = {
         doc_url,
@@ -89,16 +109,19 @@ export class DefenseService {
           tutors: tutors_names,
           student: student_name,
           court: courtMembers || [],
-          key_words: keyWords || [],
-          scientific_problem, // Added scientific_problem to metadata
+          key_words: customKeyWords || [],
+          scientific_problem,
         },
+        oponent_report,
+        tutor_opinion,
         eval: evaluation,
         recomns: recoms,
         date,
+        app_type,
       };
 
       // Save the new defense record
-      const p = await ModelDefense.create(newDefense);
+      await ModelDefense.create(newDefense);
 
       // ************* CLEAN UP *************************** //
       // Set the project as an old and not active project
@@ -143,6 +166,7 @@ export class DefenseService {
       // Define a filter object for the search
       const searchFilter = {
         $or: [
+          { app_type: searchTermRegExp },
           { "metadata.general_target": searchTermRegExp },
           { "metadata.functional_requirements": { $in: [searchTermRegExp] } },
           { "metadata.scientific_problem": searchTermRegExp },
@@ -157,7 +181,7 @@ export class DefenseService {
             },
           },
           { "metadata.key_words": { $in: [searchTermRegExp] } },
-          { recomns: searchTermRegExp },
+          // { recomns: searchTermRegExp },
         ],
       };
 
@@ -165,8 +189,6 @@ export class DefenseService {
       const searchResults = await ModelDefense.find(searchFilter).sort({
         date: "desc",
       });
-
-      console.log(searchResults);
 
       return searchResults;
     } catch (error: any) {

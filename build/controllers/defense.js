@@ -207,7 +207,7 @@ export var DefenseController = /*#__PURE__*/ function() {
    * @param {Response} res - Express response object.
    */ function createDefense(req, res) {
                 return _async_to_generator(function() {
-                    var data, keyWords, project, recoms, evaluation, court, date, docFiles, presFiles, doc, pres, _ref, doc_url, pres_url, error;
+                    var data, keyWords, project, recoms, evaluation, court, date, app_type, docFiles, presFiles, oponent_reportFiles, tutor_opinionFiles, doc, pres, report, opinion, _ref, doc_url, pres_url, oponent_report, tutor_opinion, error;
                     return _ts_generator(this, function(_state) {
                         switch(_state.label){
                             case 0:
@@ -217,33 +217,36 @@ export var DefenseController = /*#__PURE__*/ function() {
                                     ,
                                     4
                                 ]);
-                                data = matchedData(req, {
-                                    locations: [
-                                        "body"
-                                    ]
-                                });
-                                keyWords = data.keyWords, project = data.project, recoms = data.recoms, evaluation = data.evaluation, court = data.court, date = data.date;
+                                data = req.body;
+                                keyWords = data.keyWords, project = data.project, recoms = data.recoms, evaluation = data.evaluation, court = data.court, date = data.date, app_type = data.app_type;
+                                console.log(req.files);
                                 docFiles = req.files["docFile"];
                                 presFiles = req.files["presFile"];
+                                oponent_reportFiles = req.files["oponent_report"];
+                                tutor_opinionFiles = req.files["tutor_opinion"];
                                 // Ensure there is at least one file for each type
-                                if (!docFiles || !presFiles) {
-                                    throw new Error("Both 'docFile' and 'presFile' are required.");
+                                if (!docFiles || !presFiles || !oponent_reportFiles || !tutor_opinionFiles) {
+                                    throw new Error("'docFile' , 'presFile', 'tutor_opinion' , 'oponent_report' are required.");
                                 }
                                 // Select the first file for each type
                                 doc = docFiles[0];
                                 pres = presFiles[0];
+                                report = oponent_reportFiles[0];
+                                opinion = tutor_opinionFiles[0];
                                 return [
                                     4,
                                     Promise.all([
                                         uploadFile(doc, BucketsS3.AcademicDocs),
-                                        uploadFile(pres, BucketsS3.AcademicDocs)
+                                        uploadFile(pres, BucketsS3.AcademicDocs),
+                                        uploadFile(report, BucketsS3.AcademicDocs),
+                                        uploadFile(opinion, BucketsS3.AcademicDocs)
                                     ])
                                 ];
                             case 1:
                                 _ref = _sliced_to_array.apply(void 0, [
                                     _state.sent(),
-                                    2
-                                ]), doc_url = _ref[0], pres_url = _ref[1];
+                                    4
+                                ]), doc_url = _ref[0], pres_url = _ref[1], oponent_report = _ref[2], tutor_opinion = _ref[3];
                                 // Call the DefenseService to create a new defense record
                                 return [
                                     4,
@@ -255,7 +258,10 @@ export var DefenseController = /*#__PURE__*/ function() {
                                         keyWords: keyWords,
                                         project: project,
                                         recoms: recoms,
-                                        date: date
+                                        date: date,
+                                        app_type: app_type,
+                                        oponent_report: oponent_report,
+                                        tutor_opinion: tutor_opinion
                                     })
                                 ];
                             case 2:

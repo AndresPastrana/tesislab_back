@@ -1,5 +1,8 @@
-import { BucketsS3 } from "../const.js";
+import path from "node:path";
+import { AppTypeKeywords } from "../../types.js";
+import { AppTypes, BucketsS3 } from "../const.js";
 import { SubmissionType } from "../models/Submission.js";
+import fs from "node:fs";
 
 export const validateEditSubmissionFields = (data: Partial<SubmissionType>) => {
   const errors = [];
@@ -51,4 +54,20 @@ export function parseFileUrl(fileUrl: string): ParsedFileUrl {
 
   // Invalid bucket name
   throw new Error("Invalid bucket name in the file URL");
+}
+
+export function readAppTypeKeywords(appType: AppTypes): string[] | null {
+  try {
+    // const filePath = path.join("../data/");
+    const fileBuffer = fs.readFileSync("./src/data/keywords.json", {
+      encoding: "utf8",
+    });
+
+    const appTypeKeywords = JSON.parse(fileBuffer.toString());
+    return appTypeKeywords[appType] || null;
+  } catch (error) {
+    const err = error as Error;
+    console.error("Error reading appTypeKeywords.json:", err.message);
+    return null;
+  }
 }
